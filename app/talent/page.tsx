@@ -453,7 +453,6 @@ Select the BEST teams (3-8) that would be ideal for this candidate.`
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="all">All Departments</SelectItem>
-                      <SelectItem value="General">General</SelectItem>
                       {Object.entries(DEPARTMENT_NAMES).map(([code, name]) => (
                         <SelectItem key={code} value={code}>{name}</SelectItem>
                       ))}
