@@ -4,7 +4,6 @@ import { requireAuth } from '@/lib/middleware/auth'
 import { getAiUsageStatus } from '@/lib/utils/aiUsage'
 
 export async function GET(request: NextRequest) {
-  // Require authentication
   const user = await requireAuth(request);
   
   if (user instanceof NextResponse) {
