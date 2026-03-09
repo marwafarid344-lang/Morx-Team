@@ -3,7 +3,6 @@ import { requireAuth } from '@/lib/middleware/auth'
 import { checkAndIncrementAiUsage } from '@/lib/utils/aiUsage'
 
 // General-purpose AI generation endpoint
-// Uses OpenRouter or Gemini API
 // Rate limited based on user plan
 // Protected - requires authentication
 
