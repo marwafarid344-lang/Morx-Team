@@ -1,30 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
 import { requireAuth } from '@/lib/middleware/auth'
+import { checkAndIncrementAiUsage } from '@/lib/utils/aiUsage'
 
 // General-purpose AI generation endpoint
 // Uses OpenRouter or Gemini API
 // Rate limited based on user plan
 // Protected - requires authentication
-
-// Plan-based daily limits
-const PLAN_LIMITS: { [key: string]: number } = {
-  free: 5,
-  starter: 10,
-  professional: 20,
-  enterprise: -1, // Unlimited
-}
-
-// Helper to get today's date key
-function getTodayKey(): string {
-  return new Date().toISOString().split('T')[0] // YYYY-MM-DD
-}
-
-// Helper to get user's plan limit
-function getPlanLimit(plan: string | null): number {
-  if (!plan) return PLAN_LIMITS.free
-  return PLAN_LIMITS[plan.toLowerCase()] ?? PLAN_LIMITS.free
-}
 
 export async function POST(request: NextRequest) {
   // Require authentication
@@ -45,74 +26,24 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Use authenticated user ID instead of request body
+    // Use authenticated user ID
     const userId = user.id;
 
-    // Check rate limit using Supabase
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-    const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+    // Check rate limit using shared utility
+    const rateLimit = await checkAndIncrementAiUsage(userId)
 
-    if (supabaseUrl && supabaseKey) {
-      const supabase = createClient(supabaseUrl, supabaseKey)
-      const today = getTodayKey()
-
-      // Get user's plan
-      const { data: userData, error: userError } = await supabase
-        .from('users')
-        .select('plan')
-        .eq('auth_user_id', userId)
-        .single()
-
-      if (userError && userError.code !== 'PGRST116') {
-        console.error('Error fetching user plan:', userError)
-      }
-
-      const userPlan = userData?.plan || 'free'
-      const dailyLimit = getPlanLimit(userPlan)
-
-      // Check current usage (skip for enterprise/unlimited)
-      if (dailyLimit !== -1) {
-        const { data: usage, error: usageError } = await supabase
-          .from('ai_usage')
-          .select('request_count')
-          .eq('user_id', userId)
-          .eq('date', today)
-          .single()
-
-        if (usageError && usageError.code !== 'PGRST116') {
-          console.error('Error checking usage:', usageError)
-        }
-
-        const currentCount = usage?.request_count || 0
-
-        if (currentCount >= dailyLimit) {
-          const planName = userPlan.charAt(0).toUpperCase() + userPlan.slice(1)
-          return NextResponse.json(
-            { 
-              success: false, 
-              error: `Daily limit reached (${dailyLimit} requests for ${planName} plan). Upgrade your plan for more requests!`,
-              limitReached: true,
-              remaining: 0,
-              plan: userPlan,
-              limit: dailyLimit
-            },
-            { status: 429 }
-          )
-        }
-
-        // Update usage count
-        if (usage) {
-          await supabase
-            .from('ai_usage')
-            .update({ request_count: currentCount + 1 })
-            .eq('user_id', userId)
-            .eq('date', today)
-        } else {
-          await supabase
-            .from('ai_usage')
-            .insert({ user_id: userId, date: today, request_count: 1 })
-        }
-      }
+    if (!rateLimit.allowed) {
+      return NextResponse.json(
+        { 
+          success: false, 
+          error: rateLimit.error,
+          limitReached: true,
+          remaining: 0,
+          plan: rateLimit.plan,
+          limit: rateLimit.limit
+        },
+        { status: 429 }
+      )
     }
 
     const openRouterKey = process.env.OPENROUTER_API_KEY
