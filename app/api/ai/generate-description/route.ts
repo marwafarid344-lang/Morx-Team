@@ -3,7 +3,7 @@ import { requireAuth } from '@/lib/middleware/auth'
 import { checkAndIncrementAiUsage } from '@/lib/utils/aiUsage'
 
 // AI Description Generator using Google Gemini API
-// Supports both English and Arabic (Egyptian dialect + Modern Standard Arabic)
+// Supports both English and Arabic (Egyptian dialect)
 // Rate limited based on user's subscription plan
 // Protected - requires authentication
 
