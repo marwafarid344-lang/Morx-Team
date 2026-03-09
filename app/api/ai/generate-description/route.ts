@@ -1,69 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
 import { requireAuth } from '@/lib/middleware/auth'
+import { checkAndIncrementAiUsage } from '@/lib/utils/aiUsage'
 
 // AI Description Generator using Google Gemini API
 // Supports both English and Arabic (Egyptian dialect + Modern Standard Arabic)
-// Rate limited to 10 requests per user per day
+// Rate limited based on user's subscription plan
 // Protected - requires authentication
-
-const DAILY_LIMIT = 10
-
-// Helper to get today's date key
-function getTodayKey(): string {
-  return new Date().toISOString().split('T')[0] // YYYY-MM-DD
-}
-
-// Check rate limit and increment usage
-async function checkAndIncrementUsage(userId: string): Promise<{ allowed: boolean; remaining: number; error?: string }> {
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-  const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-
-  if (!supabaseUrl || !supabaseKey) {
-    // If no Supabase configured, allow the request
-    return { allowed: true, remaining: DAILY_LIMIT }
-  }
-
-  const supabase = createClient(supabaseUrl, supabaseKey)
-  const today = getTodayKey()
-
-  // Check current usage
-  const { data: usage, error: usageError } = await supabase
-    .from('ai_usage')
-    .select('request_count')
-    .eq('user_id', userId)
-    .eq('date', today)
-    .single()
-
-  if (usageError && usageError.code !== 'PGRST116') {
-    console.error('Error checking usage:', usageError)
-  }
-
-  const currentCount = usage?.request_count || 0
-
-  if (currentCount >= DAILY_LIMIT) {
-    return { 
-      allowed: false, 
-      remaining: 0,
-      error: `Daily limit reached (${DAILY_LIMIT} requests). Try again tomorrow!`
-    }
-  }
-
-  // Update usage count
-  if (usage) {
-    await supabase
-      .from('ai_usage')
-      .update({ request_count: currentCount + 1 })
-      .eq('user_id', userId)
-      .eq('date', today)
-  } else {
-    await supabase
-      .from('ai_usage')
-      .insert({ user_id: userId, date: today, request_count: 1 })
-  }
-
-  return { allowed: true, remaining: DAILY_LIMIT - currentCount - 1 }
-}
 
 // Check if text contains Arabic characters
 function isArabic(text: string): boolean {
@@ -282,7 +224,7 @@ export async function POST(request: NextRequest) {
     // Use authenticated user ID for rate limiting
     const userId = user.id;
     
-    const rateLimit = await checkAndIncrementUsage(userId)
+    const rateLimit = await checkAndIncrementAiUsage(userId)
     if (!rateLimit.allowed) {
       return NextResponse.json({
         success: false,
