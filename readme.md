@@ -521,5 +521,5 @@ If you have any questions or run into issues:
 </p>
 
 <p align="center">
-  Made with ❤️ by the Undefined Development Team
+  Made with ❤️ by the Chameleon Development Team
 </p>
