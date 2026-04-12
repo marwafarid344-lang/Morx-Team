@@ -93,7 +93,7 @@ export default function LandingPage() {
               className="text-center max-w-3xl mx-auto mb-12"
             >
               <Badge className="mb-4 rounded-full px-4 py-1.5 text-sm font-medium" variant="secondary">
-                More - Works
+                BETA VERSION
               </Badge>
               <h1 className="text-4xl md:text-5xl lg:text-6xl font-black italic tracking-tighter mb-6 bg-clip-text text-transparent bg-gradient-to-r from-foreground to-foreground/70">
                 Elevate Your Workflow with <span className="rock-salt">Morx</span>
@@ -137,7 +137,7 @@ export default function LandingPage() {
               transition={{ duration: 0.7, delay: 0.2 }}
               className="relative mx-auto max-w-5xl"
             >
-              <div className="rounded-xl overflow-hidden shadow-2xl border border-border/40 bg-gradient-to-b from-background to-muted/20">
+              <div className="rounded-xl overflow-hidden shadow-2xl border border-border/40 bg-primary to-muted/20">
                 <div className="relative w-full aspect-video">
                   <Image 
                     src="/Blue and White Illustration Build a Business Team Presentation.png" 
