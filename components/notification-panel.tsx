@@ -55,6 +55,12 @@ export function NotificationPanel({ userId }: NotificationPanelProps) {
             const newNotif = payload.new as Notification
             setNotifications(prev => [newNotif, ...prev])
             setUnreadCount(prev => prev + 1)
+
+            // Show a toast for the incoming notification
+            toast(newNotif.title, {
+              description: newNotif.message,
+              icon: getNotificationIcon(newNotif.type),
+            })
           }
         )
         .on(
