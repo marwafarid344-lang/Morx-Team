@@ -6,52 +6,38 @@ import { ThemeProvider } from "@/components/theme-provider"
 import { ColorThemeProvider } from "@/components/color-theme-provider"
 import { AuthProvider } from "@/contexts/auth-context"
 import { Toaster } from "@/components/ui/sonner"
-import { TutorialProvider, TutorialOverlay } from "@/components/tutorial"
 import { VoiceAssistantWidget } from "@/components/ai/VoiceAssistantWidget"
-
-
 
 const outfit = Outfit({ 
   subsets: ["latin"], 
   variable: "--font-outfit",
   display: "swap",
-  preload: false,
 })
+
 const rubik = Rubik({ 
   subsets: ["latin", "arabic"], 
   variable: "--font-rubik",
   weight: "variable",
   display: "swap",
-  preload: false,
 })
-const cairo = Cairo({
-  subsets: ["latin", "arabic"],
-  variable: "--font-cairo",
-  display: "swap",
-  preload: false,
-})
-const notoSansArabic = Noto_Sans_Arabic({
-  subsets: ["arabic"],
-  variable: "--font-noto-arabic",
-  display: "swap",
-  preload: false,
-})
+
 const cairo = Cairo({
   subsets: ["latin", "arabic"],
   variable: "--font-cairo",
   display: "swap",
 })
+
 const notoSansArabic = Noto_Sans_Arabic({
   subsets: ["arabic"],
   variable: "--font-noto-arabic",
   display: "swap",
 })
+
 const rockSalt = Rock_Salt({ 
   weight: "400",
   subsets: ["latin"],
   variable: "--font-rock-salt",
   display: "swap",
-  preload: false,
 })
 
 export const metadata: Metadata = {
@@ -77,7 +63,7 @@ export default function RootLayout({
                 <div className="pt-24 pb-12">
                   {children}
                 </div>
-              <VoiceAssistantWidget />
+              {/* <VoiceAssistantWidget /> */}
               <Toaster position="top-right" closeButton />
             </AuthProvider>
           </ColorThemeProvider>
@@ -86,4 +72,3 @@ export default function RootLayout({
     </html>
   )
 }
-
