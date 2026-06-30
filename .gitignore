@@ -1,0 +1,27 @@
+node_modules
+push-changes.ps1
+readme.md
+BACKEND_STRUCTURE.md
+FRONTEND_STRUCTURE.md
+Morx_Graduation_Project_Proposal.md
+morx_report.md
+walkthrough.md
+PentestTools-WebsiteScanner-report.pdf
+Morx/
+
+# Next.js
+.next/
+out/
+
+# dependencies
+node_modules/
+
+# env
+.env
+.env.local
+
+# logs
+*.log
+
+# OS
+.DS_Store
