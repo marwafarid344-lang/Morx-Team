@@ -637,15 +637,12 @@ export default function SettingsPage() {
               </TabsTrigger>
               <TabsTrigger value="skills" className="flex items-center gap-2">
                 <Trophy className="size-4" />
-                <span className="hidden sm:inline">Skill Tree</span>
+                <span className="hidden sm:inline">Skills and DNA</span>
               </TabsTrigger>
             </TabsList>
 
             {/* Profile Tab */}
             <TabsContent value="profile" className="space-y-6">
-              {user?.auth_user_id && (
-                <UserDNACard userId={user.auth_user_id} userName={user.first_name || 'Member'} />
-              )}
               <Card>
                 <CardHeader>
                   <CardTitle>Profile Information</CardTitle>
@@ -1102,6 +1099,7 @@ export default function SettingsPage() {
             <TabsContent value="skills" className="space-y-6">
               {user?.auth_user_id && (
                 <>
+                  <UserDNACard userId={user.auth_user_id} userName={user.first_name || 'Member'} />
                   <SkillTreeGraph userId={user.auth_user_id} />
                   <GamificationWidget userId={user.auth_user_id} />
                 </>

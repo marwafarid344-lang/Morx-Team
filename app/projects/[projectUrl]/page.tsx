@@ -810,46 +810,101 @@ Make the tasks specific, actionable, and relevant to the project. Each task shou
               </div>
               
               {/* Time + Buttons Row */}
-              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-muted/50 pb-4 mb-2">
-                {/* Left Side: Clock & View Toggle */}
-                <div className="flex flex-wrap items-center gap-3">
-                  <LiveClock compact showSettings={false} />
-                  <Separator orientation="vertical" className="hidden md:block h-6" />
-                  
-                  {/* View Mode Toggle */}
-                  <div className="flex items-center rounded-lg border bg-muted/30 p-1">
-                    <Button
-                      variant={viewMode === 'kanban' ? 'default' : 'ghost'}
-                      size="sm"
-                      className="h-8 px-3 gap-1.5"
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                {/* Clock on left */}
+                <LiveClock compact showSettings={false} />
+                
+                {/* Buttons on right */}
+                <div className="flex flex-wrap items-center gap-2">
+                  {/* Unified Slider Tab Container */}
+                  <div className="flex items-center h-10 rounded-lg border bg-muted/30 p-1 relative gap-0.5">
+                    {/* Board Tab */}
+                    <button
+                      className={`relative h-8 px-3 gap-1.5 flex items-center justify-center text-xs sm:text-sm font-medium rounded-md transition-colors z-10 ${viewMode === 'kanban' ? 'text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
                       onClick={() => setViewMode('kanban')}
                     >
+                      {viewMode === 'kanban' && (
+                        <motion.div 
+                          layoutId="activeTabPill" 
+                          className="absolute inset-0 bg-background rounded-md shadow-sm border z-[-1]" 
+                          transition={{ type: "spring", stiffness: 380, damping: 30 }}
+                        />
+                      )}
                       <LayoutGrid className="size-4" />
                       <span className="hidden sm:inline">Board</span>
-                    </Button>
-                    <Button
-                      variant={viewMode === 'calendar' ? 'default' : 'ghost'}
-                      size="sm"
-                      className="h-8 px-3 gap-1.5"
+                    </button>
+
+                    {/* Calendar Tab */}
+                    <button
+                      className={`relative h-8 px-3 gap-1.5 flex items-center justify-center text-xs sm:text-sm font-medium rounded-md transition-colors z-10 ${viewMode === 'calendar' ? 'text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
                       onClick={() => setViewMode('calendar')}
                     >
+                      {viewMode === 'calendar' && (
+                        <motion.div 
+                          layoutId="activeTabPill" 
+                          className="absolute inset-0 bg-background rounded-md shadow-sm border z-[-1]" 
+                          transition={{ type: "spring", stiffness: 380, damping: 30 }}
+                        />
+                      )}
                       <CalendarDays className="size-4" />
                       <span className="hidden sm:inline">Calendar</span>
-                    </Button>
-                    <Button
-                      variant={viewMode === 'ai' ? 'default' : 'ghost'}
-                      size="sm"
-                      className="h-8 px-3 gap-1.5"
-                      onClick={() => setViewMode('ai')}
-                    >
-                      <Sparkles className="size-4 text-purple-500" />
-                      <span className="hidden sm:inline">Marlin AI</span>
-                    </Button>
+                    </button>
+
+                    {/* Marlin AI Tab with Dropdown Menu */}
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <button
+                          className={`relative h-8 px-3 gap-1.5 flex items-center justify-center text-xs sm:text-sm font-medium rounded-md transition-colors z-10 ${viewMode === 'ai' ? 'text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
+                        >
+                          {viewMode === 'ai' && (
+                            <motion.div 
+                              layoutId="activeTabPill" 
+                              className="absolute inset-0 bg-background rounded-md shadow-sm border z-[-1]" 
+                              transition={{ type: "spring", stiffness: 380, damping: 30 }}
+                            />
+                          )}
+                          <Sparkles className={`size-4 ${viewMode === 'ai' ? 'text-purple-500' : 'text-purple-400'}`} />
+                          <span className="hidden sm:inline">Marlin AI</span>
+                          <ChevronDown className="size-3.5 opacity-60" />
+                        </button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end" className="w-52">
+                        <DropdownMenuItem 
+                          onClick={() => setViewMode('ai')}
+                          className="gap-2 cursor-pointer"
+                        >
+                          <Sparkles className="size-4 text-purple-500" />
+                          <span>Open AI Dashboard</span>
+                        </DropdownMenuItem>
+
+                        {(project.role === 'owner' || project.role === 'admin') && (
+                          <DropdownMenuItem 
+                            onClick={handleAiSuggestTasks}
+                            disabled={aiSuggestionsLoading}
+                            className="gap-2 cursor-pointer"
+                          >
+                            {aiSuggestionsLoading ? (
+                              <Loader2 className="size-4 animate-spin" />
+                            ) : (
+                              <Wand2 className="size-4 text-blue-500" />
+                            )}
+                            <span>AI Suggest Tasks</span>
+                          </DropdownMenuItem>
+                        )}
+
+                        {user && (
+                          <DropdownMenuItem 
+                            onClick={() => setIsRatingOpen(true)}
+                            className="gap-2 cursor-pointer"
+                          >
+                            <Star className="size-4 text-amber-500" />
+                            <span>Rate Teammates</span>
+                          </DropdownMenuItem>
+                        )}
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   </div>
-                </div>
-                
-                {/* Right Side: Action Buttons */}
-                <div className="flex flex-wrap items-center gap-2">
+
                   {user && (
                     <TeammateRatingModal 
                       projectId={project.project_id} 
@@ -859,49 +914,12 @@ Make the tasks specific, actionable, and relevant to the project. Each task shou
                       onOpenChange={setIsRatingOpen}
                     />
                   )}
-
-                  {/* Dropdown Menu for secondary tools (AI Suggest, Rate Teammates) */}
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="outline" className="gap-2 border-purple-500/20 text-purple-700 dark:text-purple-300">
-                        <Wand2 className="size-4 text-purple-500" />
-                        <span>Tools</span>
-                        <ChevronDown className="size-3.5 opacity-60" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="w-48">
-                      {(project.role === 'owner' || project.role === 'admin') && (
-                        <DropdownMenuItem 
-                          onClick={handleAiSuggestTasks}
-                          disabled={aiSuggestionsLoading}
-                          className="gap-2 cursor-pointer"
-                        >
-                          {aiSuggestionsLoading ? (
-                            <Loader2 className="size-4 animate-spin" />
-                          ) : (
-                            <Wand2 className="size-4 text-blue-500" />
-                          )}
-                          <span>AI Suggest Tasks</span>
-                        </DropdownMenuItem>
-                      )}
-
-                      {user && (
-                        <DropdownMenuItem 
-                          onClick={() => setIsRatingOpen(true)}
-                          className="gap-2 cursor-pointer"
-                        >
-                          <Star className="size-4 text-amber-500" />
-                          <span>Rate Teammates</span>
-                        </DropdownMenuItem>
-                      )}
-                    </DropdownMenuContent>
-                  </DropdownMenu>
                   
                   {/* New Task Button - Only for owners and admins */}
                   {(project.role === 'owner' || project.role === 'admin') && (
                     <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
                       <DialogTrigger asChild>
-                        <Button>
+                        <Button className="h-10">
                           <Plus className="sm:mr-2 size-4" />
                           <span className="hidden sm:inline">New Task</span>
                         </Button>

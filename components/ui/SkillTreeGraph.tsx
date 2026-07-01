@@ -137,7 +137,7 @@ export function SkillTreeGraph({ userId }: SkillTreeGraphProps) {
             </div>
 
             {/* Core Root node */}
-            <div className="z-10 bg-gradient-to-r from-purple-600 to-indigo-600 text-white px-5 py-3 rounded-2xl shadow-lg border border-purple-500/30 text-center mb-16 animate-bounce">
+            <div className="z-10 bg-gradient-to-r from-purple-600 to-indigo-600 text-white px-5 py-3 rounded-2xl shadow-lg border border-purple-500/30 text-center mb-16">
               <span className="text-xs font-bold uppercase tracking-widest text-purple-200 block">Root Node</span>
               <span className="font-bold text-sm">Morx Team OS Profile</span>
             </div>
