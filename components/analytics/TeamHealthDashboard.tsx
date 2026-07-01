@@ -11,6 +11,7 @@ import { toast } from "sonner"
 import { useParams } from "next/navigation"
 import { useTheme } from "next-themes"
 import ReactMarkdown from "react-markdown"
+import remarkGfm from "remark-gfm"
 
 interface HealthData {
   team_id: string
@@ -108,6 +109,65 @@ export function TeamHealthDashboard({ teamId }: TeamHealthDashboardProps) {
 
     if (teamId && teamUrl) fetchData()
   }, [teamId, teamUrl])
+
+  useEffect(() => {
+    if (!aiReport) return
+
+    // Inject KaTeX CSS
+    if (!document.getElementById("katex-css")) {
+      const link = document.createElement("link")
+      link.id = "katex-css"
+      link.rel = "stylesheet"
+      link.href = "https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css"
+      document.head.appendChild(link)
+    }
+
+    // Inject KaTeX JS
+    const loadKatex = () => {
+      if (!(window as any).katex) {
+        const script = document.createElement("script")
+        script.src = "https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"
+        script.async = true;
+        script.onload = () => loadAutoRender()
+        document.body.appendChild(script)
+      } else {
+        loadAutoRender()
+      }
+    }
+
+    // Inject Auto-render JS
+    const loadAutoRender = () => {
+      if (!(window as any).renderMathInElement) {
+        const script = document.createElement("script")
+        script.src = "https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js"
+        script.async = true;
+        script.onload = () => triggerRender()
+        document.body.appendChild(script)
+      } else {
+        triggerRender()
+      }
+    }
+
+    // Trigger rendering on content
+    const triggerRender = () => {
+      const el = document.getElementById("ai-report-content")
+      if (el && (window as any).renderMathInElement) {
+        try {
+          (window as any).renderMathInElement(el, {
+            delimiters: [
+              { left: "$$", right: "$$", display: true },
+              { left: "$", right: "$", display: false }
+            ],
+            throwOnError: false
+          })
+        } catch (e) {
+          console.error("Error rendering KaTeX math:", e)
+        }
+      }
+    }
+
+    loadKatex()
+  }, [aiReport])
 
   const generateTeamReport = async () => {
     try {
@@ -415,9 +475,9 @@ export function TeamHealthDashboard({ teamId }: TeamHealthDashboardProps) {
         </CardHeader>
         <CardContent className="space-y-4">
           {aiReport ? (
-            <div className="prose prose-sm dark:prose-invert max-w-none bg-background/50 border p-5 rounded-2xl backdrop-blur-sm animate-in fade-in duration-300">
+            <div id="ai-report-content" className="prose prose-sm dark:prose-invert max-w-none bg-background/50 border p-5 rounded-2xl backdrop-blur-sm animate-in fade-in duration-300">
               <div className="space-y-4 text-sm text-foreground/90 leading-relaxed">
-                <ReactMarkdown>
+                <ReactMarkdown remarkPlugins={[remarkGfm]}>
                   {aiReport}
                 </ReactMarkdown>
               </div>
