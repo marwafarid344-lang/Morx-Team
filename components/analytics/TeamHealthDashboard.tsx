@@ -476,7 +476,24 @@ export function TeamHealthDashboard({ teamId }: TeamHealthDashboardProps) {
         <CardContent className="space-y-4">
           {aiReport ? (
             <div id="ai-report-content" className="prose prose-sm dark:prose-invert max-w-none bg-background/50 border p-5 rounded-2xl backdrop-blur-sm animate-in fade-in duration-300">
-              <div className="space-y-4 text-sm text-foreground/90 leading-relaxed">
+              <style dangerouslySetInnerHTML={{__html: `
+                #ai-report-content table {
+                  width: 100% !important;
+                  border-collapse: collapse !important;
+                  margin: 1rem 0 !important;
+                  text-align: left !important;
+                }
+                #ai-report-content th, #ai-report-content td {
+                  border: 1px solid ${isDark ? '#27272a' : '#e2e8f0'} !important;
+                  padding: 0.6rem 0.8rem !important;
+                  text-align: left !important;
+                }
+                #ai-report-content th {
+                  background-color: ${isDark ? '#1f1f23' : '#f4f4f5'} !important;
+                  font-weight: 700 !important;
+                }
+              `}} />
+              <div className="space-y-4 text-sm text-foreground/90 leading-relaxed text-left">
                 <ReactMarkdown remarkPlugins={[remarkGfm]}>
                   {aiReport}
                 </ReactMarkdown>
