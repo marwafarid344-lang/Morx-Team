@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/middleware/auth';
 import { supabaseAdmin as supabase } from '@/lib/supabase';
 import { ApiResponse } from '@/lib/types';
-import { generateAI } from '@/lib/utils/ai';
+import { generateAI, extractAndParseJSON } from '@/lib/utils/ai';
 import { encodeContent, decodeContent } from '@/lib/utils/contentEncoding';
 
 export async function POST(request: NextRequest) {
@@ -34,15 +34,12 @@ For each sub-task, provide:
 4. Priority level (1 = High, 2 = Medium, 3 = Low).
 Return the result strictly as a JSON array of objects with keys: "title", "description", "priority", "estimated_days". Do not include markdown code block formatting or backticks around the JSON.`;
 
-        const response = await generateAI({ userId, prompt });
+        const response = await generateAI({ userId, prompt, jsonMode: true });
         if (!response.success) {
           return NextResponse.json<ApiResponse>({ success: false, error: response.error, limitReached: response.limitReached }, { status: 500 });
         }
 
-        // Clean JSON response (remove any markdown formatting)
-        let jsonText = response.data || '[]';
-        jsonText = jsonText.replace(/```json/g, '').replace(/```/g, '').trim();
-        const subTasks = JSON.parse(jsonText);
+        const subTasks = extractAndParseJSON(response.data || '[]');
 
         return NextResponse.json<ApiResponse>({ success: true, data: subTasks });
       }
@@ -60,14 +57,12 @@ For each milestone, provide:
 3. Recommended relative deadline (e.g. "Week 2")
 Return the response strictly as a JSON array of objects with keys: "title", "goals", "relative_deadline". Do not wrap the JSON in markdown code blocks.`;
 
-        const response = await generateAI({ userId, prompt });
+        const response = await generateAI({ userId, prompt, jsonMode: true });
         if (!response.success) {
           return NextResponse.json<ApiResponse>({ success: false, error: response.error, limitReached: response.limitReached }, { status: 500 });
         }
 
-        let jsonText = response.data || '[]';
-        jsonText = jsonText.replace(/```json/g, '').replace(/```/g, '').trim();
-        const milestones = JSON.parse(jsonText);
+        const milestones = extractAndParseJSON(response.data || '[]');
 
         return NextResponse.json<ApiResponse>({ success: true, data: milestones });
       }
@@ -105,14 +100,12 @@ ${commentsText}
 List any blockers or warnings. Suggest solutions.
 Return a JSON object with keys: "blockers" (array of strings outlining blockers), "at_risk_tasks" (array of strings listing tasks at risk), "recommendations" (array of strings with recommended fixes). Do not include markdown code block formatting.`;
 
-        const response = await generateAI({ userId, prompt });
+        const response = await generateAI({ userId, prompt, jsonMode: true });
         if (!response.success) {
           return NextResponse.json<ApiResponse>({ success: false, error: response.error, limitReached: response.limitReached }, { status: 500 });
         }
 
-        let jsonText = response.data || '{}';
-        jsonText = jsonText.replace(/```json/g, '').replace(/```/g, '').trim();
-        const analysis = JSON.parse(jsonText);
+        const analysis = extractAndParseJSON(response.data || '{}');
 
         return NextResponse.json<ApiResponse>({ success: true, data: analysis });
       }
@@ -138,14 +131,12 @@ ${tasksList}
 Recommend the top 3 next actions for the team to keep the project on track.
 Return a JSON array of strings, e.g. ["Action 1", "Action 2", "Action 3"]. Do not include markdown formatting.`;
 
-        const response = await generateAI({ userId, prompt });
+        const response = await generateAI({ userId, prompt, jsonMode: true });
         if (!response.success) {
           return NextResponse.json<ApiResponse>({ success: false, error: response.error, limitReached: response.limitReached }, { status: 500 });
         }
 
-        let jsonText = response.data || '[]';
-        jsonText = jsonText.replace(/```json/g, '').replace(/```/g, '').trim();
-        const actions = JSON.parse(jsonText);
+        const actions = extractAndParseJSON(response.data || '[]');
 
         return NextResponse.json<ApiResponse>({ success: true, data: actions });
       }
@@ -162,14 +153,12 @@ ${notes}
 
 Return the response strictly as a JSON object with keys: "summary" (string), "key_decisions" (array of strings), "action_items" (array of objects with keys "item" and "assignee"). Do not include markdown formatting.`;
 
-        const response = await generateAI({ userId, prompt });
+        const response = await generateAI({ userId, prompt, jsonMode: true });
         if (!response.success) {
           return NextResponse.json<ApiResponse>({ success: false, error: response.error, limitReached: response.limitReached }, { status: 500 });
         }
 
-        let jsonText = response.data || '{}';
-        jsonText = jsonText.replace(/```json/g, '').replace(/```/g, '').trim();
-        const summary = JSON.parse(jsonText);
+        const summary = extractAndParseJSON(response.data || '{}');
 
         return NextResponse.json<ApiResponse>({ success: true, data: summary });
       }

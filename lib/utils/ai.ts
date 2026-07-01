@@ -41,6 +41,144 @@ interface GenerateOptions {
   maxTokens?: number;
   temperature?: number;
   skipCache?: boolean;
+  jsonMode?: boolean;
+}
+
+/**
+ * Repairs a truncated JSON string by closing unclosed double quotes, brackets, and curly braces.
+ */
+export function repairTruncatedJSON(json: string): string {
+  let cleaned = json.trim();
+  
+  // If it's already valid JSON, don't touch it
+  try {
+    JSON.parse(cleaned);
+    return cleaned;
+  } catch (e) {}
+
+  let inString = false;
+  let escape = false;
+  const stack: ('{' | '[')[] = [];
+
+  for (let i = 0; i < cleaned.length; i++) {
+    const char = cleaned[i];
+    if (escape) {
+      escape = false;
+      continue;
+    }
+    if (char === '\\') {
+      escape = true;
+      continue;
+    }
+    if (char === '"') {
+      inString = !inString;
+      continue;
+    }
+    if (!inString) {
+      if (char === '{' || char === '[') {
+        stack.push(char);
+      } else if (char === '}') {
+        if (stack[stack.length - 1] === '{') stack.pop();
+      } else if (char === ']') {
+        if (stack[stack.length - 1] === '[') stack.pop();
+      }
+    }
+  }
+
+  // If we ended inside a string, close it
+  if (inString) {
+    cleaned += '"';
+  }
+
+  // Remove trailing commas, colons or unclosed property patterns
+  let prevCleaned = '';
+  while (cleaned !== prevCleaned) {
+    prevCleaned = cleaned;
+    cleaned = cleaned.trim();
+    if (cleaned.endsWith(',') || cleaned.endsWith(':')) {
+      cleaned = cleaned.slice(0, -1);
+    }
+  }
+
+  // Clean trailing commas after trimming
+  cleaned = cleaned.trim().replace(/,\s*$/, '');
+
+  // Close remaining items in the stack
+  while (stack.length > 0) {
+    const last = stack.pop();
+    if (last === '{') {
+      cleaned += '}';
+    } else if (last === '[') {
+      cleaned += ']';
+    }
+  }
+
+  return cleaned;
+}
+
+/**
+ * Robustly extracts and parses JSON from AI response text.
+ * Handles leading/trailing markdown blocks, conversational text, and whitespace.
+ * Attempts to repair truncated JSON response blocks.
+ */
+export function extractAndParseJSON<T>(text: string): T {
+  const trimmed = text.trim();
+  
+  // Try parsing directly first
+  try {
+    return JSON.parse(trimmed) as T;
+  } catch (e) {
+    // Continue cleanup
+  }
+
+  // Remove markdown code blocks if any
+  let cleaned = trimmed
+    .replace(/```json/gi, '')
+    .replace(/```/g, '')
+    .trim();
+
+  try {
+    return JSON.parse(cleaned) as T;
+  } catch (e) {
+    // Continue cleanup
+  }
+
+  // Find the boundaries of the JSON object or array
+  const firstCurly = cleaned.indexOf('{');
+  const lastCurly = cleaned.lastIndexOf('}');
+  const firstBracket = cleaned.indexOf('[');
+  const lastBracket = cleaned.lastIndexOf(']');
+
+  let startIndex = -1;
+  let endIndex = -1;
+
+  if (firstCurly !== -1 && (firstBracket === -1 || firstCurly < firstBracket)) {
+    // Object matches
+    startIndex = firstCurly;
+    endIndex = lastCurly;
+  } else if (firstBracket !== -1) {
+    // Array matches
+    startIndex = firstBracket;
+    endIndex = lastBracket;
+  }
+
+  // If last brace is missing (e.g. truncated), try to repair from the start index to the end of string
+  if (startIndex !== -1 && (endIndex === -1 || endIndex < startIndex)) {
+    endIndex = cleaned.length - 1;
+  }
+
+  if (startIndex !== -1 && endIndex !== -1 && endIndex >= startIndex) {
+    const candidate = cleaned.slice(startIndex, endIndex + 1);
+    try {
+      const repaired = repairTruncatedJSON(candidate);
+      return JSON.parse(repaired) as T;
+    } catch (parseErr: any) {
+      console.error('Failed to parse and repair JSON candidate:', parseErr);
+      throw new Error(`JSON parsing failed: ${parseErr.message}. Content was: ${candidate.substring(0, 200)}...`);
+    }
+  }
+
+  throw new Error(`Could not find valid JSON object or array in AI response. Content was: ${trimmed.substring(0, 200)}...`);
 }
 
 /**
@@ -49,9 +187,10 @@ interface GenerateOptions {
 export async function generateAI({
   userId,
   prompt,
-  maxTokens = 800,
+  maxTokens = 2000,
   temperature = 0.7,
-  skipCache = false
+  skipCache = false,
+  jsonMode = false
 }: GenerateOptions): Promise<{ success: boolean; data?: string; error?: string; limitReached?: boolean }> {
   const cacheKey = getCacheKey(prompt);
 
@@ -59,8 +198,18 @@ export async function generateAI({
   if (!skipCache) {
     const cached = await getCachedResponse(cacheKey);
     if (cached) {
-      console.log(`[AI Utility] Cache HIT for key ${cacheKey}`);
-      return { success: true, data: cached };
+      if (jsonMode) {
+        try {
+          extractAndParseJSON(cached);
+          console.log(`[AI Utility] Cache HIT for key ${cacheKey}`);
+          return { success: true, data: cached };
+        } catch (e) {
+          console.warn(`[AI Utility] Cache hit but invalid JSON, skipping cache for key ${cacheKey}`);
+        }
+      } else {
+        console.log(`[AI Utility] Cache HIT for key ${cacheKey}`);
+        return { success: true, data: cached };
+      }
     }
   }
 
@@ -97,6 +246,7 @@ export async function generateAI({
           messages: [{ role: 'user', content: prompt }],
           max_tokens: maxTokens,
           temperature: temperature,
+          response_format: jsonMode ? { type: 'json_object' } : undefined,
         })
       });
 
@@ -128,6 +278,7 @@ export async function generateAI({
             generationConfig: {
               temperature: temperature,
               maxOutputTokens: maxTokens,
+              responseMimeType: jsonMode ? 'application/json' : undefined,
             }
           })
         }

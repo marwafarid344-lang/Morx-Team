@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/middleware/auth';
 import { supabaseAdmin as supabase } from '@/lib/supabase';
 import { ApiResponse } from '@/lib/types';
-import { generateAI } from '@/lib/utils/ai';
+import { generateAI, extractAndParseJSON } from '@/lib/utils/ai';
 import { decodeContent } from '@/lib/utils/contentEncoding';
 
 export async function POST(request: NextRequest) {
@@ -37,12 +37,10 @@ Organize the plan into:
 3. Recommended Member Assignments
 Return a JSON object with keys: "focus" (string), "priorities" (array of strings), "assignments" (array of strings). Do not include markdown code block formatting.`;
 
-        const response = await generateAI({ userId, prompt });
+        const response = await generateAI({ userId, prompt, maxTokens: 2000, jsonMode: true });
         if (!response.success) throw new Error(response.error);
 
-        let jsonText = response.data || '{}';
-        jsonText = jsonText.replace(/```json/g, '').replace(/```/g, '').trim();
-        const plan = JSON.parse(jsonText);
+        const plan = extractAndParseJSON(response.data || '{}');
         return NextResponse.json<ApiResponse>({ success: true, data: plan });
       }
 
@@ -53,12 +51,10 @@ ${taskList}
 Compare completed tasks vs planned. Outline achievements, carryover tasks, and general team velocity.
 Return a JSON object with keys: "completed_count" (number), "total_count" (number), "achievements" (array of strings), "carryover" (array of strings), "summary" (string). Do not include markdown.`;
 
-        const response = await generateAI({ userId, prompt });
+        const response = await generateAI({ userId, prompt, maxTokens: 2500, jsonMode: true });
         if (!response.success) throw new Error(response.error);
 
-        let jsonText = response.data || '{}';
-        jsonText = jsonText.replace(/```json/g, '').replace(/```/g, '').trim();
-        const review = JSON.parse(jsonText);
+        const review = extractAndParseJSON(response.data || '{}');
         return NextResponse.json<ApiResponse>({ success: true, data: review });
       }
 
@@ -88,12 +84,10 @@ Outline:
 3. Active blockers/concerns
 Return a JSON object with keys: "yesterday" (array of strings), "today" (array of strings), "blockers" (array of strings). Do not include markdown formatting.`;
 
-        const response = await generateAI({ userId, prompt });
+        const response = await generateAI({ userId, prompt, maxTokens: 2000, jsonMode: true });
         if (!response.success) throw new Error(response.error);
 
-        let jsonText = response.data || '{}';
-        jsonText = jsonText.replace(/```json/g, '').replace(/```/g, '').trim();
-        const standup = JSON.parse(jsonText);
+        const standup = extractAndParseJSON(response.data || '{}');
         return NextResponse.json<ApiResponse>({ success: true, data: standup });
       }
 
@@ -104,12 +98,10 @@ ${completedTasksText}
 
 Return a JSON object with keys: "version" (string, e.g. "v1.1.0"), "title" (string), "features" (array of strings), "improvements" (array of strings). Do not include markdown.`;
 
-        const response = await generateAI({ userId, prompt });
+        const response = await generateAI({ userId, prompt, maxTokens: 2000, jsonMode: true });
         if (!response.success) throw new Error(response.error);
 
-        let jsonText = response.data || '{}';
-        jsonText = jsonText.replace(/```json/g, '').replace(/```/g, '').trim();
-        const notes = JSON.parse(jsonText);
+        const notes = extractAndParseJSON(response.data || '{}');
         return NextResponse.json<ApiResponse>({ success: true, data: notes });
       }
 

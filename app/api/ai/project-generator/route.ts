@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/middleware/auth';
 import { supabaseAdmin as supabase } from '@/lib/supabase';
 import { ApiResponse } from '@/lib/types';
-import { generateAI } from '@/lib/utils/ai';
+import { generateAI, extractAndParseJSON } from '@/lib/utils/ai';
 import { encodeContent } from '@/lib/utils/contentEncoding';
 
 export async function POST(request: NextRequest) {
@@ -81,14 +81,12 @@ Structure your response strictly as a JSON object with the following fields:
 
 Do not wrap the JSON in markdown code blocks.`;
 
-    const response = await generateAI({ userId, prompt: aiPrompt, maxTokens: 1500 });
+    const response = await generateAI({ userId, prompt: aiPrompt, maxTokens: 3000, jsonMode: true });
     if (!response.success) {
       return NextResponse.json<ApiResponse>({ success: false, error: response.error, limitReached: response.limitReached }, { status: 500 });
     }
 
-    let jsonText = response.data || '{}';
-    jsonText = jsonText.replace(/```json/g, '').replace(/```/g, '').trim();
-    const projectSchema = JSON.parse(jsonText);
+    const projectSchema = extractAndParseJSON(response.data || '{}');
 
     return NextResponse.json<ApiResponse>({
       success: true,
