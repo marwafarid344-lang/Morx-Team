@@ -21,10 +21,14 @@ interface TeammateRatingModalProps {
   projectId: string
   teamMembers: Member[]
   currentUserId: string
+  open?: boolean
+  onOpenChange?: (open: boolean) => void
 }
 
-export function TeammateRatingModal({ projectId, teamMembers, currentUserId }: TeammateRatingModalProps) {
-  const [open, setOpen] = useState(false)
+export function TeammateRatingModal({ projectId, teamMembers, currentUserId, open: externalOpen, onOpenChange: externalOnOpenChange }: TeammateRatingModalProps) {
+  const [internalOpen, setInternalOpen] = useState(false)
+  const open = externalOpen !== undefined ? externalOpen : internalOpen
+  const setOpen = externalOnOpenChange !== undefined ? externalOnOpenChange : setInternalOpen
   const [selectedMember, setSelectedMember] = useState("")
   const [submitting, setSubmitting] = useState(false)
 
@@ -50,8 +54,8 @@ export function TeammateRatingModal({ projectId, teamMembers, currentUserId }: T
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          project_id: projectId,
-          reviewee_id: selectedMember,
+          projectId,
+          targetUserId: selectedMember,
           ratings: {
             leadership,
             communication,
@@ -81,12 +85,14 @@ export function TeammateRatingModal({ projectId, teamMembers, currentUserId }: T
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button variant="outline" size="sm" className="border-purple-500/30 hover:bg-purple-500/10 text-purple-700 dark:text-purple-300 gap-1 text-xs">
-          <Star className="size-3.5 text-purple-500" />
-          <span>Rate Teammates</span>
-        </Button>
-      </DialogTrigger>
+      {externalOpen === undefined && (
+        <DialogTrigger asChild>
+          <Button variant="outline" size="sm" className="border-purple-500/30 hover:bg-purple-500/10 text-purple-700 dark:text-purple-300 gap-1 text-xs">
+            <Star className="size-3.5 text-purple-500" />
+            <span className="hidden sm:inline">Rate Teammates</span>
+          </Button>
+        </DialogTrigger>
+      )}
       <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">

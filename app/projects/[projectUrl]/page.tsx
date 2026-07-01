@@ -18,7 +18,7 @@ import { PlanAvatar } from "@/components/ui/plan-avatar"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Plus, ArrowLeft, MoreVertical, Trash2, Calendar, User, AlertCircle, CheckCircle2, Clock, Settings, Edit, MessageSquare, Paperclip, Send, X, Download, Heart, ChevronDown, Check, LayoutGrid, CalendarDays, Sparkles, Loader2 } from "lucide-react"
+import { Plus, ArrowLeft, MoreVertical, Trash2, Calendar, User, AlertCircle, CheckCircle2, Clock, Settings, Edit, MessageSquare, Paperclip, Send, X, Download, Heart, ChevronDown, Check, LayoutGrid, CalendarDays, Sparkles, Loader2, Wand2, Star } from "lucide-react"
 import { cn } from "@/lib/utils"
 import TaskCalendar from "@/components/TaskCalendar"
 import { LiveClock } from "@/components/LiveClock"
@@ -118,6 +118,7 @@ export default function ProjectPage() {
   const [aiSuggestionsOpen, setAiSuggestionsOpen] = useState(false)
   const [aiSuggestionsLoading, setAiSuggestionsLoading] = useState(false)
   const [aiSuggestions, setAiSuggestions] = useState<{title: string; description: string; priority: number}[]>([])
+  const [isRatingOpen, setIsRatingOpen] = useState(false)
 
   useEffect(() => {
     // Auth is now managed by useAuth context
@@ -809,12 +810,12 @@ Make the tasks specific, actionable, and relevant to the project. Each task shou
               </div>
               
               {/* Time + Buttons Row */}
-              <div className="flex items-center justify-between">
-                {/* Clock on left */}
-                <LiveClock compact showSettings={false} />
-                
-                {/* Buttons on right */}
-                <div className="flex items-center gap-2">
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-muted/50 pb-4 mb-2">
+                {/* Left Side: Clock & View Toggle */}
+                <div className="flex flex-wrap items-center gap-3">
+                  <LiveClock compact showSettings={false} />
+                  <Separator orientation="vertical" className="hidden md:block h-6" />
+                  
                   {/* View Mode Toggle */}
                   <div className="flex items-center rounded-lg border bg-muted/30 p-1">
                     <Button
@@ -845,43 +846,66 @@ Make the tasks specific, actionable, and relevant to the project. Each task shou
                       <span className="hidden sm:inline">Marlin AI</span>
                     </Button>
                   </div>
-                  
-
+                </div>
+                
+                {/* Right Side: Action Buttons */}
+                <div className="flex flex-wrap items-center gap-2">
                   {user && (
                     <TeammateRatingModal 
                       projectId={project.project_id} 
                       teamMembers={teamMembers} 
                       currentUserId={user.auth_user_id} 
+                      open={isRatingOpen}
+                      onOpenChange={setIsRatingOpen}
                     />
                   )}
 
+                  {/* Dropdown Menu for secondary tools (AI Suggest, Rate Teammates) */}
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="outline" className="gap-2 border-purple-500/20 text-purple-700 dark:text-purple-300">
+                        <Wand2 className="size-4 text-purple-500" />
+                        <span>Tools</span>
+                        <ChevronDown className="size-3.5 opacity-60" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="w-48">
+                      {(project.role === 'owner' || project.role === 'admin') && (
+                        <DropdownMenuItem 
+                          onClick={handleAiSuggestTasks}
+                          disabled={aiSuggestionsLoading}
+                          className="gap-2 cursor-pointer"
+                        >
+                          {aiSuggestionsLoading ? (
+                            <Loader2 className="size-4 animate-spin" />
+                          ) : (
+                            <Wand2 className="size-4 text-blue-500" />
+                          )}
+                          <span>AI Suggest Tasks</span>
+                        </DropdownMenuItem>
+                      )}
 
-                {/* AI Task Suggestions Button - Only for owners and admins */}
-                {(project.role === 'owner' || project.role === 'admin') && (
-                  <Button 
-                    variant="outline" 
-                    className="gap-2 border-purple-500/30 hover:border-purple-500/50 hover:bg-purple-500/10 text-purple-700 dark:text-purple-400"
-                    onClick={handleAiSuggestTasks}
-                    disabled={aiSuggestionsLoading}
-                  >
-                    {aiSuggestionsLoading ? (
-                      <Loader2 className="size-4 animate-spin" />
-                    ) : (
-                      <Sparkles className="size-4" />
-                    )}
-                    <span className="hidden sm:inline">AI Suggest</span>
-                  </Button>
-                )}
-                
-                {/* New Task Button - Only for owners and admins */}
-                {(project.role === 'owner' || project.role === 'admin') && (
-                  <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-                  <DialogTrigger asChild>
-                    <Button>
-                      <Plus className="sm:mr-2 size-4" />
-                      <span className="hidden sm:inline">New Task</span>
-                    </Button>
-                  </DialogTrigger>
+                      {user && (
+                        <DropdownMenuItem 
+                          onClick={() => setIsRatingOpen(true)}
+                          className="gap-2 cursor-pointer"
+                        >
+                          <Star className="size-4 text-amber-500" />
+                          <span>Rate Teammates</span>
+                        </DropdownMenuItem>
+                      )}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                  
+                  {/* New Task Button - Only for owners and admins */}
+                  {(project.role === 'owner' || project.role === 'admin') && (
+                    <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+                      <DialogTrigger asChild>
+                        <Button>
+                          <Plus className="sm:mr-2 size-4" />
+                          <span className="hidden sm:inline">New Task</span>
+                        </Button>
+                      </DialogTrigger>
                 <DialogContent className="max-w-2xl">
                   <DialogHeader>
                     <DialogTitle>Create New Task</DialogTitle>
