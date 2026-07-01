@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { motion } from "framer-motion"
 import { 
   BookOpen, 
@@ -1250,10 +1250,233 @@ const sections = [
       </div>
     )
   },
+  { 
+    id: "ai-team-os", 
+    title: "AI Team OS & Formulas", 
+    icon: <Sparkles className="size-4" />,
+    content: (
+      <div className="space-y-6">
+        <h2 className="text-3xl font-black italic flex items-center gap-2">🤖 Marlin AI Team OS</h2>
+        <p className="text-muted-foreground">Morx transforms project spaces using a modular AI engine that calculates behavioral metrics, matches skills, runs health diagnostics, and utilizes semantic memory.</p>
+
+        <div className="p-4 bg-primary/5 rounded-xl border-l-4 border-primary">
+          <p className="font-bold">LaTeX Math & Calculations</p>
+          <p className="text-sm mt-1">Below are the concise mathematical models used to power Marlin's analysis and indicators.</p>
+        </div>
+
+        <Accordion type="single" collapsible className="w-full space-y-3">
+          <AccordionItem value="dna" className="border rounded-xl px-4">
+            <AccordionTrigger className="hover:no-underline font-bold">🧬 AI Team DNA Profile</AccordionTrigger>
+            <AccordionContent className="space-y-4 pt-2">
+              <p className="text-sm text-muted-foreground">Evolves continuously based on user commits, task status, comments, and project timelines.</p>
+              <div className="p-4 bg-muted/40 rounded-xl space-y-4">
+                <div>
+                  <p className="text-xs font-bold uppercase text-primary">1. Preferred Working Hours</p>
+                  <p className="text-xs text-muted-foreground mb-2">Calculates the statistical mode of activity timestamps:</p>
+                  <div className="bg-background p-3 rounded-lg border flex justify-center text-sm font-semibold">
+                    {"$$\\text{Peak Hour} = \\text{mode}\\left(\\{ \\text{Hour}(c.\\text{created\\_at}) \\mid c \\in \\text{Comments} \\} \\cup \\{ \\text{Hour}(t.\\text{created\\_at}) \\mid t \\in \\text{Tasks} \\}\\right)$$"}
+                  </div>
+                </div>
+                <div>
+                  <p className="text-xs font-bold uppercase text-primary">2. Deadline Reliability</p>
+                  <p className="text-xs text-muted-foreground mb-2">The percentage of assigned tasks completed before or on the due date:</p>
+                  <div className="bg-background p-3 rounded-lg border flex justify-center text-sm font-semibold">
+                    {"$$\\text{Reliability} = \\frac{\\text{Tasks Completed On Time}}{\\text{Total Assigned Tasks}} \\times 100\\%$$"}
+                  </div>
+                </div>
+                <div>
+                  <p className="text-xs font-bold uppercase text-primary">3. Collaboration Score</p>
+                  <p className="text-xs text-muted-foreground mb-2">Quantifies messaging behavior and team integration:</p>
+                  <div className="bg-background p-3 rounded-lg border flex justify-center text-sm font-semibold">
+                    {"$$\\text{Collaboration} = \\min\\left(100, \\text{Comments Count} \\times 5 + \\text{Teams Joined} \\times 10\\right)$$"}
+                  </div>
+                </div>
+                <div>
+                  <p className="text-xs font-bold uppercase text-primary">4. Task Consistency</p>
+                  <p className="text-xs text-muted-foreground mb-2">Measures completion variance via standard deviation $\sigma$:</p>
+                  <div className="bg-background p-3 rounded-lg border flex justify-center text-sm font-semibold">
+                    {"$$\\text{Consistency} = \\max\\left(0, 100 - \\sigma\\right)$$\n\n$$\\text{where } \\sigma = \\sqrt{\\frac{1}{N}\\sum_{i=1}^{N}(X_i - \\mu)^2}$$"}
+                  </div>
+                </div>
+              </div>
+            </AccordionContent>
+          </AccordionItem>
+
+          <AccordionItem value="matching" className="border rounded-xl px-4">
+            <AccordionTrigger className="hover:no-underline font-bold">🤝 Smart Team Matching</AccordionTrigger>
+            <AccordionContent className="space-y-4 pt-2">
+              <p className="text-sm text-muted-foreground">Finds the best-suited student candidates for projects based on skills and reliability DNA.</p>
+              <div className="p-4 bg-muted/40 rounded-xl space-y-2">
+                <p className="text-xs font-bold uppercase text-primary">Compatibility Score Formula</p>
+                <div className="bg-background p-3 rounded-lg border flex justify-center text-sm font-semibold">
+                  {"$$\\text{Compatibility} = 0.4 \\times \\text{Skills Match} + 0.3 \\times \\text{Reliability} + 0.3 \\times \\text{Collaboration}$$"}
+                </div>
+                <p className="text-xs text-muted-foreground">Where the Skills Match ratio is computed as:</p>
+                <div className="bg-background p-3 rounded-lg border flex justify-center text-sm font-semibold">
+                  {"$$\\text{Skills Match} = \\frac{\\text{Candidate Skills} \\cap \\text{Project Required Skills}}{\\text{Project Required Skills}} \\times 100\\%$$"}
+                </div>
+              </div>
+            </AccordionContent>
+          </AccordionItem>
+
+          <AccordionItem value="health" className="border rounded-xl px-4">
+            <AccordionTrigger className="hover:no-underline font-bold">🏥 Team Health Engine</AccordionTrigger>
+            <AccordionContent className="space-y-4 pt-2">
+              <p className="text-sm text-muted-foreground">Monitors workload distribution imbalances and burnout indexes across active student groups.</p>
+              <div className="p-4 bg-muted/40 rounded-xl space-y-4">
+                <div>
+                  <p className="text-xs font-bold uppercase text-primary">1. Workload Imbalance</p>
+                  <p className="text-xs text-muted-foreground mb-2">Calculated using the standard deviation of tasks assigned among active members:</p>
+                  <div className="bg-background p-3 rounded-lg border flex justify-center text-sm font-semibold">
+                    {"$$\\text{Imbalance} = \\sqrt{\\frac{1}{M}\\sum_{j=1}^{M}(T_j - \\bar{T})^2}$$"}
+                  </div>
+                </div>
+                <div>
+                  <p className="text-xs font-bold uppercase text-primary">2. Burnout Risk Index</p>
+                  <p className="text-xs text-muted-foreground mb-2">Aggregates overdue backlogs against completion speed:</p>
+                  <div className="bg-background p-3 rounded-lg border flex justify-center text-sm font-semibold">
+                    {"$$\\text{Burnout Risk} = \\min\\left(100, \\frac{\\text{Overdue Tasks} \\times 1.5 + \\text{Active Tasks}}{\\text{Historical Velocity}} \\times 100\\right)$$"}
+                  </div>
+                </div>
+              </div>
+            </AccordionContent>
+          </AccordionItem>
+
+          <AccordionItem value="skills" className="border rounded-xl px-4">
+            <AccordionTrigger className="hover:no-underline font-bold">🌳 Skill Trees & Gamification</AccordionTrigger>
+            <AccordionContent className="space-y-4 pt-2">
+              <p className="text-sm text-muted-foreground">Progresses academic capabilities automatically upon task completion and keyword analysis.</p>
+              <div className="p-4 bg-muted/40 rounded-xl space-y-4">
+                <div>
+                  <p className="text-xs font-bold uppercase text-primary">1. Skill Level Progression</p>
+                  <p className="text-xs text-muted-foreground mb-2">Calculates the current tier based on accumulated Experience Points (XP):</p>
+                  <div className="bg-background p-3 rounded-lg border flex justify-center text-sm font-semibold">
+                    {"$$\\text{Level} = \\left\\lfloor \\frac{\\text{Total XP}}{300} \\right\\rfloor + 1$$"}
+                  </div>
+                </div>
+                <div>
+                  <p className="text-xs font-bold uppercase text-primary">2. Confidence Score</p>
+                  <p className="text-xs text-muted-foreground mb-2">Formulates a credibility ranking by scaling reliability with level weights:</p>
+                  <div className="bg-background p-3 rounded-lg border flex justify-center text-sm font-semibold">
+                    {"$$\\text{Confidence} = \\max\\left(30, \\min\\left(100, 45 + 0.5 \\times (\\text{Reliability} - 50) + \\text{Level} \\times 5\\right)\\right)$$"}
+                  </div>
+                </div>
+              </div>
+            </AccordionContent>
+          </AccordionItem>
+
+          <AccordionItem value="reputation" className="border rounded-xl px-4">
+            <AccordionTrigger className="hover:no-underline font-bold">🌟 Team Reputation</AccordionTrigger>
+            <AccordionContent className="space-y-4 pt-2">
+              <p className="text-sm text-muted-foreground">Merges anonymous teammate reviews into DNA scores using a Weighted Moving Average:</p>
+              <div className="p-4 bg-muted/40 rounded-xl">
+                <div className="bg-background p-3 rounded-lg border flex justify-center text-sm font-semibold">
+                  {"$$\\text{New DNA Score} = 0.7 \\times \\text{Existing Score} + 0.3 \\times (\\text{Peer Rating} \\times 20)$$" }
+                </div>
+              </div>
+            </AccordionContent>
+          </AccordionItem>
+
+          <AccordionItem value="memory" className="border rounded-xl px-4">
+            <AccordionTrigger className="hover:no-underline font-bold">🎙️ Voice Assistant & Semantic Memory</AccordionTrigger>
+            <AccordionContent className="space-y-4 pt-2">
+              <p className="text-sm text-muted-foreground">Retrieves long-term chat contexts using vector cosine similarity:</p>
+              <div className="p-4 bg-muted/40 rounded-xl">
+                <div className="bg-background p-3 rounded-lg border flex justify-center text-sm font-semibold">
+                  {"$$\\text{Cosine Distance} = 1 - \\frac{\\mathbf{A} \\cdot \\mathbf{B}}{\\|\\mathbf{A}\\| \\|\\mathbf{B}\\|} = 1 - \\frac{\\sum_{i=1}^{n} A_i B_i}{\\sqrt{\\sum_{i=1}^{n} A_i^2} \\sqrt{\\sum_{i=1}^{n} B_i^2}}$$" }
+                </div>
+              </div>
+            </AccordionContent>
+          </AccordionItem>
+        </Accordion>
+      </div>
+    )
+  },
 ]
 
 export default function DocsPage() {
   const [activeSection, setActiveSection] = useState("getting-started")
+
+  useEffect(() => {
+    // Inject KaTeX CSS
+    if (!document.getElementById("katex-css")) {
+      const link = document.createElement("link");
+      link.id = "katex-css";
+      link.rel = "stylesheet";
+      link.href = "https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css";
+      document.head.appendChild(link);
+    }
+
+    let observer: MutationObserver | null = null;
+
+    // Trigger rendering on content
+    const triggerRender = () => {
+      const el = document.getElementById("docs-content");
+      if (el && (window as any).renderMathInElement) {
+        try {
+          if (observer) observer.disconnect();
+          (window as any).renderMathInElement(el, {
+            delimiters: [
+              { left: "$$", right: "$$", display: true },
+              { left: "$", right: "$", display: false }
+            ],
+            throwOnError: false
+          });
+          if (observer) observer.observe(el, { childList: true, subtree: true });
+        } catch (e) {
+          console.error("Error rendering KaTeX math:", e);
+        }
+      }
+    };
+
+    // Inject Auto-render JS
+    const loadAutoRender = () => {
+      if (!(window as any).renderMathInElement) {
+        const script = document.createElement("script");
+        script.src = "https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js";
+        script.async = true;
+        script.onload = () => {
+          triggerRender();
+          startObserver();
+        };
+        document.body.appendChild(script);
+      } else {
+        triggerRender();
+        startObserver();
+      }
+    };
+
+    // Inject KaTeX JS
+    const loadKatex = () => {
+      if (!(window as any).katex) {
+        const script = document.createElement("script");
+        script.src = "https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js";
+        script.async = true;
+        script.onload = () => loadAutoRender();
+        document.body.appendChild(script);
+      } else {
+        loadAutoRender();
+      }
+    };
+
+    const startObserver = () => {
+      const el = document.getElementById("docs-content");
+      if (el && !observer) {
+        observer = new MutationObserver(() => {
+          triggerRender();
+        });
+        observer.observe(el, { childList: true, subtree: true });
+      }
+    };
+
+    loadKatex();
+
+    return () => {
+      if (observer) {
+        observer.disconnect();
+      }
+    };
+  }, [activeSection]);
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -1300,7 +1523,7 @@ export default function DocsPage() {
           </aside>
 
           {/* Content Area */}
-          <div className="flex-1 max-w-4xl min-h-[600px] border-l md:pl-12">
+          <div id="docs-content" className="flex-1 max-w-4xl min-h-[600px] border-l md:pl-12">
              <motion.div
                 key={activeSection}
                 initial={{ opacity: 0, x: 20 }}
