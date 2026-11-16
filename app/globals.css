@@ -99,8 +99,8 @@
         --sidebar-foreground: 142 20% 90%;
         --sidebar-primary: 158 64% 52%;
         --sidebar-primary-foreground: 0 0% 100%;
-        --sidebar-accent: 142 20% 15%;
-        --sidebar-accent-foreground: 142 20% 90%;
+        --sidebar-accent: 142 20% 12%;
+        --sidebar-accent-foreground: 142 64% 20%;
         --sidebar-border: 142 15% 18%;
         --sidebar-ring: 158 64% 52%;
     }
@@ -112,89 +112,79 @@
     }
 
     body {
-        @apply bg-background text-foreground;
+        @apply bg-background text-foreground font-sans;
     }
 }
 
-.rock-salt {
-    font-family: var(--font-rock-salt), cursive;
-}
-
-.size-15 {
-    width: 60px;
-    height: 60px;
-}
-
-/* Theme Palettes */
-.theme-volcano {
-    --primary: 14 100% 57%;
-    --primary-foreground: 0 0% 100%;
-    --secondary: 24 95% 53%;
-    --secondary-foreground: 0 0% 100%;
-    --accent: 14 100% 57%;
-    --accent-foreground: 0 0% 100%;
-}
-
-.theme-nightowl {
-    --primary: 207 90% 54%;
-    --primary-foreground: 0 0% 100%;
-    --secondary: 286 85% 60%;
-    --secondary-foreground: 0 0% 100%;
-    --accent: 171 100% 41%;
-    --accent-foreground: 0 0% 100%;
-}
-
-.theme-skyblue {
+.theme-ocean {
     --primary: 199 89% 48%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 204 96% 27%;
+    --secondary: 217 91% 60%;
     --secondary-foreground: 0 0% 100%;
-    --accent: 186 100% 69%;
+    --accent: 187 92% 69%;
     --accent-foreground: 0 0% 0%;
 }
 
 .theme-sunset {
-    --primary: 340 82% 52%;
+    --primary: 12 76% 61%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 25 95% 53%;
-    --secondary-foreground: 0 0% 100%;
-    --accent: 291 64% 42%;
+    --secondary: 35 92% 71%;
+    --secondary-foreground: 0 0% 0%;
+    --accent: 283 39% 53%;
     --accent-foreground: 0 0% 100%;
 }
 
 .theme-forest {
     --primary: 142 76% 36%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 84 68% 42%;
+    --secondary: 160 84% 39%;
     --secondary-foreground: 0 0% 100%;
-    --accent: 173 58% 39%;
+    --accent: 120 60% 40%;
     --accent-foreground: 0 0% 100%;
 }
 
-.theme-ocean {
-    --primary: 212 100% 48%;
-    --primary-foreground: 0 0% 100%;
-    --secondary: 188 78% 41%;
-    --secondary-foreground: 0 0% 100%;
-    --accent: 199 89% 48%;
-    --accent-foreground: 0 0% 100%;
-}
-
-.theme-lavender {
+.theme-royal {
     --primary: 262 83% 58%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 291 47% 51%;
+    --secondary: 291 64% 42%;
     --secondary-foreground: 0 0% 100%;
-    --accent: 280 67% 80%;
+    --accent: 231 48% 48%;
+    --accent-foreground: 0 0% 100%;
+}
+
+.theme-dark {
+    --primary: 158 64% 52%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 142 50% 25%;
+    --secondary-foreground: 0 0% 100%;
+    --accent: 142 30% 18%;
+    --accent-foreground: 0 0% 100%;
+}
+
+.theme-cyber {
+    --primary: 180 100% 50%;
+    --primary-foreground: 0 0% 0%;
+    --secondary: 300 100% 50%;
+    --secondary-foreground: 0 0% 100%;
+    --accent: 60 100% 50%;
     --accent-foreground: 0 0% 0%;
 }
 
-.theme-rose {
-    --primary: 330 81% 60%;
+.theme-nord {
+    --primary: 193 43% 67%;
+    --primary-foreground: 0 0% 0%;
+    --secondary: 210 34% 63%;
+    --secondary-foreground: 0 0% 0%;
+    --accent: 179 25% 65%;
+    --accent-foreground: 0 0% 0%;
+}
+
+.theme-retro {
+    --primary: 28 80% 52%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 346 77% 49%;
-    --secondary-foreground: 0 0% 100%;
-    --accent: 350 89% 60%;
+    --secondary: 43 96% 56%;
+    --secondary-foreground: 0 0% 0%;
+    --accent: 14 77% 62%;
     --accent-foreground: 0 0% 100%;
 }
 
@@ -289,4 +279,71 @@
     background-color: hsl(var(--destructive) / 0.1) !important;
     color: hsl(var(--destructive)) !important;
     border-color: hsl(var(--destructive) / 0.2) !important;
+}
+
+/* ==============================================================================
+   GLOBAL SLEEK CUSTOM SCROLLBAR REDESIGN (CROSS-BROWSER & WINDOWS RESILIENT)
+   ============================================================================== */
+
+/* Modern WebKit (Chrome, Edge, Safari, Opera, Brave) */
+::-webkit-scrollbar {
+    width: 6px !important;
+    height: 6px !important;
+}
+
+::-webkit-scrollbar-track,
+::-webkit-scrollbar-track-piece {
+    background: transparent !important;
+}
+
+::-webkit-scrollbar-thumb {
+    background: hsl(var(--muted-foreground) / 0.25) !important;
+    border-radius: 9999px !important;
+    border: 1px solid transparent !important;
+    background-clip: padding-box !important;
+    transition: background-color 0.2s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--primary) / 0.6) !important;
+}
+
+::-webkit-scrollbar-thumb:active {
+    background: hsl(var(--primary)) !important;
+}
+
+/* Remove default arrow buttons on Windows Chromium entirely */
+::-webkit-scrollbar-button {
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
+}
+
+::-webkit-scrollbar-corner {
+    background: transparent !important;
+}
+
+/* Firefox standard (applied only when webkit is not supported to avoid Chromium fallback to OS scrollbars) */
+@supports not selector(::-webkit-scrollbar) {
+    * {
+        scrollbar-width: thin;
+        scrollbar-color: hsl(var(--muted-foreground) / 0.3) transparent;
+    }
+}
+
+/* Completely hidden scrollbar utility across all browsers */
+.no-scrollbar,
+.scrollbar-none,
+[data-no-scrollbar] {
+    -ms-overflow-style: none !important;
+    scrollbar-width: none !important;
+}
+
+.no-scrollbar::-webkit-scrollbar,
+.scrollbar-none::-webkit-scrollbar,
+[data-no-scrollbar]::-webkit-scrollbar {
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
+    background: transparent !important;
 }

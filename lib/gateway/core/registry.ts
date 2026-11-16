@@ -1,0 +1,167 @@
+import {
+  IProvider,
+  ProviderCapability,
+  ServiceCategory,
+} from '../types';
+import { YouTubeProvider } from '../providers/videos/youtube';
+import { OpenWeatherProvider } from '../providers/weather/openweather';
+import { GoogleMapsProvider } from '../providers/maps/google-maps';
+import { MapboxProvider } from '../providers/maps/mapbox';
+import { GoogleRoutesProvider } from '../providers/routing/google-routes';
+import { InternalTspProvider } from '../providers/routing/internal-tsp';
+import { TikTokProvider } from '../providers/social/tiktok';
+import { InstagramProvider } from '../providers/social/instagram';
+
+export class ProviderRegistry {
+  private static providers: Map<ServiceCategory, IProvider[]> = new Map();
+  private static capabilities: Map<string, ProviderCapability> = new Map();
+
+  static {
+    // 1. Register Providers
+    this.register(new YouTubeProvider());
+    this.register(new OpenWeatherProvider());
+    this.register(new GoogleMapsProvider());
+    this.register(new MapboxProvider());
+    this.register(new GoogleRoutesProvider());
+    this.register(new InternalTspProvider());
+    this.register(new TikTokProvider());
+    this.register(new InstagramProvider());
+
+    // 2. Define Capabilities
+    this.capabilities.set('youtube', {
+      supportedOperations: ['search'],
+      supportedFilters: [
+        'q',
+        'limit',
+        'page',
+        'sort',
+        'published_after',
+        'published_before',
+        'region',
+        'language',
+        'duration',
+      ],
+      authType: 'api_key',
+      paginationSupported: true,
+      maxLimit: 50,
+      quotaCostPerCall: 100,
+      notes: 'YouTube Data API v3 search endpoint with video enrichment',
+    });
+
+    this.capabilities.set('openweather', {
+      supportedOperations: ['current', 'forecast', 'air_quality'],
+      supportedFilters: ['lat', 'lon', 'city', 'unit'],
+      authType: 'api_key',
+      paginationSupported: false,
+      quotaCostPerCall: 1,
+      notes: 'OpenWeather 2.5 API with metric, imperial, and standard units',
+    });
+
+    this.capabilities.set('google_maps', {
+      supportedOperations: [
+        'geocode',
+        'reverse_geocode',
+        'places',
+        'directions',
+        'distance_matrix',
+      ],
+      supportedFilters: [
+        'address',
+        'lat',
+        'lon',
+        'query',
+        'radius',
+        'type',
+        'origin',
+        'destination',
+        'mode',
+        'waypoints',
+        'origins',
+        'destinations',
+      ],
+      authType: 'api_key',
+      paginationSupported: true,
+      quotaCostPerCall: 1,
+      notes: 'Google Maps Platform full geocoding, directions, and places suite',
+    });
+
+    this.capabilities.set('mapbox', {
+      supportedOperations: ['geocode', 'reverse_geocode', 'directions'],
+      supportedFilters: ['address', 'lat', 'lon', 'origin', 'destination'],
+      authType: 'bearer',
+      paginationSupported: false,
+      quotaCostPerCall: 1,
+      notes: 'Mapbox Places v5 and Directions v5 APIs for geocoding & routing fallback',
+    });
+
+    this.capabilities.set('google_routes', {
+      supportedOperations: ['optimize'],
+      supportedFilters: ['origin', 'destination', 'stops', 'travel_mode'],
+      authType: 'api_key',
+      paginationSupported: false,
+      quotaCostPerCall: 1,
+      notes: 'Google Directions with optimizeWaypoints:true algorithm',
+    });
+
+    this.capabilities.set('internal_tsp', {
+      supportedOperations: ['optimize'],
+      supportedFilters: ['origin', 'destination', 'stops'],
+      authType: 'none',
+      paginationSupported: false,
+      quotaCostPerCall: 0,
+      notes: 'Zero-cost local 2-opt Traveling Salesperson heuristic optimizer',
+    });
+
+    this.capabilities.set('tiktok', {
+      supportedOperations: ['user', 'videos', 'video_details'],
+      supportedFilters: ['access_token', 'cursor', 'limit', 'id'],
+      authType: 'oauth2',
+      paginationSupported: true,
+      maxLimit: 50,
+      quotaCostPerCall: 1,
+      notes: 'Official TikTok Display API for authorized creators',
+    });
+
+    this.capabilities.set('instagram', {
+      supportedOperations: ['profile', 'media', 'media_details'],
+      supportedFilters: ['access_token', 'limit', 'after', 'id'],
+      authType: 'oauth2',
+      paginationSupported: true,
+      maxLimit: 50,
+      quotaCostPerCall: 1,
+      notes: 'Official Meta Instagram Platform / Instagram Login for authorized profiles',
+    });
+  }
+
+  static register(provider: IProvider): void {
+    const list = this.providers.get(provider.service) || [];
+    // prevent duplicates
+    const filtered = list.filter((p) => p.name !== provider.name);
+    filtered.push(provider);
+    // sort by priority descending
+    filtered.sort((a, b) => b.priority - a.priority);
+    this.providers.set(provider.service, filtered);
+  }
+
+  static getProviders(service: ServiceCategory): IProvider[] {
+    return this.providers.get(service) || [];
+  }
+
+  static getProvider(service: ServiceCategory, name: string): IProvider | undefined {
+    const list = this.providers.get(service) || [];
+    return list.find((p) => p.name === name);
+  }
+
+  static getCapabilities(providerName: string): ProviderCapability | undefined {
+    return this.capabilities.get(providerName);
+  }
+
+  static getAllCapabilities(): Record<string, ProviderCapability> {
+    const result: Record<string, ProviderCapability> = {};
+    for (const [k, v] of this.capabilities.entries()) {
+      result[k] = v;
+    }
+    return result;
+  }
+}
+

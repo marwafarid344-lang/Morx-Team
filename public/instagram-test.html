@@ -1,0 +1,1355 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MORX — Instagram Graph & Messaging Testing Lab</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'Cairo', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace'],
+          },
+          colors: {
+            brand: {
+              DEFAULT: '#E1306C',
+              purple: '#833AB4',
+              orange: '#F77737',
+              yellow: '#FCAF45',
+              dark: '#0e1015',
+              card: '#161922',
+              border: '#232734'
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    /* Custom sleek scrollbars */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.15); border-radius: 9999px; }
+    ::-webkit-scrollbar-thumb:hover { background: #E1306C; }
+    ::-webkit-scrollbar-button { display: none !important; }
+    .gradient-ig {
+      background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+    }
+    .gradient-text {
+      background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+  </style>
+</head>
+<body class="bg-brand-dark text-slate-100 min-h-screen font-sans antialiased selection:bg-brand selection:text-white">
+
+  <!-- TOP HEADER -->
+  <header class="border-b border-brand-border bg-brand-card/70 backdrop-blur-xl sticky top-0 z-40">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3.5 flex flex-wrap items-center justify-between gap-4">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-2xl gradient-ig flex items-center justify-center shadow-lg shadow-brand/20">
+          <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+          </svg>
+        </div>
+        <div>
+          <h1 class="text-base font-bold flex items-center gap-2">
+            <span>MORX</span>
+            <span class="text-xs px-2 py-0.5 rounded-full bg-brand/10 border border-brand/30 text-brand font-medium">Instagram Lab</span>
+          </h1>
+          <p class="text-[11px] text-slate-400">Manage Messages & Content on Instagram (Graph API v21.0)</p>
+        </div>
+      </div>
+
+      <!-- Quick Action Badges -->
+      <div class="flex items-center gap-2 text-xs">
+        <span id="tokenStatusBadge" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/30 text-[11px] font-medium">
+          <span class="w-1.5 h-1.5 rounded-full bg-amber-400 animate-ping"></span>
+          No Active Token
+        </span>
+        <a href="https://developers.facebook.com/tools/explorer/" target="_blank" class="px-3 py-1 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 transition-colors text-[11px] flex items-center gap-1 border border-brand-border">
+          <span>Graph API Explorer</span>
+          <svg class="w-3 h-3 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- OAUTH REDIRECT CODE BANNER (IF DETECTED IN URL) -->
+  <div id="codeBanner" class="hidden bg-emerald-500/15 border-b border-emerald-500/30 py-3 px-4 text-center text-xs text-emerald-300">
+    <div class="max-w-4xl mx-auto flex items-center justify-between gap-3">
+      <div class="flex items-center gap-2 text-left">
+        <span class="text-emerald-400 text-base">🎉</span>
+        <span>Meta OAuth Code detected in URL! Exchanging automatically for Access Token...</span>
+      </div>
+      <button onclick="handleAutoExchangeCode()" id="btnAutoExchange" class="px-3 py-1 rounded-lg bg-emerald-500 text-emerald-950 font-bold hover:bg-emerald-400 transition-colors">
+        Exchange Code Now
+      </button>
+    </div>
+  </div>
+
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 py-6 space-y-6">
+
+    <!-- APP CREDENTIALS & QUICK CONFIG BAR -->
+    <div class="p-4 sm:p-5 rounded-2xl bg-brand-card border border-brand-border shadow-sm">
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div>
+          <label class="block text-[11px] font-medium text-slate-400 mb-1">Meta App ID</label>
+          <div class="relative">
+            <input type="text" id="appIdInput" value="28857766263891383" class="w-full bg-slate-900 border border-brand-border rounded-xl px-3 py-2 text-xs font-mono text-slate-200 focus:outline-none focus:border-brand" />
+          </div>
+        </div>
+        <div>
+          <label class="block text-[11px] font-medium text-slate-400 mb-1">Meta App Secret</label>
+          <div class="relative">
+            <input type="password" id="appSecretInput" value="50787fbc5b8a81194099b0f12b3276e3" class="w-full bg-slate-900 border border-brand-border rounded-xl px-3 py-2 text-xs font-mono text-slate-200 focus:outline-none focus:border-brand" />
+            <button onclick="toggleSecretVisibility()" class="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-200 text-xs">👁️</button>
+          </div>
+        </div>
+        <div>
+          <label class="block text-[11px] font-medium text-slate-400 mb-1">Client Token</label>
+          <div class="relative">
+            <input type="text" id="clientTokenInput" value="19bf84f5ceedd455fe697979a9f97fa6" class="w-full bg-slate-900 border border-brand-border rounded-xl px-3 py-2 text-xs font-mono text-slate-200 focus:outline-none focus:border-brand" />
+          </div>
+        </div>
+        <div>
+          <label class="block text-[11px] font-medium text-slate-400 mb-1">Redirect URI (OAuth)</label>
+          <input type="text" id="redirectUriInput" class="w-full bg-slate-900 border border-brand-border rounded-xl px-3 py-2 text-xs font-mono text-slate-200 focus:outline-none focus:border-brand" />
+        </div>
+      </div>
+    </div>
+
+    <!-- TABS NAVIGATION -->
+    <div class="flex items-center gap-2 overflow-x-auto border-b border-brand-border pb-2 text-xs">
+      <button onclick="switchTab('auth')" id="tabBtn-auth" class="tab-btn px-4 py-2 rounded-xl font-medium transition-all flex items-center gap-2 bg-brand text-white shadow-sm">
+        <span>🔐</span> <span>1. Connect & Token</span>
+      </button>
+      <button onclick="switchTab('accounts')" id="tabBtn-accounts" class="tab-btn px-4 py-2 rounded-xl font-medium transition-all flex items-center gap-2 text-slate-400 hover:text-slate-200 hover:bg-slate-800">
+        <span>👤</span> <span>2. Accounts & Pages</span>
+      </button>
+      <button onclick="switchTab('media')" id="tabBtn-media" class="tab-btn px-4 py-2 rounded-xl font-medium transition-all flex items-center gap-2 text-slate-400 hover:text-slate-200 hover:bg-slate-800">
+        <span>📸</span> <span>3. Content & Media</span>
+      </button>
+      <button onclick="switchTab('messages')" id="tabBtn-messages" class="tab-btn px-4 py-2 rounded-xl font-medium transition-all flex items-center gap-2 text-slate-400 hover:text-slate-200 hover:bg-slate-800">
+        <span>💬</span> <span>4. Direct Messages (DM)</span>
+      </button>
+      <button onclick="switchTab('reels')" id="tabBtn-reels" class="tab-btn px-4 py-2 rounded-xl font-medium transition-all flex items-center gap-2 text-slate-400 hover:text-slate-200 hover:bg-slate-800">
+        <span>📍</span> <span>5. Reels & Location Search</span>
+      </button>
+      <button onclick="switchTab('raw')" id="tabBtn-raw" class="tab-btn px-4 py-2 rounded-xl font-medium transition-all flex items-center gap-2 text-slate-400 hover:text-slate-200 hover:bg-slate-800">
+        <span>⚡</span> <span>6. Graph API Runner</span>
+      </button>
+      <button onclick="switchTab('guide')" id="tabBtn-guide" class="tab-btn px-4 py-2 rounded-xl font-medium transition-all flex items-center gap-2 text-slate-400 hover:text-slate-200 hover:bg-slate-800">
+        <span>📖</span> <span>7. How to Get Token</span>
+      </button>
+    </div>
+
+    <!-- ========================================================================= -->
+    <!-- TAB 1: AUTHENTICATION & ACCESS TOKEN -->
+    <!-- ========================================================================= -->
+    <section id="tab-auth" class="tab-pane space-y-6">
+      
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        
+        <!-- METHOD A: 1-CLICK OAUTH LOGIN -->
+        <div class="p-6 rounded-2xl bg-brand-card border border-brand-border space-y-4">
+          <div class="flex items-center justify-between">
+            <h3 class="text-sm font-bold flex items-center gap-2">
+              <span class="w-6 h-6 rounded-lg gradient-ig flex items-center justify-center text-xs">🚀</span>
+              Method 1: Connect via Meta OAuth
+            </h3>
+            <span class="text-[10px] uppercase font-mono px-2 py-0.5 rounded bg-brand/10 text-brand border border-brand/20">Recommended</span>
+          </div>
+
+          <p class="text-xs text-slate-400 leading-relaxed">
+            Generates the official Meta authorization dialog with scopes: <code class="text-brand font-mono">instagram_basic</code>, <code class="text-brand font-mono">instagram_manage_messages</code>, and <code class="text-brand font-mono">instagram_manage_contents</code>.
+          </p>
+
+          <div class="space-y-3 pt-2">
+            <button onclick="startOAuthFlow()" class="w-full py-3 px-4 rounded-xl gradient-ig text-white font-semibold text-xs flex items-center justify-center gap-2 shadow-lg shadow-brand/20 hover:opacity-95 transition-all">
+              <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069z"/></svg>
+              <span>Login with Instagram / Facebook</span>
+            </button>
+
+            <div class="text-[11px] text-slate-500 bg-slate-900/60 p-3 rounded-xl border border-brand-border/60">
+              <p class="font-semibold text-slate-400 mb-1">⚠️ Requirement in Meta Dashboard:</p>
+              <p>Add this URL to <span class="text-slate-300">Facebook Login &rarr; Settings &rarr; Valid OAuth Redirect URIs</span>:</p>
+              <div class="mt-1.5 flex items-center gap-2">
+                <code id="displayRedirectUri" class="text-[10px] text-brand font-mono truncate flex-1">...</code>
+                <button onclick="copyToClipboard(document.getElementById('displayRedirectUri').innerText)" class="text-xs text-slate-400 hover:text-white px-2 py-0.5 bg-slate-800 rounded">Copy</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- METHOD B: DIRECT TOKEN INPUT (GRAPH API EXPLORER) -->
+        <div class="p-6 rounded-2xl bg-brand-card border border-brand-border space-y-4">
+          <div class="flex items-center justify-between">
+            <h3 class="text-sm font-bold flex items-center gap-2">
+              <span class="w-6 h-6 rounded-lg bg-blue-500/20 text-blue-400 flex items-center justify-center text-xs">🔑</span>
+              Method 2: Paste Access Token directly
+            </h3>
+            <span class="text-[10px] uppercase font-mono px-2 py-0.5 rounded bg-blue-500/10 text-blue-400 border border-blue-500/20">Instant Test</span>
+          </div>
+
+          <p class="text-xs text-slate-400 leading-relaxed">
+            If you already generated a User Access Token or Page Token inside <a href="https://developers.facebook.com/tools/explorer/" target="_blank" class="text-blue-400 hover:underline">Meta Graph API Explorer</a>, paste it here to test immediately without OAuth setup.
+          </p>
+
+          <div class="space-y-3">
+            <textarea id="directTokenInput" rows="3" placeholder="EAAG..." class="w-full bg-slate-900 border border-brand-border rounded-xl p-3 text-xs font-mono text-slate-200 focus:outline-none focus:border-brand placeholder:text-slate-600"></textarea>
+
+            <div class="flex flex-wrap items-center gap-2">
+              <button onclick="applyDirectToken()" class="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-semibold text-xs transition-colors flex items-center gap-1.5">
+                <span>Save & Use Token</span>
+              </button>
+              <button onclick="inspectToken()" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs transition-colors border border-brand-border">
+                <span>Inspect / Debug Token</span>
+              </button>
+              <button onclick="exchangeLongLived()" class="px-4 py-2 rounded-xl bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-400 border border-emerald-500/30 text-xs transition-colors">
+                <span>Convert to 60-Day Token</span>
+              </button>
+              <button onclick="useAppToken()" class="px-3 py-2 rounded-xl bg-purple-600/20 hover:bg-purple-600/30 text-purple-300 border border-purple-500/30 text-xs transition-colors" title="Generates App Access Token for app-level queries">
+                <span>Use App Token (Client Token)</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ACTIVE TOKEN DETAILS CARD -->
+      <div id="tokenInfoCard" class="hidden p-5 rounded-2xl bg-slate-900/90 border border-brand-border space-y-3">
+        <div class="flex items-center justify-between">
+          <h4 class="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-emerald-400"></span> Active Token Inspection
+          </h4>
+          <span id="tokenExpiryLabel" class="text-xs font-mono text-slate-400">Expires: --</span>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+          <div class="p-3 rounded-xl bg-brand-card/80 border border-brand-border">
+            <div class="text-[11px] text-slate-400">App ID</div>
+            <div id="tokenAppId" class="font-mono font-bold text-slate-200 mt-0.5">--</div>
+          </div>
+          <div class="p-3 rounded-xl bg-brand-card/80 border border-brand-border">
+            <div class="text-[11px] text-slate-400">User ID / Scoped ID</div>
+            <div id="tokenUserId" class="font-mono font-bold text-slate-200 mt-0.5">--</div>
+          </div>
+          <div class="p-3 rounded-xl bg-brand-card/80 border border-brand-border">
+            <div class="text-[11px] text-slate-400">Is Valid</div>
+            <div id="tokenIsValid" class="font-mono font-bold text-emerald-400 mt-0.5">--</div>
+          </div>
+        </div>
+
+        <div class="p-3 rounded-xl bg-brand-card/80 border border-brand-border">
+          <div class="text-[11px] text-slate-400 mb-1.5 font-medium">Granted Permissions / Scopes:</div>
+          <div id="tokenScopesList" class="flex flex-wrap gap-1.5">
+            <!-- Badges populated dynamically -->
+          </div>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ========================================================================= -->
+    <!-- TAB 2: ACCOUNTS & PAGES DISCOVERY -->
+    <!-- ========================================================================= -->
+    <section id="tab-accounts" class="tab-pane hidden space-y-6">
+      <div class="p-5 rounded-2xl bg-brand-card border border-brand-border flex items-center justify-between flex-wrap gap-4">
+        <div>
+          <h3 class="text-sm font-bold">Discover Connected Instagram Accounts</h3>
+          <p class="text-xs text-slate-400 mt-0.5">Fetches Facebook Pages and finds the linked Instagram Professional (Business or Creator) accounts.</p>
+        </div>
+        <button onclick="fetchAccounts()" class="px-5 py-2.5 rounded-xl gradient-ig text-white font-semibold text-xs shadow-md hover:opacity-95 transition-opacity flex items-center gap-2">
+          <span>🔄 Fetch Accounts</span>
+        </button>
+      </div>
+
+      <div id="accountsLoading" class="hidden text-center py-12 text-slate-400 text-xs">
+        <div class="w-8 h-8 border-2 border-brand border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
+        Querying Meta Graph API /me/accounts...
+      </div>
+
+      <div id="accountsList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <!-- Accounts injected dynamically -->
+        <div class="col-span-full text-center py-12 border border-dashed border-brand-border rounded-2xl text-slate-500 text-xs">
+          Click "Fetch Accounts" to load your Instagram accounts using the active access token.
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================================================= -->
+    <!-- TAB 3: MEDIA & CONTENT -->
+    <!-- ========================================================================= -->
+    <section id="tab-media" class="tab-pane hidden space-y-6">
+      <div class="p-5 rounded-2xl bg-brand-card border border-brand-border flex items-center justify-between flex-wrap gap-4">
+        <div>
+          <h3 class="text-sm font-bold flex items-center gap-2">
+            <span>📸 Instagram Media & Content Feed</span>
+            <span id="activeAccountMediaLabel" class="text-xs px-2 py-0.5 rounded-full bg-brand/10 text-brand font-mono font-normal">No Account Selected</span>
+          </h3>
+          <p class="text-xs text-slate-400 mt-0.5">Loads recent photos, videos, and reels with engagement metrics.</p>
+        </div>
+        <div class="flex items-center gap-2">
+          <input type="text" id="mediaAccountIdInput" placeholder="Instagram Account ID" class="bg-slate-900 border border-brand-border rounded-xl px-3 py-1.5 text-xs font-mono w-48 text-slate-200" />
+          <button onclick="fetchMedia()" class="px-4 py-2 rounded-xl gradient-ig text-white font-semibold text-xs shadow-md hover:opacity-95 transition-opacity">
+            Load Posts
+          </button>
+        </div>
+      </div>
+
+      <div id="mediaLoading" class="hidden text-center py-12 text-slate-400 text-xs">
+        <div class="w-8 h-8 border-2 border-brand border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
+        Fetching Instagram posts and reels...
+      </div>
+
+      <div id="mediaGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+        <div class="col-span-full text-center py-12 border border-dashed border-brand-border rounded-2xl text-slate-500 text-xs">
+          Select an account or enter an Instagram ID and click "Load Posts".
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================================================= -->
+    <!-- TAB 4: DIRECT MESSAGES (INSTAGRAM DM) -->
+    <!-- ========================================================================= -->
+    <section id="tab-messages" class="tab-pane hidden space-y-6">
+      
+      <!-- Top Actions Bar -->
+      <div class="p-5 rounded-2xl bg-brand-card border border-brand-border flex items-center justify-between flex-wrap gap-4">
+        <div>
+          <h3 class="text-sm font-bold flex items-center gap-2">
+            <span>💬 Direct Messages (Manage Messages on Instagram)</span>
+          </h3>
+          <p class="text-xs text-slate-400 mt-0.5">Test reading incoming conversations and sending replies using the Instagram Messaging API.</p>
+        </div>
+        <button onclick="fetchConversations()" class="px-4 py-2 rounded-xl gradient-ig text-white font-semibold text-xs shadow-md hover:opacity-95 transition-opacity flex items-center gap-1.5">
+          <span>🔄 Sync Conversations</span>
+        </button>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        
+        <!-- CONVERSATIONS LIST -->
+        <div class="lg:col-span-1 p-4 rounded-2xl bg-brand-card border border-brand-border space-y-3">
+          <h4 class="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center justify-between">
+            <span>Threads</span>
+            <span id="threadsCount" class="text-[10px] text-slate-500 font-mono">0 active</span>
+          </h4>
+
+          <div id="threadsList" class="space-y-2 max-h-[460px] overflow-y-auto pr-1">
+            <div class="text-center py-8 text-slate-500 text-xs">
+              Click "Sync Conversations" to load inbox threads.
+            </div>
+          </div>
+        </div>
+
+        <!-- MESSAGE SENDING & THREAD VIEWER -->
+        <div class="lg:col-span-2 space-y-4">
+          
+          <!-- SEND NEW MESSAGE FORM -->
+          <div class="p-5 rounded-2xl bg-brand-card border border-brand-border space-y-3">
+            <h4 class="text-xs font-bold text-slate-200 flex items-center gap-2">
+              <span class="w-2 h-2 rounded-full bg-brand"></span>
+              Send Direct Message (DM)
+            </h4>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+              <div>
+                <label class="block text-[11px] text-slate-400 mb-1">From: Your Instagram Account ID</label>
+                <input type="text" id="senderIgIdInput" placeholder="e.g. 17841405309..." class="w-full bg-slate-900 border border-brand-border rounded-xl px-3 py-2 font-mono text-slate-200 text-xs focus:outline-none focus:border-brand" />
+              </div>
+              <div>
+                <label class="block text-[11px] text-slate-400 mb-1">To: Recipient IGSID (Instagram Scoped ID)</label>
+                <input type="text" id="recipientIgIdInput" placeholder="User IGSID" class="w-full bg-slate-900 border border-brand-border rounded-xl px-3 py-2 font-mono text-slate-200 text-xs focus:outline-none focus:border-brand" />
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-[11px] text-slate-400 mb-1">Message Text</label>
+              <div class="flex gap-2">
+                <input type="text" id="messageTextInput" placeholder="Hello from Morx Instagram Gateway test!" class="flex-1 bg-slate-900 border border-brand-border rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-brand" />
+                <button onclick="sendMessage()" class="px-5 py-2 rounded-xl gradient-ig text-white font-semibold text-xs hover:opacity-95 transition-opacity flex items-center gap-1.5 shrink-0">
+                  <span>Send DM &rarr;</span>
+                </button>
+              </div>
+            </div>
+
+            <div id="sendMessageResult" class="hidden text-xs p-3 rounded-xl bg-slate-900 border border-brand-border font-mono text-slate-300"></div>
+          </div>
+
+          <!-- THREAD MESSAGES INSPECTOR -->
+          <div class="p-5 rounded-2xl bg-brand-card border border-brand-border space-y-3">
+            <h4 class="text-xs font-bold text-slate-300 uppercase tracking-wider">Conversation Messages</h4>
+            <div id="threadMessages" class="p-4 rounded-xl bg-slate-950/80 border border-brand-border/70 min-h-[180px] max-h-[300px] overflow-y-auto space-y-2 text-xs">
+              <div class="text-slate-500 text-center py-10">Select a thread on the left to view messages.</div>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+    </section>
+
+    <!-- ========================================================================= -->
+    <!-- TAB 5: REELS & LOCATION SEARCH -->
+    <!-- ========================================================================= -->
+    <section id="tab-reels" class="tab-pane hidden space-y-6">
+      
+      <!-- Top Search & Explainer Box -->
+      <div class="p-6 rounded-2xl bg-brand-card border border-brand-border space-y-4">
+        <div>
+          <h3 class="text-sm font-bold flex items-center gap-2">
+            <span>📍 Search Reels & Videos by Location</span>
+            <span class="text-xs px-2 py-0.5 rounded-full bg-brand/10 text-brand font-mono font-normal">Place Discovery</span>
+          </h3>
+          <p class="text-xs text-slate-400 mt-1 leading-relaxed">
+            Search for reels and short vertical videos for any city, landmark, or tourist destination (e.g. <strong>Alexandria</strong>, <strong>Cairo</strong>, <strong>Dahab</strong>, <strong>Siwa Oasis</strong>).
+          </p>
+        </div>
+
+        <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+          <div class="relative flex-1">
+            <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500 text-xs">🔍</span>
+            <input 
+              type="text" 
+              id="reelsLocationInput" 
+              placeholder="Enter location or place (e.g. Alexandria, Cairo, Dahab)..." 
+              value="Alexandria"
+              class="w-full pl-9 pr-3 py-2.5 rounded-xl bg-slate-900 border border-brand-border text-xs text-slate-200 focus:outline-none focus:border-brand"
+            />
+          </div>
+
+          <div class="flex items-center gap-2">
+            <button 
+              onclick="searchReelsByLocation('instagram')" 
+              class="px-4 py-2.5 rounded-xl gradient-ig text-white font-semibold text-xs shadow-md hover:opacity-95 transition-opacity flex items-center gap-1.5 shrink-0"
+            >
+              <span>Search Instagram Hashtag Reels</span>
+            </button>
+
+            <button 
+              onclick="searchReelsByLocation('gateway')" 
+              class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold text-xs border border-brand-border transition-colors flex items-center gap-1.5 shrink-0"
+              title="Uses Morx Unified Video Gateway (Shorts / Reels format)"
+            >
+              <span>Gateway Shorts (Instant)</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Quick Location Suggestions -->
+        <div class="flex items-center gap-2 flex-wrap text-xs text-slate-400 pt-1">
+          <span class="text-[11px]">Popular Places:</span>
+          <button onclick="document.getElementById('reelsLocationInput').value='Alexandria'; searchReelsByLocation('instagram');" class="px-2.5 py-1 rounded-lg bg-slate-800/80 hover:bg-slate-700 text-slate-300 text-[11px]">📍 Alexandria</button>
+          <button onclick="document.getElementById('reelsLocationInput').value='Dahab'; searchReelsByLocation('instagram');" class="px-2.5 py-1 rounded-lg bg-slate-800/80 hover:bg-slate-700 text-slate-300 text-[11px]">📍 Dahab</button>
+          <button onclick="document.getElementById('reelsLocationInput').value='Cairo'; searchReelsByLocation('instagram');" class="px-2.5 py-1 rounded-lg bg-slate-800/80 hover:bg-slate-700 text-slate-300 text-[11px]">📍 Cairo</button>
+          <button onclick="document.getElementById('reelsLocationInput').value='Siwa'; searchReelsByLocation('instagram');" class="px-2.5 py-1 rounded-lg bg-slate-800/80 hover:bg-slate-700 text-slate-300 text-[11px]">📍 Siwa Oasis</button>
+          <button onclick="document.getElementById('reelsLocationInput').value='Pyramids'; searchReelsByLocation('instagram');" class="px-2.5 py-1 rounded-lg bg-slate-800/80 hover:bg-slate-700 text-slate-300 text-[11px]">📍 Pyramids</button>
+        </div>
+      </div>
+
+      <!-- Reels Loading -->
+      <div id="reelsLoading" class="hidden text-center py-12 text-slate-400 text-xs">
+        <div class="w-8 h-8 border-2 border-brand border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
+        Searching reels and videos for location...
+      </div>
+
+      <!-- Reels Results Grid -->
+      <div id="reelsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+        <div class="col-span-full text-center py-12 border border-dashed border-brand-border rounded-2xl text-slate-500 text-xs">
+          Enter a location name above and click "Search Instagram Hashtag Reels" or "Gateway Shorts".
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ========================================================================= -->
+    <!-- TAB 6: RAW GRAPH API RUNNER -->
+    <!-- ========================================================================= -->
+    <section id="tab-raw" class="tab-pane hidden space-y-6">
+      <div class="p-6 rounded-2xl bg-brand-card border border-brand-border space-y-4">
+        <div>
+          <h3 class="text-sm font-bold flex items-center gap-2">
+            <span>⚡ Raw Meta Graph API Runner</span>
+          </h3>
+          <p class="text-xs text-slate-400 mt-0.5">Send custom queries directly to <code class="text-brand font-mono">https://graph.facebook.com/v21.0/</code> through the Morx proxy without CORS issues.</p>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <select id="rawMethodSelect" class="bg-slate-900 border border-brand-border rounded-xl px-3 py-2 text-xs font-mono font-bold text-slate-200">
+            <option value="GET">GET</option>
+            <option value="POST">POST</option>
+            <option value="DELETE">DELETE</option>
+          </select>
+          <div class="relative flex-1">
+            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 font-mono text-xs">/v21.0/</span>
+            <input type="text" id="rawEndpointInput" value="me?fields=id,name" class="w-full bg-slate-900 border border-brand-border rounded-xl pl-16 pr-3 py-2 text-xs font-mono text-slate-200 focus:outline-none focus:border-brand" />
+          </div>
+          <button onclick="executeRawRequest()" class="px-5 py-2 rounded-xl gradient-ig text-white font-semibold text-xs shadow-md hover:opacity-95 transition-opacity">
+            Send Request
+          </button>
+        </div>
+
+        <!-- Quick Presets -->
+        <div class="flex items-center gap-2 flex-wrap text-xs text-slate-400 pt-1">
+          <span class="text-[11px]">Quick Presets:</span>
+          <button onclick="setRawPreset('me?fields=id,name')" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-[11px] font-mono">/me</button>
+          <button onclick="setRawPreset('me/accounts?fields=id,name,category,instagram_business_account{id,username,followers_count}')" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-[11px] font-mono">/me/accounts</button>
+          <button onclick="setRawPreset('me/permissions')" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-[11px] font-mono">/me/permissions</button>
+        </div>
+
+        <!-- Response Container -->
+        <div class="space-y-2 pt-2">
+          <div class="flex items-center justify-between text-xs text-slate-400">
+            <span id="rawLatencyBadge" class="font-mono">Response: --</span>
+            <button onclick="copyToClipboard(document.getElementById('rawResponseCode').innerText)" class="hover:text-white flex items-center gap-1">
+              📋 Copy JSON
+            </button>
+          </div>
+          <pre id="rawResponseCode" class="p-4 rounded-xl bg-slate-950 border border-brand-border text-emerald-400 font-mono text-xs overflow-x-auto max-h-96">Click "Send Request" to see results...</pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================================================= -->
+    <!-- TAB 7: HOW TO GET TOKEN & SETUP GUIDE -->
+    <!-- ========================================================================= -->
+    <section id="tab-guide" class="tab-pane hidden space-y-6">
+      <div class="p-6 rounded-2xl bg-brand-card border border-brand-border space-y-5 text-xs leading-relaxed text-slate-300">
+        <div>
+          <h3 class="text-sm font-bold text-white flex items-center gap-2">
+            <span>🔑 How to Get an Access Token & Test Reels for Locations</span>
+          </h3>
+          <p class="text-slate-400 text-xs mt-1">
+            Follow this 2-minute guide to get an Access Token and search Reels for any city or destination.
+          </p>
+        </div>
+
+        <div class="space-y-4">
+          <!-- Step 1: Quick Token -->
+          <div class="p-4 rounded-xl bg-slate-900 border border-brand-border space-y-2">
+            <h4 class="font-bold text-brand text-xs flex items-center gap-2">
+              <span class="w-5 h-5 rounded-full bg-brand/20 text-brand flex items-center justify-center text-[10px]">1</span>
+              How to get an Access Token in 2 Minutes (Graph API Explorer)
+            </h4>
+            <ol class="list-decimal list-inside space-y-1.5 text-slate-400 pl-1">
+              <li>Open Meta's official tool: <a href="https://developers.facebook.com/tools/explorer/" target="_blank" class="text-brand underline font-medium">Graph API Explorer &rarr;</a></li>
+              <li>In the <strong>Meta App</strong> dropdown on the right, select: <code class="text-slate-200 font-mono">App ID: 28857766263891383</code>.</li>
+              <li>Under <strong>User or Page</strong>, select <strong>"Get Page Access Token"</strong> (or User Token).</li>
+              <li>Under <strong>Permissions</strong>, make sure the following scopes are added:
+                <div class="flex flex-wrap gap-1 mt-1 font-mono text-[10px]">
+                  <span class="px-2 py-0.5 rounded bg-slate-800 text-brand">instagram_basic</span>
+                  <span class="px-2 py-0.5 rounded bg-slate-800 text-brand">instagram_manage_contents</span>
+                  <span class="px-2 py-0.5 rounded bg-slate-800 text-brand">instagram_manage_messages</span>
+                  <span class="px-2 py-0.5 rounded bg-slate-800 text-slate-300">pages_show_list</span>
+                  <span class="px-2 py-0.5 rounded bg-slate-800 text-slate-300">pages_read_engagement</span>
+                </div>
+              </li>
+              <li>Click the blue <strong>"Generate Access Token"</strong> button and log in to authorize.</li>
+              <li>Copy the token string (starts with <code class="text-emerald-400 font-mono">EAAG...</code>).</li>
+              <li>Go back to <strong>1. Connect & Token</strong> &rarr; paste it &rarr; click <strong>"Save & Use Token"</strong> &rarr; then click <strong>"Convert to 60-Day Token"</strong>!</li>
+            </ol>
+          </div>
+
+          <!-- Step 2: Location Reels -->
+          <div class="p-4 rounded-xl bg-slate-900 border border-brand-border space-y-2">
+            <h4 class="font-bold text-brand text-xs flex items-center gap-2">
+              <span class="w-5 h-5 rounded-full bg-brand/20 text-brand flex items-center justify-center text-[10px]">2</span>
+              How to get Reels for a specific place (e.g. Alexandria, Dahab)
+            </h4>
+            <p class="text-slate-400">
+              Under Meta's API rules, you cannot search any private person's posts by GPS coordinates. Instead, Meta provides the official <strong>Instagram Hashtag API</strong>:
+            </p>
+            <ul class="list-disc list-inside space-y-1 text-slate-400 pl-1">
+              <li>When you search for <strong>"Alexandria"</strong>, the API searches <code class="text-brand font-mono">#alexandria</code>.</li>
+              <li>It extracts top public videos and reels posted with that location hashtag.</li>
+              <li><strong>Morx Gateway Alternative:</strong> In Morx, you can also use <code class="text-slate-200 font-mono">GET /api/v1/videos/search?q=Alexandria&duration=short</code> to get short vertical reels/shorts for ANY place worldwide without hashtag quota limits!</li>
+            </ul>
+          </div>
+
+          <!-- Step 3: OAuth Redirect -->
+          <div class="p-4 rounded-xl bg-slate-900 border border-brand-border space-y-2">
+            <h4 class="font-bold text-brand text-xs flex items-center gap-2">
+              <span class="w-5 h-5 rounded-full bg-brand/20 text-brand flex items-center justify-center text-[10px]">3</span>
+              Meta Dashboard Redirect URI Setup (For OAuth Login)
+            </h4>
+            <p class="text-slate-400">
+              To use the 1-Click "Login with Instagram" button, copy this redirect URI and paste it in <span class="text-slate-200">Facebook Login &rarr; Settings &rarr; Valid OAuth Redirect URIs</span>:
+            </p>
+            <div class="p-2 bg-slate-950 rounded font-mono text-[11px] text-brand select-all" id="guideRedirectUri">...</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- JAVASCRIPT LOGIC -->
+  <script>
+    // State
+    let currentToken = localStorage.getItem('morx_ig_token') || '';
+    let selectedInstagramAccountId = localStorage.getItem('morx_ig_account_id') || '';
+
+    // Initialize UI on load
+    window.addEventListener('DOMContentLoaded', () => {
+      // Set Redirect URI default
+      const currentOrigin = window.location.origin;
+      const redirectUri = window.location.origin === 'null' || window.location.protocol === 'file:'
+        ? 'http://localhost:3000/instagram-test.html'
+        : `${window.location.origin}${window.location.pathname}`;
+
+      document.getElementById('redirectUriInput').value = redirectUri;
+      document.getElementById('displayRedirectUri').innerText = redirectUri;
+      document.getElementById('guideRedirectUri').innerText = redirectUri;
+
+      if (currentToken) {
+        document.getElementById('directTokenInput').value = currentToken;
+        updateTokenBadge(true);
+      }
+
+      if (selectedInstagramAccountId) {
+        document.getElementById('mediaAccountIdInput').value = selectedInstagramAccountId;
+        document.getElementById('senderIgIdInput').value = selectedInstagramAccountId;
+        document.getElementById('activeAccountMediaLabel').innerText = `ID: ${selectedInstagramAccountId}`;
+      }
+
+      // Check if URL has ?code= from OAuth redirect
+      const urlParams = new URLSearchParams(window.location.search);
+      const code = urlParams.get('code');
+      if (code) {
+        document.getElementById('codeBanner').classList.remove('hidden');
+      }
+    });
+
+    // Toggle Secret
+    function toggleSecretVisibility() {
+      const input = document.getElementById('appSecretInput');
+      input.type = input.type === 'password' ? 'text' : 'password';
+    }
+
+    // Tab Switching
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-pane').forEach(el => el.classList.add('hidden'));
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.remove('bg-brand', 'text-white', 'shadow-sm');
+        btn.classList.add('text-slate-400');
+      });
+
+      const pane = document.getElementById(`tab-${tabId}`);
+      const btn = document.getElementById(`tabBtn-${tabId}`);
+      if (pane) pane.classList.remove('hidden');
+      if (btn) {
+        btn.classList.add('bg-brand', 'text-white', 'shadow-sm');
+        btn.classList.remove('text-slate-400');
+      }
+    }
+
+    // Token Badge
+    function updateTokenBadge(hasToken, label = 'Token Active') {
+      const badge = document.getElementById('tokenStatusBadge');
+      if (hasToken) {
+        badge.className = 'inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 text-[11px] font-medium';
+        badge.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> ' + label;
+      } else {
+        badge.className = 'inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/30 text-[11px] font-medium';
+        badge.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-amber-400 animate-ping"></span> No Active Token';
+      }
+    }
+
+    // 1. Start OAuth Flow
+    function startOAuthFlow() {
+      const appId = document.getElementById('appIdInput').value;
+      const redirectUri = document.getElementById('redirectUriInput').value;
+      const scopes = [
+        'instagram_basic',
+        'instagram_manage_messages',
+        'instagram_manage_contents',
+        'pages_show_list',
+        'pages_read_engagement',
+        'pages_manage_metadata',
+        'business_management'
+      ].join(',');
+
+      const oauthUrl = `https://www.facebook.com/v21.0/dialog/oauth?client_id=${appId}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=${encodeURIComponent(scopes)}&response_type=code`;
+      window.location.href = oauthUrl;
+    }
+
+    // 2. Exchange OAuth Code for Token
+    async function handleAutoExchangeCode() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const code = urlParams.get('code');
+      const appId = document.getElementById('appIdInput').value;
+      const appSecret = document.getElementById('appSecretInput').value;
+      const redirectUri = document.getElementById('redirectUriInput').value;
+
+      const btn = document.getElementById('btnAutoExchange');
+      btn.innerText = 'Exchanging...';
+      btn.disabled = true;
+
+      try {
+        const res = await fetch('/api/v1/instagram/test', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'exchange_code',
+            code,
+            app_id: appId,
+            app_secret: appSecret,
+            redirect_uri: redirectUri
+          })
+        });
+
+        const data = await res.json();
+        if (data.success && data.access_token) {
+          currentToken = data.access_token;
+          localStorage.setItem('morx_ig_token', currentToken);
+          document.getElementById('directTokenInput').value = currentToken;
+          updateTokenBadge(true, 'OAuth Token Ready');
+          document.getElementById('codeBanner').innerHTML = '<div class="py-1 text-emerald-400 font-bold">✅ Access token successfully acquired!</div>';
+          setTimeout(() => {
+            document.getElementById('codeBanner').classList.add('hidden');
+            // Clean URL from code
+            window.history.replaceState({}, document.title, window.location.pathname);
+            inspectToken();
+          }, 2000);
+        } else {
+          alert('Error exchanging code: ' + (data.error || JSON.stringify(data)));
+          btn.innerText = 'Exchange Failed - Try Again';
+          btn.disabled = false;
+        }
+      } catch (err) {
+        alert('Request failed: ' + err.message);
+        btn.innerText = 'Exchange Failed';
+        btn.disabled = false;
+      }
+    }
+
+    // 3. Apply Direct Token
+    function applyDirectToken() {
+      const token = document.getElementById('directTokenInput').value.trim();
+      if (!token) {
+        alert('Please paste an access token first.');
+        return;
+      }
+      currentToken = token;
+      localStorage.setItem('morx_ig_token', currentToken);
+      updateTokenBadge(true, 'Token Saved');
+      inspectToken();
+    }
+
+    // 3b. Use App Token (App ID + Client Token)
+    function useAppToken() {
+      const appId = document.getElementById('appIdInput').value.trim();
+      const clientToken = document.getElementById('clientTokenInput').value.trim();
+      if (!appId || !clientToken) {
+        alert('App ID and Client Token are required.');
+        return;
+      }
+      currentToken = `${appId}|${clientToken}`;
+      document.getElementById('directTokenInput').value = currentToken;
+      localStorage.setItem('morx_ig_token', currentToken);
+      updateTokenBadge(true, 'App Token Active');
+      alert('App Access Token is set to: ' + currentToken + '\n\nNote: App Token is great for inspecting app status & public queries, but to read Direct Messages or manage account content, Meta requires a User/Page Token from Graph API Explorer.');
+    }
+
+    // 4. Inspect Token
+    async function inspectToken() {
+      if (!currentToken) {
+        alert('No access token available. Paste one or log in first.');
+        return;
+      }
+
+      const appId = document.getElementById('appIdInput').value;
+      const appSecret = document.getElementById('appSecretInput').value;
+
+      try {
+        const res = await fetch('/api/v1/instagram/test', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'debug_token',
+            access_token: currentToken,
+            app_id: appId,
+            app_secret: appSecret
+          })
+        });
+
+        const data = await res.json();
+        if (data.success && data.data) {
+          const info = data.data;
+          document.getElementById('tokenInfoCard').classList.remove('hidden');
+          document.getElementById('tokenAppId').innerText = info.app_id || appId;
+          document.getElementById('tokenUserId').innerText = info.user_id || 'N/A';
+          document.getElementById('tokenIsValid').innerText = info.is_valid ? 'VALID ✅' : 'INVALID ❌';
+
+          if (info.expires_at) {
+            const expDate = new Date(info.expires_at * 1000);
+            document.getElementById('tokenExpiryLabel').innerText = `Expires: ${expDate.toLocaleDateString()} ${expDate.toLocaleTimeString()}`;
+          } else {
+            document.getElementById('tokenExpiryLabel').innerText = 'Expires: Never / Long-lived';
+          }
+
+          const scopesBox = document.getElementById('tokenScopesList');
+          scopesBox.innerHTML = '';
+          (info.scopes || []).forEach(sc => {
+            const isTarget = ['instagram_basic', 'instagram_manage_messages', 'instagram_manage_contents'].includes(sc);
+            const badge = document.createElement('span');
+            badge.className = `px-2 py-0.5 rounded text-[10px] font-mono font-medium ${
+              isTarget ? 'bg-brand/20 text-brand border border-brand/40 font-bold' : 'bg-slate-800 text-slate-300'
+            }`;
+            badge.innerText = sc;
+            scopesBox.appendChild(badge);
+          });
+        } else {
+          alert('Failed to inspect token: ' + (data.error || 'Unknown error'));
+        }
+      } catch (err) {
+        alert('Inspection request error: ' + err.message);
+      }
+    }
+
+    // 5. Exchange for Long-Lived Token (60 Days)
+    async function exchangeLongLived() {
+      if (!currentToken) {
+        alert('Save or acquire a short-lived token first.');
+        return;
+      }
+
+      const appId = document.getElementById('appIdInput').value;
+      const appSecret = document.getElementById('appSecretInput').value;
+
+      try {
+        const res = await fetch('/api/v1/instagram/test', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'exchange_long_lived',
+            access_token: currentToken,
+            app_id: appId,
+            app_secret: appSecret
+          })
+        });
+
+        const data = await res.json();
+        if (data.success && data.access_token) {
+          currentToken = data.access_token;
+          localStorage.setItem('morx_ig_token', currentToken);
+          document.getElementById('directTokenInput').value = currentToken;
+          alert(`✅ Successfully converted to 60-day Long-Lived Token! Valid for ~${data.expires_in_days || 60} days.`);
+          inspectToken();
+        } else {
+          alert('Conversion failed: ' + (data.error || JSON.stringify(data)));
+        }
+      } catch (err) {
+        alert('Exchange request failed: ' + err.message);
+      }
+    }
+
+    // 6. Fetch Accounts (Pages & Linked Instagram)
+    async function fetchAccounts() {
+      if (!currentToken) {
+        alert('Please connect or paste an access token first.');
+        switchTab('auth');
+        return;
+      }
+
+      const loader = document.getElementById('accountsLoading');
+      const list = document.getElementById('accountsList');
+      loader.classList.remove('hidden');
+      list.innerHTML = '';
+
+      try {
+        const res = await fetch('/api/v1/instagram/test', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'get_accounts',
+            access_token: currentToken
+          })
+        });
+
+        const data = await res.json();
+        loader.classList.add('hidden');
+
+        if (!data.success) {
+          list.innerHTML = `<div class="col-span-full p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-xs">Error: ${data.error || 'Failed to fetch'}</div>`;
+          return;
+        }
+
+        const pages = data.pages || data.accounts || [];
+        if (pages.length === 0) {
+          list.innerHTML = `<div class="col-span-full p-6 text-center border border-dashed border-brand-border rounded-2xl text-slate-400 text-xs">No Facebook Pages found. Make sure your account has a Facebook Page linked to your Instagram Professional Account.</div>`;
+          return;
+        }
+
+        pages.forEach(p => {
+          const ig = p.instagram_business_account;
+          const card = document.createElement('div');
+          card.className = 'p-5 rounded-2xl bg-brand-card border border-brand-border flex flex-col justify-between gap-4 transition-all hover:border-brand/50';
+
+          card.innerHTML = `
+            <div class="space-y-3">
+              <div class="flex items-center justify-between">
+                <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-300">Page: ${p.name}</span>
+                ${ig ? '<span class="text-[10px] px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 font-bold border border-emerald-500/20">IG Linked ✅</span>' : '<span class="text-[10px] px-2 py-0.5 rounded bg-amber-500/10 text-amber-400">No IG Linked</span>'}
+              </div>
+
+              ${ig ? `
+                <div class="flex items-center gap-3 pt-2">
+                  <div class="w-12 h-12 rounded-full gradient-ig p-0.5 flex-shrink-0">
+                    <img src="${ig.profile_picture_url || 'https://via.placeholder.com/150'}" class="w-full h-full object-cover rounded-full bg-slate-900" onerror="this.src='https://via.placeholder.com/150'" />
+                  </div>
+                  <div class="min-w-0">
+                    <h4 class="font-bold text-sm text-white truncate">@${ig.username || 'unknown'}</h4>
+                    <p class="text-[11px] font-mono text-slate-400 truncate">ID: ${ig.id}</p>
+                    <p class="text-[11px] text-slate-500">${ig.followers_count !== undefined ? `${ig.followers_count.toLocaleString()} followers` : ''}</p>
+                  </div>
+                </div>
+              ` : `
+                <p class="text-xs text-slate-500 pt-2">This Page does not have a linked Instagram Business account yet.</p>
+              `}
+            </div>
+
+            ${ig ? `
+              <button onclick="selectAccount('${ig.id}', '${ig.username || ''}')" class="w-full py-2 rounded-xl gradient-ig text-white font-semibold text-xs hover:opacity-95 transition-opacity">
+                Select for Testing &rarr;
+              </button>
+            ` : ''}
+          `;
+          list.appendChild(card);
+        });
+
+      } catch (err) {
+        loader.classList.add('hidden');
+        list.innerHTML = `<div class="col-span-full p-4 rounded-xl bg-red-500/10 text-red-400 text-xs">Request failed: ${err.message}</div>`;
+      }
+    }
+
+    // 7. Select Account for Testing
+    function selectAccount(igId, username) {
+      selectedInstagramAccountId = igId;
+      localStorage.setItem('morx_ig_account_id', igId);
+      document.getElementById('mediaAccountIdInput').value = igId;
+      document.getElementById('senderIgIdInput').value = igId;
+      document.getElementById('activeAccountMediaLabel').innerText = `@${username} (${igId})`;
+      alert(`Selected @${username} (ID: ${igId}) as active Instagram account!`);
+      switchTab('media');
+      fetchMedia();
+    }
+
+    // 8. Fetch Media Posts
+    async function fetchMedia() {
+      const igId = document.getElementById('mediaAccountIdInput').value.trim() || selectedInstagramAccountId;
+      if (!igId) {
+        alert('Please enter an Instagram Account ID or select one from the Accounts tab.');
+        return;
+      }
+      if (!currentToken) {
+        alert('Please save an access token first.');
+        return;
+      }
+
+      const loader = document.getElementById('mediaLoading');
+      const grid = document.getElementById('mediaGrid');
+      loader.classList.remove('hidden');
+      grid.innerHTML = '';
+
+      try {
+        const res = await fetch('/api/v1/instagram/test', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'get_media',
+            instagram_account_id: igId,
+            access_token: currentToken
+          })
+        });
+
+        const data = await res.json();
+        loader.classList.add('hidden');
+
+        if (!data.success) {
+          grid.innerHTML = `<div class="col-span-full p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-xs">Error: ${data.error || 'Failed to fetch media'}</div>`;
+          return;
+        }
+
+        const items = data.media || [];
+        if (items.length === 0) {
+          grid.innerHTML = `<div class="col-span-full p-8 text-center text-slate-400 text-xs border border-dashed border-brand-border rounded-2xl">No media items found for this account.</div>`;
+          return;
+        }
+
+        items.forEach(m => {
+          const card = document.createElement('div');
+          card.className = 'rounded-2xl bg-brand-card border border-brand-border overflow-hidden flex flex-col justify-between';
+
+          const imgUrl = m.media_url || m.thumbnail_url || 'https://via.placeholder.com/400';
+          const isVideo = m.media_type === 'VIDEO';
+
+          card.innerHTML = `
+            <div class="relative aspect-square bg-slate-950 overflow-hidden">
+              <img src="${imgUrl}" class="w-full h-full object-cover" onerror="this.src='https://via.placeholder.com/400'" />
+              <span class="absolute top-2.5 right-2.5 px-2 py-0.5 rounded-lg bg-black/70 backdrop-blur-sm text-[10px] font-mono text-white">
+                ${m.media_type || 'POST'}
+              </span>
+            </div>
+            <div class="p-3.5 space-y-2 text-xs flex-1 flex flex-col justify-between">
+              <p class="text-slate-300 line-clamp-2 leading-relaxed">${m.caption || 'No caption'}</p>
+              <div class="flex items-center justify-between text-[11px] text-slate-500 pt-2 border-t border-brand-border/60">
+                <span>❤️ ${m.like_count || 0}</span>
+                <span>💬 ${m.comments_count || 0}</span>
+                ${m.permalink ? `<a href="${m.permalink}" target="_blank" class="text-brand hover:underline font-medium">View &rarr;</a>` : ''}
+              </div>
+            </div>
+          `;
+          grid.appendChild(card);
+        });
+
+      } catch (err) {
+        loader.classList.add('hidden');
+        grid.innerHTML = `<div class="col-span-full p-4 rounded-xl bg-red-500/10 text-red-400 text-xs">Request error: ${err.message}</div>`;
+      }
+    }
+
+    // 9. Fetch Conversations (DM Threads)
+    async function fetchConversations() {
+      const igId = document.getElementById('senderIgIdInput').value.trim() || selectedInstagramAccountId;
+      if (!igId) {
+        alert('Please enter or select your Instagram Account ID.');
+        return;
+      }
+      if (!currentToken) {
+        alert('Please provide an access token.');
+        return;
+      }
+
+      const list = document.getElementById('threadsList');
+      list.innerHTML = '<div class="text-center py-6 text-slate-400 text-xs animate-pulse">Loading threads...</div>';
+
+      try {
+        const res = await fetch('/api/v1/instagram/test', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'get_conversations',
+            instagram_account_id: igId,
+            access_token: currentToken
+          })
+        });
+
+        const data = await res.json();
+        if (!data.success) {
+          list.innerHTML = `<div class="p-3 rounded-xl bg-red-500/10 text-red-400 text-xs">${data.error || 'Failed to fetch conversations'}</div>`;
+          return;
+        }
+
+        const convs = data.conversations || [];
+        document.getElementById('threadsCount').innerText = `${convs.length} active`;
+
+        if (convs.length === 0) {
+          list.innerHTML = `<div class="text-center py-8 text-slate-500 text-xs">No active DM threads found. Send a message on Instagram to your account to initiate a test conversation!</div>`;
+          return;
+        }
+
+        list.innerHTML = '';
+        convs.forEach(c => {
+          const btn = document.createElement('div');
+          btn.className = 'p-3 rounded-xl bg-slate-900/80 hover:bg-slate-800 border border-brand-border cursor-pointer transition-colors space-y-1';
+          btn.onclick = () => renderThreadMessages(c);
+
+          const lastMsg = c.messages?.data?.[0]?.message || 'Conversation thread';
+          btn.innerHTML = `
+            <div class="flex items-center justify-between text-xs">
+              <span class="font-bold text-slate-200 font-mono">ID: ${c.id.slice(0, 12)}...</span>
+              <span class="text-[10px] text-slate-500">${new Date(c.updated_time).toLocaleDateString()}</span>
+            </div>
+            <p class="text-[11px] text-slate-400 truncate">${lastMsg}</p>
+          `;
+          list.appendChild(btn);
+        });
+
+      } catch (err) {
+        list.innerHTML = `<div class="p-3 rounded-xl bg-red-500/10 text-red-400 text-xs">Error: ${err.message}</div>`;
+      }
+    }
+
+    // Render thread messages
+    function renderThreadMessages(conv) {
+      const container = document.getElementById('threadMessages');
+      container.innerHTML = '';
+
+      const msgs = conv.messages?.data || [];
+      if (msgs.length === 0) {
+        container.innerHTML = '<div class="text-slate-500 text-center py-6">No messages found in this thread.</div>';
+        return;
+      }
+
+      msgs.forEach(m => {
+        const row = document.createElement('div');
+        row.className = 'p-2.5 rounded-lg bg-slate-900 border border-brand-border/60 text-xs space-y-1';
+        row.innerHTML = `
+          <div class="flex items-center justify-between text-[10px] text-slate-500">
+            <span class="font-bold text-slate-300 font-mono">From: ${m.from?.username || m.from?.id || 'Unknown'}</span>
+            <span>${new Date(m.created_time).toLocaleTimeString()}</span>
+          </div>
+          <p class="text-slate-200">${m.message || ''}</p>
+        `;
+        container.appendChild(row);
+      });
+
+      // Pre-fill recipient ID if sender is different
+      const otherUser = msgs.find(m => m.from?.id !== selectedInstagramAccountId);
+      if (otherUser) {
+        document.getElementById('recipientIgIdInput').value = otherUser.from.id;
+      }
+    }
+
+    // 10. Send Direct Message
+    async function sendMessage() {
+      const igId = document.getElementById('senderIgIdInput').value.trim();
+      const recipientId = document.getElementById('recipientIgIdInput').value.trim();
+      const text = document.getElementById('messageTextInput').value.trim();
+      const resultBox = document.getElementById('sendMessageResult');
+
+      if (!igId || !recipientId || !text) {
+        alert('Please fill out Sender ID, Recipient ID, and message text.');
+        return;
+      }
+      if (!currentToken) {
+        alert('Please provide an access token.');
+        return;
+      }
+
+      resultBox.classList.remove('hidden');
+      resultBox.innerText = 'Sending message to ' + recipientId + '...';
+
+      try {
+        const res = await fetch('/api/v1/instagram/test', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'send_message',
+            instagram_account_id: igId,
+            recipient_id: recipientId,
+            text,
+            access_token: currentToken
+          })
+        });
+
+        const data = await res.json();
+        if (data.success) {
+          resultBox.className = 'text-xs p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 font-mono text-emerald-400';
+          resultBox.innerHTML = `✅ Message sent successfully!<br>Message ID: ${data.result?.message_id || 'N/A'}`;
+          document.getElementById('messageTextInput').value = '';
+          fetchConversations();
+        } else {
+          resultBox.className = 'text-xs p-3 rounded-xl bg-red-500/10 border border-red-500/20 font-mono text-red-400';
+          resultBox.innerHTML = `❌ Failed to send message: ${data.error || JSON.stringify(data)}`;
+        }
+      } catch (err) {
+        resultBox.className = 'text-xs p-3 rounded-xl bg-red-500/10 border border-red-500/20 font-mono text-red-400';
+        resultBox.innerText = 'Request error: ' + err.message;
+      }
+    }
+
+    // 11. Raw Graph API Request Runner
+    async function executeRawRequest() {
+      if (!currentToken) {
+        alert('Please provide an access token.');
+        return;
+      }
+
+      const method = document.getElementById('rawMethodSelect').value;
+      const endpoint = document.getElementById('rawEndpointInput').value.trim();
+      const latencyBadge = document.getElementById('rawLatencyBadge');
+      const codeBox = document.getElementById('rawResponseCode');
+
+      codeBox.innerText = 'Sending request to Meta Graph API...';
+      const start = Date.now();
+
+      try {
+        const res = await fetch('/api/v1/instagram/test', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'raw_proxy',
+            method,
+            endpoint,
+            access_token: currentToken
+          })
+        });
+
+        const latency = Date.now() - start;
+        const data = await res.json();
+        latencyBadge.innerText = `Status: ${data.status || 200} • Latency: ${latency}ms`;
+        codeBox.innerText = JSON.stringify(data.data || data, null, 2);
+      } catch (err) {
+        codeBox.innerText = 'Error: ' + err.message;
+      }
+    }
+
+    function setRawPreset(endpoint) {
+      document.getElementById('rawEndpointInput').value = endpoint;
+      executeRawRequest();
+    }
+
+    // 12. Search Reels by Location
+    async function searchReelsByLocation(mode = 'instagram') {
+      const location = document.getElementById('reelsLocationInput').value.trim();
+      if (!location) {
+        alert('Please enter a location name (e.g. Alexandria, Dahab, Cairo).');
+        return;
+      }
+
+      const loader = document.getElementById('reelsLoading');
+      const grid = document.getElementById('reelsGrid');
+      loader.classList.remove('hidden');
+      grid.innerHTML = '';
+
+      if (mode === 'instagram') {
+        const igId = selectedInstagramAccountId || document.getElementById('senderIgIdInput').value.trim();
+        if (!igId || !currentToken) {
+          loader.classList.add('hidden');
+          grid.innerHTML = `
+            <div class="col-span-full p-5 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs space-y-2">
+              <p class="font-bold">⚠️ Instagram Account & Token Required for Hashtag Reels:</p>
+              <p>Meta requires a connected Instagram Professional Account and Access Token to query the Hashtag Search API.</p>
+              <p>1. Go to <strong>1. Connect & Token</strong> and paste your token.</p>
+              <p>2. Go to <strong>2. Accounts & Pages</strong> and select your account.</p>
+              <div class="pt-2">
+                <button onclick="searchReelsByLocation('gateway')" class="px-3 py-1.5 rounded-lg bg-brand text-white font-bold text-xs">
+                  Or click here to search via Gateway Shorts (No token needed!) &rarr;
+                </button>
+              </div>
+            </div>
+          `;
+          return;
+        }
+
+        try {
+          const res = await fetch('/api/v1/instagram/test', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              action: 'search_location_reels',
+              instagram_account_id: igId,
+              query: location,
+              access_token: currentToken
+            })
+          });
+
+          const data = await res.json();
+          loader.classList.add('hidden');
+
+          if (!data.success) {
+            grid.innerHTML = `
+              <div class="col-span-full p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-xs space-y-2">
+                <p class="font-bold">Instagram Search Error: ${data.error || 'Hashtag not found or limit reached'}</p>
+                <p class="text-slate-400">${data.hint || ''}</p>
+                <button onclick="searchReelsByLocation('gateway')" class="px-3 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-200 mt-2">
+                  Try searching via Gateway Shorts instead &rarr;
+                </button>
+              </div>
+            `;
+            return;
+          }
+
+          const reels = data.reels || [];
+          if (reels.length === 0) {
+            grid.innerHTML = `<div class="col-span-full p-8 text-center text-slate-400 text-xs border border-dashed border-brand-border rounded-2xl">No video reels found for #${data.hashtag}. Try another city name.</div>`;
+            return;
+          }
+
+          reels.forEach(r => {
+            const card = document.createElement('div');
+            card.className = 'rounded-2xl bg-brand-card border border-brand-border overflow-hidden flex flex-col justify-between hover:border-brand/50 transition-all';
+            card.innerHTML = `
+              <div class="relative aspect-[9/16] bg-slate-950 overflow-hidden">
+                <img src="${r.thumbnail || 'https://via.placeholder.com/400'}" class="w-full h-full object-cover" onerror="this.src='https://via.placeholder.com/400'" />
+                <span class="absolute top-2.5 right-2.5 px-2 py-0.5 rounded-lg bg-black/70 backdrop-blur-sm text-[10px] font-mono text-white flex items-center gap-1">
+                  🎬 REEL
+                </span>
+              </div>
+              <div class="p-3.5 space-y-2 text-xs flex-1 flex flex-col justify-between">
+                <p class="text-slate-300 line-clamp-2 leading-relaxed">${r.caption || '#' + data.hashtag}</p>
+                <div class="flex items-center justify-between text-[11px] text-slate-500 pt-2 border-t border-brand-border/60">
+                  <span>❤️ ${r.like_count || 0}</span>
+                  <span>💬 ${r.comments_count || 0}</span>
+                  ${r.url ? `<a href="${r.url}" target="_blank" class="text-brand hover:underline font-bold">Watch on IG &rarr;</a>` : ''}
+                </div>
+              </div>
+            `;
+            grid.appendChild(card);
+          });
+
+        } catch (err) {
+          loader.classList.add('hidden');
+          grid.innerHTML = `<div class="col-span-full p-4 rounded-xl bg-red-500/10 text-red-400 text-xs">Error: ${err.message}</div>`;
+        }
+      } else {
+        // Gateway Shorts Search (YouTube Shorts format for Alexandria, Dahab, etc.)
+        try {
+          const res = await fetch(`/api/v1/videos/search?q=${encodeURIComponent(location + ' Reels')}&duration=short&limit=12`, {
+            headers: {
+              'Authorization': 'Bearer morx_live_grad_project_2026_demo_key'
+            }
+          });
+          const data = await res.json();
+          loader.classList.add('hidden');
+
+          const items = data.data || [];
+          if (items.length === 0) {
+            grid.innerHTML = `<div class="col-span-full p-8 text-center text-slate-400 text-xs border border-dashed border-brand-border rounded-2xl">No video shorts found for "${location}".</div>`;
+            return;
+          }
+
+          items.forEach(v => {
+            const card = document.createElement('div');
+            card.className = 'rounded-2xl bg-brand-card border border-brand-border overflow-hidden flex flex-col justify-between hover:border-brand/50 transition-all';
+            card.innerHTML = `
+              <div class="relative aspect-video bg-slate-950 overflow-hidden">
+                <img src="${v.thumbnail || 'https://via.placeholder.com/400'}" class="w-full h-full object-cover" />
+                <span class="absolute top-2.5 right-2.5 px-2 py-0.5 rounded-lg bg-black/70 backdrop-blur-sm text-[10px] font-mono text-white flex items-center gap-1">
+                  ▶️ VIDEO / SHORT
+                </span>
+              </div>
+              <div class="p-3.5 space-y-2 text-xs flex-1 flex flex-col justify-between">
+                <div>
+                  <h4 class="font-bold text-slate-200 line-clamp-1">${v.title}</h4>
+                  <p class="text-slate-400 line-clamp-2 mt-1 leading-relaxed">${v.description || ''}</p>
+                </div>
+                <div class="flex items-center justify-between text-[11px] text-slate-500 pt-2 border-t border-brand-border/60">
+                  <span>Creator: ${v.creator?.name || 'Creator'}</span>
+                  ${v.url ? `<a href="${v.url}" target="_blank" class="text-brand hover:underline font-bold">Watch &rarr;</a>` : ''}
+                </div>
+              </div>
+            `;
+            grid.appendChild(card);
+          });
+        } catch (err) {
+          loader.classList.add('hidden');
+          grid.innerHTML = `<div class="col-span-full p-4 rounded-xl bg-red-500/10 text-red-400 text-xs">Gateway search error: ${err.message}</div>`;
+        }
+      }
+    }
+
+    // Helper: Copy to Clipboard
+    function copyToClipboard(text) {
+      navigator.clipboard.writeText(text);
+      alert('Copied to clipboard!');
+    }
+  </script>
+</body>
+</html>
+
