@@ -96,8 +96,6 @@ export function ApiAccessGuard({ children }: ApiAccessGuardProps) {
   const { user, setUser, isLoading } = useAuth()
   const [billing, setBilling] = useState<"monthly" | "annually">("monthly")
   const [isUpgrading, setIsUpgrading] = useState(false)
-  const [showTestSwitcher, setShowTestSwitcher] = useState(false)
-  const [dismissNotice, setDismissNotice] = useState(false)
 
   // Determine access status
   const isAuthenticated = !isLoading && !!user
@@ -580,61 +578,5 @@ export function ApiAccessGuard({ children }: ApiAccessGuardProps) {
   }
 
   // 4. AUTHENTICATED AND ENTERPRISE PLAN (Grant Full Access)
-  return (
-    <>
-      {/* Enterprise Active Notice Banner */}
-      {!dismissNotice && (
-        <div className="bg-gradient-to-r from-emerald-500/10 via-primary/10 to-emerald-500/10 border-b border-primary/20 py-2.5 px-4 text-xs">
-          <div className="container max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-2">
-            <div className="flex items-center gap-2">
-              <span className="flex size-2 rounded-full bg-emerald-500 animate-pulse" />
-              <Crown className="size-4 text-amber-500 fill-amber-500" />
-              <span className="font-bold text-foreground">
-                Enterprise Clearance Active:
-              </span>
-              <span className="text-muted-foreground hidden sm:inline">
-                Authenticated as <strong className="text-foreground">{user?.email}</strong>. Uncapped access to Unified API Gateway and Testing Lab.
-              </span>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <Badge className="bg-emerald-500/20 text-emerald-500 border border-emerald-500/30 text-[10px] font-mono uppercase">
-                Enterprise Tier
-              </Badge>
-              <button 
-                onClick={() => setShowTestSwitcher(!showTestSwitcher)}
-                className="text-[11px] text-muted-foreground hover:text-foreground underline ml-2"
-                title="Test access restriction gate"
-              >
-                {showTestSwitcher ? "Hide Test Switcher" : "Test Gate"}
-              </button>
-              <button 
-                onClick={() => setDismissNotice(true)}
-                className="text-muted-foreground hover:text-foreground ml-1"
-                aria-label="Dismiss banner"
-              >
-                ✕
-              </button>
-            </div>
-          </div>
-
-          {/* Quick tester dropdown when toggled */}
-          {showTestSwitcher && (
-            <div className="container max-w-7xl mx-auto mt-2 pt-2 border-t border-primary/10 flex items-center justify-end gap-2">
-              <span className="text-[11px] text-muted-foreground">Test restriction by downgrading:</span>
-              <Button size="sm" variant="outline" className="h-7 text-[11px]" onClick={() => handleSwitchPlan("free")}>
-                Downgrade to Free
-              </Button>
-              <Button size="sm" variant="outline" className="h-7 text-[11px]" onClick={() => handleSwitchPlan("professional")}>
-                Downgrade to Pro
-              </Button>
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* Render Protected Content */}
-      {children}
-    </>
-  )
+  return <>{children}</>
 }
