@@ -18,6 +18,8 @@ export class Normalizer {
     totalReturned?: number;
     nextPage?: string | null;
     quotaCost?: number;
+    attribution?: any;
+    complianceStatus?: string;
     headers?: Record<string, string>;
   }): NextResponse<UnifiedResponse<T>> {
     const requestId = params.requestId || this.generateRequestId();
@@ -41,6 +43,8 @@ export class Normalizer {
             : 1,
         next_page: params.nextPage || null,
         quota_cost: params.quotaCost,
+        attribution: params.attribution,
+        compliance_status: params.complianceStatus,
       },
       errors: [],
     };

@@ -32,7 +32,7 @@ export class GatewayCache {
 
     const payload = JSON.stringify({ service, operation, scope, normalized });
     const hash = crypto.createHash('sha256').update(payload).digest('hex').substring(0, 24);
-    return `morx_cache:${service}:${operation}:${hash}`;
+    return `morx_cache:${scope}:${service}:${operation}:${hash}`;
   }
 
   /**
@@ -105,6 +105,36 @@ export class GatewayCache {
     let count = 0;
     for (const k of this.store.keys()) {
       if (k.includes(pattern)) {
+        this.store.delete(k);
+        count++;
+      }
+    }
+    return count;
+  }
+
+  /**
+   * Client-level data isolation purge (User-requested or client deletion)
+   */
+  static purgeClientData(clientId: string): number {
+    return this.invalidate(clientId);
+  }
+
+  /**
+   * OAuth revocation cleanup for social/connected accounts
+   */
+  static purgeOAuthData(provider: string, accountId?: string): number {
+    const pattern = accountId ? `${provider}:${accountId}` : provider;
+    return this.invalidate(pattern);
+  }
+
+  /**
+   * Scheduled deletion & automatic retention expiration enforcement
+   */
+  static purgeExpired(): number {
+    const now = Date.now();
+    let count = 0;
+    for (const [k, v] of this.store.entries()) {
+      if (now > v.expiresAt) {
         this.store.delete(k);
         count++;
       }

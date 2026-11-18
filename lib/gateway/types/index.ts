@@ -13,6 +13,14 @@ export interface UnifiedResponseMeta {
   total_returned?: number;
   next_page?: string | null;
   quota_cost?: number;
+  attribution?: {
+    required: boolean;
+    displayText: string;
+    logoUrl?: string;
+    linkUrl: string;
+    placement?: string;
+  };
+  compliance_status?: string;
 }
 
 export interface UnifiedError {
@@ -74,6 +82,7 @@ export interface ProviderResult<T = unknown> {
   cached?: boolean;
   error?: UnifiedError;
   rawResponse?: unknown;
+  meta?: Record<string, any>;
 }
 
 export interface IProvider {

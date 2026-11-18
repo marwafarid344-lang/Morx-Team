@@ -912,41 +912,88 @@ export default function GatewayAdminPage() {
         {/* TAB 3: PROVIDERS CATALOG */}
         {/* ========================================================================= */}
         {activeTab === "providers" && (
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
-            {providers.map((p) => (
-              <div key={p.name} className="p-4 rounded-2xl border border-border/70 bg-card flex flex-col justify-between space-y-3 shadow-xs">
-                <div>
-                  <div className="flex items-center justify-between">
-                    <span className="font-bold text-sm capitalize flex items-center gap-1.5">
-                      {p.service === "weather" && <CloudSun className="size-3.5 text-amber-500" />}
-                      {p.service === "videos" && <Video className="size-3.5 text-red-500" />}
-                      {p.service === "maps" && <Compass className="size-3.5 text-blue-500" />}
-                      {p.service === "routing" && <Navigation className="size-3.5 text-emerald-500" />}
-                      {p.service === "tiktok" && <Share2 className="size-3.5 text-pink-500" />}
-                      {p.service === "instagram" && <Share2 className="size-3.5 text-purple-500" />}
-                      {p.name.replace("_", " ")}
-                    </span>
-                    <span
-                      className={`text-[9px] font-bold px-2 py-0.5 rounded-full uppercase ${
-                        p.available
-                          ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
-                          : "bg-amber-500/10 text-amber-600 dark:text-amber-400"
-                      }`}
-                    >
-                      {p.available ? "Active" : "Awaiting Key"}
-                    </span>
-                  </div>
-                  <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
-                    {p.capabilities?.notes || `Integrated provider for ${p.service}.`}
-                  </p>
+          <div className="space-y-4">
+            {/* Compliance & Licensing Banner */}
+            <div className="p-4 rounded-2xl border border-primary/20 bg-primary/[0.03] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs">
+              <div className="space-y-0.5">
+                <div className="flex items-center gap-1.5 font-bold text-foreground">
+                  <ShieldCheck className="size-4 text-primary" />
+                  <span>Mandatory API Compliance & Licensing Matrix Active</span>
                 </div>
-
-                <div className="border-t border-border/50 pt-2 text-[11px] text-muted-foreground flex justify-between">
-                  <span>Circuit: <strong className="text-foreground uppercase">{p.circuitState}</strong></span>
-                  <span>Calls: <strong className="text-foreground">{p.dailyUsage?.quotaUnitsConsumed || 0}</strong></span>
-                </div>
+                <p className="text-muted-foreground text-[11px]">
+                  All third-party provider operations are governed by contractual redistribution, retention, and attribution policies.
+                </p>
               </div>
-            ))}
+              <a
+                href="/docs"
+                className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border bg-background font-semibold text-[11px] text-primary hover:bg-muted/40 transition-colors shrink-0"
+              >
+                <span>Compliance Specs</span>
+                <ExternalLink className="size-3" />
+              </a>
+            </div>
+
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
+              {providers.map((p) => {
+                const complianceStatus = p.compliance?.status || "CONDITIONAL";
+                return (
+                  <div key={p.name} className="p-4 rounded-2xl border border-border/70 bg-card flex flex-col justify-between space-y-3 shadow-xs">
+                    <div>
+                      <div className="flex items-center justify-between">
+                        <span className="font-bold text-sm capitalize flex items-center gap-1.5">
+                          {p.service === "weather" && <CloudSun className="size-3.5 text-amber-500" />}
+                          {p.service === "videos" && <Video className="size-3.5 text-red-500" />}
+                          {p.service === "maps" && <Compass className="size-3.5 text-blue-500" />}
+                          {p.service === "routing" && <Navigation className="size-3.5 text-emerald-500" />}
+                          {p.service === "tiktok" && <Share2 className="size-3.5 text-pink-500" />}
+                          {p.service === "instagram" && <Share2 className="size-3.5 text-purple-500" />}
+                          {p.name.replace("_", " ")}
+                        </span>
+                        <div className="flex items-center gap-1.5">
+                          {/* Compliance Status Badge */}
+                          <span
+                            className={`text-[8px] font-mono font-bold px-1.5 py-0.5 rounded-md uppercase tracking-tight ${
+                              complianceStatus === "APPROVED"
+                                ? "bg-emerald-500/10 text-emerald-500 border border-emerald-500/20"
+                                : complianceStatus === "CONDITIONAL"
+                                ? "bg-blue-500/10 text-blue-500 border border-blue-500/20"
+                                : complianceStatus === "INTERNAL_ONLY"
+                                ? "bg-purple-500/10 text-purple-500 border border-purple-500/20"
+                                : "bg-amber-500/10 text-amber-500 border border-amber-500/20"
+                            }`}
+                            title={`Compliance: ${complianceStatus}`}
+                          >
+                            {complianceStatus === "BLOCKED_PENDING_APPROVAL" ? "PENDING" : complianceStatus}
+                          </span>
+                          <span
+                            className={`text-[9px] font-bold px-2 py-0.5 rounded-full uppercase ${
+                              p.available
+                                ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
+                                : "bg-amber-500/10 text-amber-600 dark:text-amber-400"
+                            }`}
+                          >
+                            {p.available ? "Active" : "Awaiting Key"}
+                          </span>
+                        </div>
+                      </div>
+                      <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
+                        {p.capabilities?.notes || `Integrated provider for ${p.service}.`}
+                      </p>
+                      {p.compliance?.attribution?.displayText && (
+                        <p className="text-[10px] text-muted-foreground/70 mt-1.5 italic">
+                          Attribution: {p.compliance.attribution.displayText}
+                        </p>
+                      )}
+                    </div>
+
+                    <div className="border-t border-border/50 pt-2 text-[11px] text-muted-foreground flex justify-between">
+                      <span>Circuit: <strong className="text-foreground uppercase">{p.circuitState}</strong></span>
+                      <span>Calls: <strong className="text-foreground">{p.dailyUsage?.quotaUnitsConsumed || 0}</strong></span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
           </div>
         )}
 

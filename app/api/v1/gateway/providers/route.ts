@@ -4,6 +4,7 @@ import { CircuitBreaker } from '@/lib/gateway/core/circuit-breaker';
 import { RateLimiter } from '@/lib/gateway/core/rate-limiter';
 import { ServiceCategory } from '@/lib/gateway/types';
 import { GatewayDatabase } from '@/lib/gateway/database/gateway-db';
+import { ComplianceRegistry } from '@/lib/gateway/compliance/compliance-registry';
 
 export const dynamic = 'force-dynamic';
 
@@ -30,6 +31,7 @@ export async function GET(request: NextRequest) {
       const circuit = CircuitBreaker.getStatus(p.name);
       const quota = RateLimiter.getProviderMetrics(p.name);
       const dbEntry = dbStatusMap.get(p.name);
+      const compliance = ComplianceRegistry.getConfig(p.name);
 
       providerList.push({
         id: p.name,
@@ -44,6 +46,14 @@ export async function GET(request: NextRequest) {
         lastSuccessAt: circuit.lastSuccessAt,
         capabilities,
         dailyUsage: quota,
+        compliance: compliance ? {
+          status: compliance.complianceStatus,
+          agreement: compliance.applicableAgreement,
+          attribution: compliance.attributionRequirements,
+          reason: compliance.restrictionReason,
+          clientEligibility: compliance.clientEligibility,
+          dataRedistribution: compliance.dataRedistributionPolicy,
+        } : null,
       });
     }
   }

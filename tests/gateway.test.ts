@@ -30,6 +30,9 @@ import { ProviderRegistry } from '../lib/gateway/core/registry';
 import { InternalTspProvider } from '../lib/gateway/providers/routing/internal-tsp';
 import { hashApiKey, generateApiKey } from '../lib/gateway/security/crypto';
 import { GatewayDatabase } from '../lib/gateway/database/gateway-db';
+import { ComplianceRegistry } from '../lib/gateway/compliance/compliance-registry';
+import { ComplianceEngine } from '../lib/gateway/compliance/compliance-engine';
+import { ProviderOrchestrator } from '../lib/gateway/core/orchestrator';
 
 async function runGatewayTests() {
   console.log('🧪 Starting Morx Gateway Test Suite...\n');
@@ -169,7 +172,74 @@ async function runGatewayTests() {
   assert.strictEqual(instagramProviders.length >= 1, true, 'Instagram provider registered');
   console.log('   ✓ All 8 service providers and capabilities registered successfully.');
 
-  console.log('\n🎉 ALL 7 GATEWAY TEST SUITES PASSED CLEANLY!\n');
+  // ── TEST 8: Provider Compliance Engine & Registry ──
+  console.log('\n8. Testing Provider Compliance Engine & Policy Enforcement...');
+  
+  // 8.1 YouTube Proxying Blocked Pending Approval for External Clients
+  const ytExternalEval = ComplianceEngine.evaluate('youtube', 'videos', 'search', {
+    clientTier: 'third_party_developer',
+    isFirstParty: false,
+  });
+  assert.strictEqual(ytExternalEval.allowed, false, 'External developer proxying of YouTube MUST be blocked');
+  assert.strictEqual(ytExternalEval.errorCode, 'PROVIDER_COMPLIANCE_RESTRICTION');
+  assert.strictEqual(ytExternalEval.complianceStatus, 'BLOCKED_PENDING_APPROVAL');
+
+  // 8.2 YouTube First-Party Internal UI Allowed
+  const ytInternalEval = ComplianceEngine.evaluate('youtube', 'videos', 'search', {
+    isFirstParty: true,
+    clientTier: 'internal',
+  });
+  assert.strictEqual(ytInternalEval.allowed, true, 'First-party internal embed use case should pass');
+  assert.strictEqual(ytInternalEval.attribution?.displayText, 'Powered by YouTube');
+
+  // 8.3 Google Maps Canvas Co-mingling Blocked
+  const gmapsCanvasEval = ComplianceEngine.evaluate('google_maps', 'maps', 'geocode', {
+    requestedCanvas: 'mapbox',
+  });
+  assert.strictEqual(gmapsCanvasEval.allowed, false, 'Co-mingling Google Maps on Mapbox canvas must be blocked');
+  assert.strictEqual(gmapsCanvasEval.errorCode, 'PROVIDER_COMPLIANCE_RESTRICTION');
+
+  // 8.4 Mapbox Approved & Provides Attribution
+  const mapboxEval = ComplianceEngine.evaluate('mapbox', 'maps', 'geocode', {
+    clientTier: 'third_party_developer',
+  });
+  assert.strictEqual(mapboxEval.allowed, true, 'Mapbox geocoding must be approved');
+  assert.strictEqual(mapboxEval.complianceStatus, 'APPROVED');
+  assert.strictEqual(mapboxEval.attribution?.displayText, '© Mapbox © OpenStreetMap');
+
+  // 8.5 TikTok / Instagram Blocked Pending Approval
+  const tiktokEval = ComplianceEngine.evaluate('tiktok', 'social', 'feed', {
+    clientTier: 'third_party_developer',
+  });
+  assert.strictEqual(tiktokEval.allowed, false, 'TikTok proxying must be BLOCKED_PENDING_APPROVAL');
+  assert.strictEqual(tiktokEval.errorCode, 'PROVIDER_COMPLIANCE_RESTRICTION');
+
+  const igEval = ComplianceEngine.evaluate('instagram', 'social', 'feed', {
+    clientTier: 'third_party_developer',
+  });
+  assert.strictEqual(igEval.allowed, false, 'Instagram proxying must be BLOCKED_PENDING_APPROVAL');
+
+  // 8.6 Runtime Orchestrator Zero Silent Fallback on Compliance Rejection
+  const orchResult = await ProviderOrchestrator.execute('videos', 'search', { q: 'Cairo' }, {
+    clientTier: 'third_party_developer',
+    isFirstParty: false,
+  });
+  assert.strictEqual(orchResult.success, false, 'Orchestrator must not execute YouTube for unapproved client');
+  assert.strictEqual(orchResult.error?.code, 'PROVIDER_COMPLIANCE_RESTRICTION');
+  console.log('   ✓ Compliance Engine successfully enforces policy restrictions, zero silent fallback, and attribution.');
+
+  // ── TEST 9: Data Retention & Purge ──
+  console.log('\n9. Testing Data Retention & Purge Controls...');
+  const isolatedKey = GatewayCache.generateKey('maps', 'geocode', { address: 'Cairo' }, 'client_iso_01');
+  GatewayCache.set(isolatedKey, { lat: 30, lng: 31 }, 3600, 'mapbox');
+  assert.strictEqual(GatewayCache.get(isolatedKey).hit, true, 'Cached item exists');
+  
+  const purgedCount = GatewayCache.purgeClientData('client_iso_01');
+  assert.strictEqual(purgedCount >= 1, true, 'Client isolation purge must delete data');
+  assert.strictEqual(GatewayCache.get(isolatedKey).hit, false, 'Purged data must result in cache miss');
+  console.log('   ✓ Data retention, client isolation, and purge handlers working as specified.');
+
+  console.log('\n🎉 ALL 9 GATEWAY TEST SUITES PASSED CLEANLY!\n');
 }
 
 runGatewayTests().catch((err) => {

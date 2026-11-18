@@ -8,8 +8,9 @@ import {
 import { ProviderRegistry } from './registry';
 import { GatewayCache } from './cache';
 import { GatewayDatabase } from '../database/gateway-db';
+import { ComplianceEngine, ClientContext } from '../compliance/compliance-engine';
 
-interface OrchestratorOptions {
+interface OrchestratorOptions extends ClientContext {
   policy?: ProviderSelectionPolicy;
   specificProvider?: string;
   bypassCache?: boolean;
@@ -132,14 +133,67 @@ export class ProviderOrchestrator {
       for (let i = 0; i < candidateProviders.length; i++) {
         const provider = candidateProviders[i];
 
+        // A. Runtime Compliance Evaluation
+        const compliance = ComplianceEngine.evaluate(provider.name, service, operation, {
+          clientId: options.clientId,
+          clientTier: options.clientTier,
+          isFirstParty: options.isFirstParty,
+          requestedCanvas: options.requestedCanvas,
+        });
+
+        if (!compliance.allowed) {
+          const complianceError: UnifiedError = {
+            code: compliance.errorCode || 'PROVIDER_COMPLIANCE_RESTRICTION',
+            message: compliance.errorMessage || 'This provider operation is not enabled for this client.',
+            provider: provider.name,
+            details: compliance.violationDetails,
+            retryable: false,
+          };
+
+          // Spec Rule: Never silently bypass a compliance restriction through fallback providers.
+          if (
+            policy === 'specific' ||
+            candidateProviders.length === 1 ||
+            compliance.errorCode === 'PROVIDER_OPERATION_PROHIBITED' ||
+            compliance.complianceStatus === 'BLOCKED_PENDING_APPROVAL' ||
+            service === 'videos' ||
+            service === 'tiktok' ||
+            service === 'instagram'
+          ) {
+            return {
+              success: false,
+              data: null,
+              providerName: provider.name,
+              latencyMs: 0,
+              error: complianceError,
+            };
+          }
+
+          errorsCollected.push(complianceError);
+          continue;
+        }
+
         try {
           const result = await provider.execute<T>(operation, params);
 
           if (result.success && result.data !== null) {
+            // Check caching compliance
+            const cacheCompliance = ComplianceEngine.isCacheable(provider.name);
+            const effectiveTtl = cacheCompliance.allowed 
+              ? Math.min(ttl, cacheCompliance.maxTtlSeconds) 
+              : 0;
+
             // Save to cache
-            if (ttl > 0) {
-              GatewayCache.set(cacheKey, result.data, ttl, provider.name);
+            if (effectiveTtl > 0) {
+              GatewayCache.set(cacheKey, result.data, effectiveTtl, provider.name);
             }
+
+            // Inject compliance attribution
+            result.meta = {
+              ...result.meta,
+              attribution: compliance.attribution,
+              compliance_status: compliance.complianceStatus,
+            };
 
             // Record successful usage
             GatewayDatabase.recordUsage({

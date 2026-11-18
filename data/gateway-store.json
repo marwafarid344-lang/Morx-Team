@@ -1,5 +1,33 @@
 {
-  "clients": [],
-  "keys": [],
-  "updatedAt": "2026-11-18T12:32:59.349Z"
+  "clients": [
+    {
+      "id": "client_1795007609717_2gihe",
+      "name": "Testing Suite Client",
+      "description": "Automated verification client",
+      "status": "active",
+      "rateLimitPerMinute": 120,
+      "rateLimitPerHour": 2000,
+      "rateLimitPerDay": 20000,
+      "allowedServices": [
+        "videos",
+        "weather",
+        "maps",
+        "routing"
+      ],
+      "createdAt": "2026-11-18T13:13:29.717Z",
+      "rawKey": "morx_live_e3kbbRj_fyXuW0kQviJvJpIEQFO4WNABD"
+    }
+  ],
+  "keys": [
+    {
+      "id": "key_1795007609717_fv0c4",
+      "clientId": "client_1795007609717_2gihe",
+      "keyPrefix": "morx_live_e3kbbRj",
+      "keyHash": "c5a37ae42b41aa1f7c6635c50c3219111c5dc9156d602be5267e3075672a489c",
+      "status": "active",
+      "createdAt": "2026-11-18T13:13:29.717Z",
+      "rawKey": "morx_live_e3kbbRj_fyXuW0kQviJvJpIEQFO4WNABD"
+    }
+  ],
+  "updatedAt": "2026-11-18T13:25:56.914Z"
 }
