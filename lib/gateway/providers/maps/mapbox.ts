@@ -1,5 +1,5 @@
 import { IProvider, ProviderHealth, ProviderResult, ServiceCategory } from '../../types';
-import { UnifiedDirections, UnifiedGeocodingResult, UnifiedPlace, RouteStep } from '../../types/services';
+import { UnifiedDirections, UnifiedGeocodingResult, UnifiedPlace, RouteStep, UnifiedIsochrone } from '../../types/services';
 import { CircuitBreaker } from '../../core/circuit-breaker';
 import { RateLimiter } from '../../core/rate-limiter';
 
@@ -10,22 +10,14 @@ function parseMapboxEndpoint(input: string): { lon: number; lat: number; mapboxF
     let lat = p0;
     let lon = p1;
 
-    // Detect if order is lon,lat or lat,lon
+    // Detect if first param is out of latitude range [-90, 90] -> then it must be lon,lat
     if (Math.abs(p0) > 90) {
       lon = p0;
       lat = p1;
-    } else if (Math.abs(p1) > 90) {
+    } else {
+      // Standard convention: lat,lon
       lat = p0;
       lon = p1;
-    } else if (p0 > 28 && p0 < 33 && p1 > 28 && p1 < 33) {
-      // In Egypt: Alexandria lat is ~31.2, lon is ~29.9
-      if (p0 > p1) {
-        lat = p0;
-        lon = p1;
-      } else {
-        lon = p0;
-        lat = p1;
-      }
     }
     return { lon, lat, mapboxFormat: `${lon},${lat}` };
   }
@@ -252,12 +244,12 @@ export class MapboxProvider implements IProvider {
         const normalized: UnifiedDirections = {
           summary: leg.summary || route.summary || 'Mapbox Driving Route',
           origin: {
-            latitude: data.waypoints?.[0]?.location?.[1] ?? orig.lat,
-            longitude: data.waypoints?.[0]?.location?.[0] ?? orig.lon,
+            latitude: data.waypoints?.[0]?.location?.[1] || orig.lat,
+            longitude: data.waypoints?.[0]?.location?.[0] || orig.lon,
           },
           destination: {
-            latitude: data.waypoints?.[1]?.location?.[1] ?? dest.lat,
-            longitude: data.waypoints?.[1]?.location?.[0] ?? dest.lon,
+            latitude: data.waypoints?.[1]?.location?.[1] || dest.lat,
+            longitude: data.waypoints?.[1]?.location?.[0] || dest.lon,
           },
           distance_meters: Math.round(route.distance || 0),
           duration_seconds: Math.round(route.duration || 0),
@@ -357,6 +349,77 @@ export class MapboxProvider implements IProvider {
         return {
           success: true,
           data: normalizedPlaces as unknown as T,
+          providerName: this.name,
+          latencyMs,
+        };
+      }
+
+      // 5. Isochrone Reachability Contours
+      if (operation === 'isochrone') {
+        const lat = params.lat !== undefined ? Number(params.lat) : undefined;
+        const lon = params.lon !== undefined ? Number(params.lon) : undefined;
+        const profile = String(params.profile || params.mode || 'driving').toLowerCase();
+        const contoursStr = String(params.contours || params.contours_minutes || '15,30');
+
+        if (lat === undefined || lon === undefined) {
+          return {
+            success: false,
+            data: null,
+            providerName: this.name,
+            latencyMs: 0,
+            error: {
+              code: 'INVALID_PARAMETERS',
+              message: 'Isochrone requires "lat" and "lon" coordinates.',
+              provider: this.name,
+              retryable: false,
+            },
+          };
+        }
+
+        // Mapbox Isochrone endpoint takes lon,lat
+        const url = `https://api.mapbox.com/isochrone/v1/mapbox/${profile}/${lon},${lat}?contours_minutes=${contoursStr}&polygons=true&access_token=${token}`;
+
+        const res = await fetch(url);
+        const latencyMs = Date.now() - start;
+        RateLimiter.recordProviderCall(this.name, 1);
+
+        if (!res.ok) {
+          return {
+            success: false,
+            data: null,
+            providerName: this.name,
+            latencyMs,
+            error: {
+              code: 'PROVIDER_API_ERROR',
+              message: `Mapbox isochrone failed with HTTP ${res.status}`,
+              provider: this.name,
+              retryable: res.status >= 500,
+            },
+          };
+        }
+
+        const data = await res.json();
+        const contoursList = contoursStr.split(',').map((s) => Number(s.trim())).filter((n) => !isNaN(n));
+
+        const normalized: UnifiedIsochrone = {
+          center: { latitude: lat, longitude: lon },
+          contours_minutes: contoursList,
+          type: data.type || 'FeatureCollection',
+          features: (data.features || []).map((f: any) => ({
+            type: f.type,
+            geometry: f.geometry,
+            properties: {
+              contour: f.properties?.contour || 0,
+              fillColor: f.properties?.fillColor || f.properties?.fill || '#3b82f6',
+              opacity: f.properties?.opacity || 0.33,
+              metric: f.properties?.metric || 'time',
+            },
+          })),
+        };
+
+        return {
+          success: true,
+          data: normalized as unknown as T,
           providerName: this.name,
           latencyMs,
         };

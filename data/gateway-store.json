@@ -26,7 +26,10 @@
         "videos",
         "weather",
         "maps",
-        "routing"
+        "routing",
+        "finance",
+        "news",
+        "utils"
       ],
       "createdAt": "2026-11-18T13:13:29.717Z",
       "rawKey": "morx_live_e3kbbRj_fyXuW0kQviJvJpIEQFO4WNABD"
@@ -52,5 +55,5 @@
       "rawKey": "morx_live_e3kbbRj_fyXuW0kQviJvJpIEQFO4WNABD"
     }
   ],
-  "updatedAt": "2026-11-18T14:55:07.054Z"
+  "updatedAt": "2026-11-18T16:17:36.163Z"
 }

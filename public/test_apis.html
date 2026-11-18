@@ -526,6 +526,64 @@
         body: null
       },
       {
+        id: "maps-isochrone",
+        category: "Maps",
+        icon: "⏱️",
+        title: "Isochrone Reachability",
+        method: "GET",
+        path: "/api/v1/maps/isochrone",
+        description: "Travel-time reachability contours and catchment area polygons.",
+        defaultParams: [
+          { key: "lat", value: "31.2001", desc: "Center Latitude" },
+          { key: "lon", value: "29.9187", desc: "Center Longitude" },
+          { key: "profile", value: "driving", desc: "driving | walking | cycling" },
+          { key: "contours", value: "15,30", desc: "Minutes cutoff" }
+        ],
+        body: null
+      },
+      {
+        id: "utils-ip-lookup",
+        category: "Utilities",
+        icon: "🌐",
+        title: "IP Geolocation Lookup",
+        method: "GET",
+        path: "/api/v1/utils/ip-lookup",
+        description: "Resolve client or specific IP into GPS coordinates, city, and ISP.",
+        defaultParams: [
+          { key: "ip", value: "8.8.8.8", desc: "Target IP address (or blank for client IP)" }
+        ],
+        body: null
+      },
+      {
+        id: "finance-exchange",
+        category: "Finance",
+        icon: "💱",
+        title: "Currency Exchange Rates",
+        method: "GET",
+        path: "/api/v1/finance/exchange",
+        description: "Live foreign exchange rates & currency conversion via European Central Bank.",
+        defaultParams: [
+          { key: "base", value: "USD", desc: "Base currency (e.g. USD, EUR, GBP)" },
+          { key: "target", value: "EUR", desc: "Target currency (optional)" },
+          { key: "amount", value: "100", desc: "Amount to convert" }
+        ],
+        body: null
+      },
+      {
+        id: "news-search",
+        category: "News Feeds",
+        icon: "📰",
+        title: "News Search & Headlines",
+        method: "GET",
+        path: "/api/v1/news/search",
+        description: "Global news headlines and keyword search across international publications.",
+        defaultParams: [
+          { key: "q", value: "technology", desc: "Search topic/keyword" },
+          { key: "limit", value: "6", desc: "Max articles" }
+        ],
+        body: null
+      },
+      {
         id: "routes-directions-osrm",
         category: "Routing",
         icon: "🚗",
@@ -1208,6 +1266,111 @@
             </div>
           </div>
         `;
+        container.innerHTML = html;
+        return;
+      }
+
+      // 5. ISOCHRONE REACHABILITY
+      if (endpoint.id === 'maps-isochrone' && data.features) {
+        const contours = data.contours_minutes || [];
+        const features = data.features || [];
+        let html = `
+          <div class="p-4 rounded-xl bg-morx-950 border border-morx-800 space-y-3">
+            <div class="flex items-center justify-between border-b border-morx-800 pb-2">
+              <span class="font-bold text-xs text-white">⏱️ Reachability Contours:</span>
+              <span class="font-mono text-blue-400 text-xs font-bold">${features.length} Polygons</span>
+            </div>
+            <div class="flex items-center gap-2 flex-wrap">
+              ${contours.map(c => `<span class="px-2.5 py-1 rounded-lg bg-blue-600/20 text-blue-300 font-mono text-xs border border-blue-500/30">≤ ${c} mins drive</span>`).join('')}
+            </div>
+            <div class="p-3 rounded-lg bg-morx-900 border border-morx-800/80 text-xs space-y-1 font-mono text-slate-300">
+              <div>Center: <strong class="text-white">${data.center?.latitude}, ${data.center?.longitude}</strong></div>
+              <div>GeoJSON Type: <span class="text-emerald-400">${data.type}</span></div>
+            </div>
+          </div>
+        `;
+        container.innerHTML = html;
+        return;
+      }
+
+      // 6. IP GEOLOCATION
+      if (endpoint.id === 'utils-ip-lookup' && data.ip) {
+        container.innerHTML = `
+          <div class="p-5 rounded-2xl bg-gradient-to-br from-indigo-950/40 via-morx-900 to-morx-950 border border-indigo-500/30 space-y-4">
+            <div class="flex items-center justify-between">
+              <div>
+                <h3 class="font-bold text-base text-white">${data.city || 'Unknown City'}, ${data.country || 'Unknown'}</h3>
+                <span class="text-xs text-indigo-300 font-mono">${data.ip}</span>
+              </div>
+              <span class="px-2.5 py-1 rounded-md text-xs font-mono font-bold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
+                ${data.country_code || 'GEO'}
+              </span>
+            </div>
+            <div class="grid grid-cols-2 gap-2 text-xs font-mono pt-2 border-t border-morx-800">
+              <div class="p-2 rounded bg-morx-900/80">
+                <span class="text-slate-400 text-[10px] block">COORDINATES</span>
+                <span class="font-bold text-slate-200">${data.coordinates?.latitude?.toFixed(4)}, ${data.coordinates?.longitude?.toFixed(4)}</span>
+              </div>
+              <div class="p-2 rounded bg-morx-900/80">
+                <span class="text-slate-400 text-[10px] block">TIMEZONE</span>
+                <span class="font-bold text-slate-200">${data.timezone || 'UTC'}</span>
+              </div>
+              <div class="p-2 rounded bg-morx-900/80 col-span-2">
+                <span class="text-slate-400 text-[10px] block">INTERNET SERVICE PROVIDER</span>
+                <span class="font-bold text-slate-200">${data.isp || data.org || 'Standard ISP'}</span>
+              </div>
+            </div>
+          </div>
+        `;
+        return;
+      }
+
+      // 7. FINANCIAL CURRENCY EXCHANGE
+      if (endpoint.id === 'finance-exchange' && data.rates) {
+        const rateKeys = Object.keys(data.rates);
+        container.innerHTML = `
+          <div class="p-5 rounded-2xl bg-gradient-to-br from-emerald-950/40 via-morx-900 to-morx-950 border border-emerald-500/30 space-y-4">
+            <div class="flex items-center justify-between">
+              <div>
+                <span class="text-xs text-emerald-400 font-mono font-bold">EXCHANGE RATE BASE: ${data.base}</span>
+                <div class="text-2xl font-extrabold text-white font-mono mt-1">
+                  ${data.amount} ${data.base} ${data.converted_amount !== undefined ? `= ${data.converted_amount.toFixed(2)} ${data.target}` : ''}
+                </div>
+              </div>
+              <span class="text-[10px] text-slate-400 font-mono">${data.date}</span>
+            </div>
+            <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 text-xs font-mono pt-2 border-t border-morx-800">
+              ${rateKeys.slice(0, 6).map(k => `
+                <div class="p-2 rounded bg-morx-900/80">
+                  <span class="text-slate-400 text-[10px] block">${k}</span>
+                  <span class="font-bold text-emerald-300">${data.rates[k]}</span>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        `;
+        return;
+      }
+
+      // 8. NEWS SEARCH
+      if (endpoint.id === 'news-search' && Array.isArray(data)) {
+        let html = '<div class="space-y-3">';
+        data.slice(0, 4).forEach(a => {
+          html += `
+            <div class="p-3 rounded-xl bg-morx-950 border border-morx-800 flex gap-3">
+              ${a.image ? `<img src="${a.image}" class="w-20 h-20 rounded-lg object-cover shrink-0 bg-morx-900" onerror="this.style.display='none'" />` : ''}
+              <div class="flex-1 space-y-1">
+                <div class="flex items-center justify-between">
+                  <span class="text-[10px] font-mono text-blue-400 font-semibold">${a.source?.name || 'News'}</span>
+                  <span class="text-[9px] text-slate-500 font-mono">${a.published_at?.split('T')[0] || ''}</span>
+                </div>
+                <h4 class="font-bold text-xs text-white line-clamp-1">${a.title}</h4>
+                <p class="text-[11px] text-slate-400 line-clamp-2">${a.description}</p>
+              </div>
+            </div>
+          `;
+        });
+        html += '</div>';
         container.innerHTML = html;
         return;
       }

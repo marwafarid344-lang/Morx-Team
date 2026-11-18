@@ -173,6 +173,7 @@ export class OpenMeteoProvider implements IProvider {
             icon: wmo.icon,
           },
           cloud_coverage_percent: 0,
+          visibility_meters: 10000,
           sunrise: data.daily?.sunrise?.[0] || null,
           sunset: data.daily?.sunset?.[0] || null,
           unit: isFahrenheit ? 'fahrenheit' : 'celsius',

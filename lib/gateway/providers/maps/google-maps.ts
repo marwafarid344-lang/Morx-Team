@@ -352,15 +352,25 @@ export class GoogleMapsProvider implements IProvider {
           },
         }));
 
+        const parseFallbackCoords = (str: string): { lat: number; lng: number } => {
+          const parts = str.split(',').map((s) => parseFloat(s.trim()));
+          if (parts.length === 2 && !isNaN(parts[0]) && !isNaN(parts[1])) {
+            return { lat: parts[0], lng: parts[1] };
+          }
+          return { lat: 0, lng: 0 };
+        };
+        const origFallback = parseFallbackCoords(origin);
+        const destFallback = parseFallbackCoords(destination);
+
         const normalized: UnifiedDirections = {
           summary: route.summary || 'Route',
           origin: {
-            latitude: leg.start_location?.lat || 0,
-            longitude: leg.start_location?.lng || 0,
+            latitude: leg.start_location?.lat ?? origFallback.lat,
+            longitude: leg.start_location?.lng ?? origFallback.lng,
           },
           destination: {
-            latitude: leg.end_location?.lat || 0,
-            longitude: leg.end_location?.lng || 0,
+            latitude: leg.end_location?.lat ?? destFallback.lat,
+            longitude: leg.end_location?.lng ?? destFallback.lng,
           },
           distance_meters: leg.distance?.value || 0,
           duration_seconds: leg.duration?.value || 0,

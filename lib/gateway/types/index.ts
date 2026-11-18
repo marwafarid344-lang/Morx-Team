@@ -45,7 +45,10 @@ export type ServiceCategory =
   | 'maps'
   | 'routing'
   | 'tiktok'
-  | 'instagram';
+  | 'instagram'
+  | 'finance'
+  | 'news'
+  | 'utils';
 
 export type ProviderSelectionPolicy =
   | 'primary'

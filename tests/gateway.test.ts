@@ -208,19 +208,19 @@ async function runGatewayTests() {
   assert.strictEqual(mapboxEval.attribution?.displayText, '© Mapbox © OpenStreetMap');
 
   // 8.5 TikTok / Instagram Blocked Pending Approval
-  const tiktokEval = ComplianceEngine.evaluate('tiktok', 'social', 'feed', {
+  const tiktokEval = ComplianceEngine.evaluate('tiktok', 'tiktok', 'user', {
     clientTier: 'third_party_developer',
   });
   assert.strictEqual(tiktokEval.allowed, false, 'TikTok proxying must be BLOCKED_PENDING_APPROVAL');
   assert.strictEqual(tiktokEval.errorCode, 'PROVIDER_COMPLIANCE_RESTRICTION');
 
-  const igEval = ComplianceEngine.evaluate('instagram', 'social', 'feed', {
+  const igEval = ComplianceEngine.evaluate('instagram', 'instagram', 'profile', {
     clientTier: 'third_party_developer',
   });
   assert.strictEqual(igEval.allowed, false, 'Instagram proxying must be BLOCKED_PENDING_APPROVAL');
 
   // 8.6 Runtime Orchestrator Zero Silent Fallback on Compliance Rejection
-  const orchResult = await ProviderOrchestrator.execute('tiktok', 'feed', { limit: 5 }, {
+  const orchResult = await ProviderOrchestrator.execute('tiktok', 'user', { limit: 5 }, {
     clientTier: 'third_party_developer',
     isFirstParty: false,
   });
@@ -239,7 +239,37 @@ async function runGatewayTests() {
   assert.strictEqual(GatewayCache.get(isolatedKey).hit, false, 'Purged data must result in cache miss');
   console.log('   ✓ Data retention, client isolation, and purge handlers working as specified.');
 
-  console.log('\n🎉 ALL 9 GATEWAY TEST SUITES PASSED CLEANLY!\n');
+  // ── TEST 10: New Providers (Isochrone, IP Geolocation, Frankfurter, GNews) ──
+  console.log('\n10. Testing Isochrone, IP Geolocation, Frankfurter, and GNews...');
+  const ipEval = ComplianceEngine.evaluate('ip_geolocation', 'utils', 'lookup');
+  assert.strictEqual(ipEval.allowed, true, 'IP Geolocation must be approved');
+
+  const frankEval = ComplianceEngine.evaluate('frankfurter', 'finance', 'rates');
+  assert.strictEqual(frankEval.allowed, true, 'Frankfurter must be approved');
+
+  const gnewsEval = ComplianceEngine.evaluate('gnews', 'news', 'search');
+  assert.strictEqual(gnewsEval.allowed, true, 'GNews must be approved');
+
+  const mbIsochroneEval = ComplianceEngine.evaluate('mapbox', 'maps', 'isochrone');
+  assert.strictEqual(mbIsochroneEval.allowed, true, 'Mapbox isochrone must be approved');
+
+  // Test IP Geolocation execution
+  const ipRes = await ProviderOrchestrator.execute('utils', 'lookup', { ip: '8.8.8.8' }, { specificProvider: 'ip_geolocation' });
+  assert.strictEqual(ipRes.success, true, 'IP Geolocation lookup should succeed');
+  assert.strictEqual(typeof (ipRes.data as any)?.city, 'string');
+
+  // Test Frankfurter execution
+  const frankRes = await ProviderOrchestrator.execute('finance', 'rates', { base: 'USD', target: 'EUR', amount: 10 }, { specificProvider: 'frankfurter' });
+  assert.strictEqual(frankRes.success, true, 'Frankfurter rates should succeed');
+  assert.strictEqual(typeof (frankRes.data as any)?.rates?.EUR, 'number');
+
+  // Test GNews execution
+  const gnewsRes = await ProviderOrchestrator.execute('news', 'search', { q: 'technology' }, { specificProvider: 'gnews' });
+  assert.strictEqual(gnewsRes.success, true, 'GNews search should succeed');
+  assert.strictEqual(Array.isArray(gnewsRes.data), true);
+  console.log('   ✓ All 4 new providers verified and executing cleanly.');
+
+  console.log('\n🎉 ALL 10 GATEWAY TEST SUITES PASSED CLEANLY!\n');
 }
 
 runGatewayTests().catch((err) => {

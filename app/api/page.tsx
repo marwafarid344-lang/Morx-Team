@@ -81,6 +81,9 @@ const CATEGORIES = [
   { id: "weather", label: "Weather", icon: CloudSun },
   { id: "maps", label: "Maps & Places", icon: Compass },
   { id: "routing", label: "Route Optimizer", icon: Navigation },
+  { id: "finance", label: "Financial Rates", icon: Zap },
+  { id: "news", label: "News & Media", icon: BookOpen },
+  { id: "utils", label: "Network Utils", icon: Globe },
   { id: "social", label: "Social Feeds", icon: Share2 },
   { id: "maintenance", label: "Database Cron", icon: Database },
 ]
@@ -467,6 +470,156 @@ print(res.json()["data"])`,
     "provider": "osrmroute",
     "attribution": "Routing by OSRMRoute © OpenStreetMap contributors"
   }
+}`
+  },
+  {
+    path: "/api/v1/maps/isochrone",
+    method: "GET",
+    title: "Isochrone Reachability Contours",
+    desc: "Calculates drive-time or walk-time polygons and reachability catchment zones around coordinates.",
+    category: "maps",
+    providers: ["Mapbox Isochrone v1"],
+    cacheTtl: "60m Cache",
+    rateLimit: "120 req/min",
+    params: [
+      { name: "lat", type: "number", required: true, description: "Center latitude coordinate." },
+      { name: "lon", type: "number", required: true, description: "Center longitude coordinate." },
+      { name: "profile", type: "string", required: false, defaultVal: "driving", description: "'driving' | 'walking' | 'cycling'" },
+      { name: "contours", type: "string", required: false, defaultVal: "15,30", description: "Comma-separated minutes list (e.g. '10,20,30')." }
+    ],
+    curlExample: `curl -X GET "https://YOUR-DOMAIN/api/v1/maps/isochrone?lat=31.2001&lon=29.9187&contours=15,30" \\
+  -H "Authorization: Bearer YOUR_MORX_API_KEY"`,
+    jsExample: `const res = await fetch("https://YOUR-DOMAIN/api/v1/maps/isochrone?lat=31.2001&lon=29.9187&contours=15,30", {
+  headers: { "Authorization": "Bearer YOUR_MORX_API_KEY" }
+});
+const { data } = await res.json();
+console.log(data.features);`,
+    pythonExample: `import requests
+res = requests.get("https://YOUR-DOMAIN/api/v1/maps/isochrone?lat=31.2001&lon=29.9187", headers={"Authorization": "Bearer YOUR_MORX_API_KEY"})
+print(res.json()["data"])`,
+    responseExample: `{
+  "success": true,
+  "service": "maps",
+  "data": {
+    "center": { "latitude": 31.2001, "longitude": 29.9187 },
+    "contours_minutes": [15, 30],
+    "type": "FeatureCollection",
+    "features": [
+      { "type": "Feature", "properties": { "contour": 15, "fillColor": "#3b82f6" } }
+    ]
+  }
+}`
+  },
+  {
+    path: "/api/v1/utils/ip-lookup",
+    method: "GET",
+    title: "IP Geolocation & Network ISP",
+    desc: "Resolves client IP or any target IP address into country, city, coordinates, timezone, and ASN/ISP.",
+    category: "utils",
+    providers: ["ipwho.is", "ip-api.com (Fallback)"],
+    cacheTtl: "24h Cache",
+    rateLimit: "300 req/min",
+    params: [
+      { name: "ip", type: "string", required: false, description: "IPv4 or IPv6 address (omit to auto-resolve client IP)." }
+    ],
+    curlExample: `curl -X GET "https://YOUR-DOMAIN/api/v1/utils/ip-lookup?ip=8.8.8.8" \\
+  -H "Authorization: Bearer YOUR_MORX_API_KEY"`,
+    jsExample: `const res = await fetch("https://YOUR-DOMAIN/api/v1/utils/ip-lookup?ip=8.8.8.8", {
+  headers: { "Authorization": "Bearer YOUR_MORX_API_KEY" }
+});
+const { data } = await res.json();
+console.log(data.city, data.country, data.isp);`,
+    pythonExample: `import requests
+res = requests.get("https://YOUR-DOMAIN/api/v1/utils/ip-lookup?ip=8.8.8.8", headers={"Authorization": "Bearer YOUR_MORX_API_KEY"})
+print(res.json()["data"])`,
+    responseExample: `{
+  "success": true,
+  "service": "utils",
+  "data": {
+    "ip": "8.8.8.8",
+    "city": "Mountain View",
+    "country": "United States",
+    "country_code": "US",
+    "coordinates": { "latitude": 37.4223, "longitude": -122.0848 },
+    "timezone": "America/Los_Angeles",
+    "isp": "Google LLC"
+  }
+}`
+  },
+  {
+    path: "/api/v1/finance/exchange",
+    method: "GET",
+    title: "Foreign Exchange & Currency Converter",
+    desc: "Retrieves live reference foreign exchange rates and currency conversion published by the European Central Bank.",
+    category: "finance",
+    providers: ["European Central Bank (Frankfurter)"],
+    cacheTtl: "60m Cache",
+    rateLimit: "300 req/min",
+    params: [
+      { name: "base", type: "string", required: false, defaultVal: "USD", description: "Base currency code (e.g. USD, EUR, GBP, EGP)." },
+      { name: "target", type: "string", required: false, description: "Target currency code to convert to." },
+      { name: "amount", type: "number", required: false, defaultVal: "1", description: "Currency amount to convert." }
+    ],
+    curlExample: `curl -X GET "https://YOUR-DOMAIN/api/v1/finance/exchange?base=USD&target=EUR&amount=100" \\
+  -H "Authorization: Bearer YOUR_MORX_API_KEY"`,
+    jsExample: `const res = await fetch("https://YOUR-DOMAIN/api/v1/finance/exchange?base=USD&target=EUR&amount=100", {
+  headers: { "Authorization": "Bearer YOUR_MORX_API_KEY" }
+});
+const { data } = await res.json();
+console.log(data.converted_amount);`,
+    pythonExample: `import requests
+res = requests.get("https://YOUR-DOMAIN/api/v1/finance/exchange?base=USD&target=EUR", headers={"Authorization": "Bearer YOUR_MORX_API_KEY"})
+print(res.json()["data"])`,
+    responseExample: `{
+  "success": true,
+  "service": "finance",
+  "data": {
+    "base": "USD",
+    "target": "EUR",
+    "amount": 100,
+    "date": "2026-11-18",
+    "converted_amount": 92.45,
+    "rates": { "EUR": 0.9245, "GBP": 0.7892, "JPY": 154.2 }
+  }
+}`
+  },
+  {
+    path: "/api/v1/news/search",
+    method: "GET",
+    title: "News Search & Media Headlining",
+    desc: "Full-text article search across global news outlets with image thumbnails, author, and publication timestamp.",
+    category: "news",
+    providers: ["GNews API"],
+    cacheTtl: "30m Cache",
+    rateLimit: "120 req/min",
+    params: [
+      { name: "q", type: "string", required: false, defaultVal: "technology", description: "Topic keyword or query phrase." },
+      { name: "limit", type: "number", required: false, defaultVal: "10", description: "Max articles to return (max: 10)." },
+      { name: "lang", type: "string", required: false, defaultVal: "en", description: "Language ISO code (e.g. 'en', 'ar')." }
+    ],
+    curlExample: `curl -X GET "https://YOUR-DOMAIN/api/v1/news/search?q=technology&limit=5" \\
+  -H "Authorization: Bearer YOUR_MORX_API_KEY"`,
+    jsExample: `const res = await fetch("https://YOUR-DOMAIN/api/v1/news/search?q=technology&limit=5", {
+  headers: { "Authorization": "Bearer YOUR_MORX_API_KEY" }
+});
+const { data } = await res.json();
+console.log(data);`,
+    pythonExample: `import requests
+res = requests.get("https://YOUR-DOMAIN/api/v1/news/search?q=technology", headers={"Authorization": "Bearer YOUR_MORX_API_KEY"})
+print(res.json()["data"])`,
+    responseExample: `{
+  "success": true,
+  "service": "news",
+  "data": [
+    {
+      "id": "https://example.com/article",
+      "title": "Major API Advancements Unveiled",
+      "description": "Unified architectures lead the future of enterprise software.",
+      "url": "https://example.com/article",
+      "published_at": "2026-11-18T12:00:00Z",
+      "source": { "name": "Global Tech News" }
+    }
+  ]
 }`
   },
   {

@@ -13,6 +13,9 @@ import { InternalTspProvider } from '../providers/routing/internal-tsp';
 import { OSRMRouteProvider } from '../providers/routing/osrmroute';
 import { TikTokProvider } from '../providers/social/tiktok';
 import { InstagramProvider } from '../providers/social/instagram';
+import { IpGeolocationProvider } from '../providers/utils/ip-geolocation';
+import { FrankfurterProvider } from '../providers/finance/frankfurter';
+import { GNewsProvider } from '../providers/news/gnews';
 
 export class ProviderRegistry {
   private static providers: Map<ServiceCategory, IProvider[]> = new Map();
@@ -30,6 +33,9 @@ export class ProviderRegistry {
     this.register(new OSRMRouteProvider());
     this.register(new TikTokProvider());
     this.register(new InstagramProvider());
+    this.register(new IpGeolocationProvider());
+    this.register(new FrankfurterProvider());
+    this.register(new GNewsProvider());
 
     // 2. Define Capabilities
     this.capabilities.set('youtube', {
@@ -99,12 +105,12 @@ export class ProviderRegistry {
     });
 
     this.capabilities.set('mapbox', {
-      supportedOperations: ['geocode', 'reverse_geocode', 'directions', 'places'],
-      supportedFilters: ['address', 'lat', 'lon', 'origin', 'destination', 'query'],
+      supportedOperations: ['geocode', 'reverse_geocode', 'directions', 'places', 'isochrone'],
+      supportedFilters: ['address', 'lat', 'lon', 'origin', 'destination', 'query', 'profile', 'contours'],
       authType: 'bearer',
       paginationSupported: false,
       quotaCostPerCall: 1,
-      notes: 'Mapbox Places v5 and Directions v5 APIs for geocoding & routing fallback',
+      notes: 'Mapbox Places v5, Directions v5, and Isochrone APIs for geocoding, routing, and reachability contours',
     });
 
     this.capabilities.set('google_routes', {
@@ -152,6 +158,34 @@ export class ProviderRegistry {
       maxLimit: 50,
       quotaCostPerCall: 1,
       notes: 'Official Meta Instagram Platform / Instagram Login for authorized profiles',
+    });
+
+    this.capabilities.set('ip_geolocation', {
+      supportedOperations: ['lookup'],
+      supportedFilters: ['ip'],
+      authType: 'none',
+      paginationSupported: false,
+      quotaCostPerCall: 0,
+      notes: 'High-speed IP geolocation lookup returning ISP, coordinates, timezone, and country',
+    });
+
+    this.capabilities.set('frankfurter', {
+      supportedOperations: ['rates', 'convert', 'exchange'],
+      supportedFilters: ['base', 'target', 'amount'],
+      authType: 'none',
+      paginationSupported: false,
+      quotaCostPerCall: 0,
+      notes: 'Official European Central Bank open financial foreign exchange and currency converter',
+    });
+
+    this.capabilities.set('gnews', {
+      supportedOperations: ['search', 'top_headlines'],
+      supportedFilters: ['q', 'category', 'lang', 'limit'],
+      authType: 'api_key',
+      paginationSupported: false,
+      maxLimit: 10,
+      quotaCostPerCall: 1,
+      notes: 'Global news search and real-time top headlines indexing',
     });
   }
 

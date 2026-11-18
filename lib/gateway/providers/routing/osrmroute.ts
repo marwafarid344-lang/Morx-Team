@@ -247,6 +247,8 @@ export class OSRMRouteProvider implements IProvider {
         const normalized: UnifiedDirections = {
           origin: (params.origin as string) || rawData.waypoints?.[0]?.name || coords.split(';')[0],
           destination: (params.destination as string) || rawData.waypoints?.[1]?.name || coords.split(';')[1],
+          distance_meters: distanceMeters,
+          duration_seconds: durationSeconds,
           distanceMeters,
           distanceFormatted: distanceMeters >= 1000 ? `${(distanceMeters / 1000).toFixed(1)} km` : `${distanceMeters} m`,
           durationSeconds,

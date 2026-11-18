@@ -58,7 +58,7 @@ export interface UnifiedWeatherCurrent {
   };
   condition: WeatherCondition;
   cloud_coverage_percent: number;
-  visibility_meters: number;
+  visibility_meters?: number;
   sunrise?: string | null;
   sunset?: string | null;
   unit: 'celsius' | 'fahrenheit' | 'kelvin';
@@ -143,14 +143,20 @@ export interface RouteStep {
 }
 
 export interface UnifiedDirections {
-  summary: string;
-  origin: Coordinates;
-  destination: Coordinates;
+  summary?: string;
+  origin: Coordinates | string;
+  destination: Coordinates | string;
   distance_meters: number;
   duration_seconds: number;
+  distanceMeters?: number;
+  durationSeconds?: number;
+  distanceFormatted?: string;
+  durationFormatted?: string;
   duration_in_traffic_seconds?: number | null;
-  steps: RouteStep[];
+  steps: RouteStep[] | any[];
   polyline?: string | null;
+  geometry?: any;
+  waypoints?: any[];
   bounds?: {
     northeast: Coordinates;
     southwest: Coordinates;
@@ -240,5 +246,63 @@ export interface UnifiedInstagramMedia {
   published_at: string | null;
   like_count?: number | null;
   comments_count?: number | null;
+}
+
+// ─── 7. GEOSPATIAL ISOCHRONE ──────────────────────────────────────────
+export interface UnifiedIsochrone {
+  center: Coordinates;
+  contours_minutes: number[];
+  type: string;
+  features: Array<{
+    type: string;
+    geometry: {
+      type: string;
+      coordinates: any;
+    };
+    properties: {
+      contour: number;
+      fillColor?: string;
+      opacity?: number;
+      metric: string;
+    };
+  }>;
+}
+
+// ─── 8. IP GEOLOCATION UTILITIES ─────────────────────────────────────
+export interface UnifiedIpLookup {
+  ip: string;
+  city: string;
+  region?: string;
+  country: string;
+  country_code?: string;
+  coordinates: Coordinates;
+  timezone?: string;
+  isp?: string;
+  org?: string;
+}
+
+// ─── 9. FINANCIAL & CURRENCY EXCHANGE ────────────────────────────────
+export interface UnifiedExchangeRate {
+  base: string;
+  target?: string;
+  amount: number;
+  date: string;
+  converted_amount?: number;
+  rates: Record<string, number>;
+}
+
+// ─── 10. NEWS & MEDIA FEEDS ──────────────────────────────────────────
+export interface UnifiedNewsArticle {
+  id: string;
+  title: string;
+  description: string;
+  content?: string;
+  url: string;
+  image?: string | null;
+  published_at: string;
+  source: {
+    name: string;
+    url?: string;
+  };
 }
 

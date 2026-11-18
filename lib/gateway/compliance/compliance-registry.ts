@@ -63,7 +63,7 @@ export class ComplianceRegistry {
         'Address geocoding and verification displayed on official Google Maps canvas',
         'Place discovery and details with required Google attribution',
       ],
-      allowedOperations: ['geocode', 'reverse_geocode', 'places', 'details'],
+      allowedOperations: ['geocode', 'reverse_geocode', 'places', 'details', 'directions', 'distance_matrix'],
       prohibitedOperations: [
         'co_mingle_content_with_non_google_maps',
         'display_google_content_on_mapbox_canvas',
@@ -111,7 +111,7 @@ export class ComplianceRegistry {
         'Routing and distance calculations for team planning',
         'Independent fallback geocoding without Google Maps co-mingling',
       ],
-      allowedOperations: ['geocode', 'reverse_geocode', 'places', 'directions', 'matrix'],
+      allowedOperations: ['geocode', 'reverse_geocode', 'places', 'directions', 'matrix', 'isochrone'],
       prohibitedOperations: [
         'cache_standard_geocoding_permanently',
         'redistribute_raw_vector_tiles_outside_session',
@@ -441,6 +441,111 @@ export class ComplianceRegistry {
       oauthRequirements: {
         required: false,
       },
+      geographicRestrictions: [],
+      clientEligibility: 'all',
+      requiredApprovals: [],
+      lastReviewedDate: '2026-11-18',
+    });
+
+    // 10. IP Geolocation (ipwho.is / ip-api)
+    this.register({
+      providerName: 'ip_geolocation',
+      service: 'utils',
+      officialDocumentation: 'https://ipwhois.io/documentation',
+      applicableAgreement: 'IPWhois Terms of Service & Free API Usage Policy',
+      complianceStatus: 'APPROVED',
+      approvedUseCases: ['Client IP lookup', 'Country and city detection for localized routing'],
+      allowedOperations: ['lookup', 'ip_lookup'],
+      prohibitedOperations: [],
+      dataRedistributionPolicy: 'TRANSFORMED_ONLY',
+      dataRetentionPolicy: {
+        maxStorageDays: 30,
+        allowPermanentStorage: false,
+        deletionOnRevocationRequired: false,
+      },
+      cachingPolicy: {
+        allowed: true,
+        maxTtlSeconds: 86400,
+        prohibitedDataTypes: [],
+        allowPersistentStorage: false,
+      },
+      attributionRequirements: {
+        required: false,
+        displayText: 'IP Geolocation by ipwho.is',
+        linkUrl: 'https://ipwho.is',
+        placement: 'metadata',
+      },
+      oauthRequirements: { required: false },
+      geographicRestrictions: [],
+      clientEligibility: 'all',
+      requiredApprovals: [],
+      lastReviewedDate: '2026-11-18',
+    });
+
+    // 11. Frankfurter Currency Rates (European Central Bank)
+    this.register({
+      providerName: 'frankfurter',
+      service: 'finance',
+      officialDocumentation: 'https://frankfurter.dev/',
+      applicableAgreement: 'Frankfurter Open Source License & European Central Bank Public Data',
+      complianceStatus: 'APPROVED',
+      approvedUseCases: ['Currency conversion', 'Foreign exchange rates tracking'],
+      allowedOperations: ['rates', 'convert', 'exchange'],
+      prohibitedOperations: [],
+      dataRedistributionPolicy: 'LICENSED_PERMITTED',
+      dataRetentionPolicy: {
+        maxStorageDays: 365,
+        allowPermanentStorage: true,
+        deletionOnRevocationRequired: false,
+      },
+      cachingPolicy: {
+        allowed: true,
+        maxTtlSeconds: 3600,
+        prohibitedDataTypes: [],
+        allowPersistentStorage: true,
+      },
+      attributionRequirements: {
+        required: true,
+        displayText: 'Data published by European Central Bank via Frankfurter',
+        linkUrl: 'https://frankfurter.dev',
+        placement: 'metadata',
+      },
+      oauthRequirements: { required: false },
+      geographicRestrictions: [],
+      clientEligibility: 'all',
+      requiredApprovals: [],
+      lastReviewedDate: '2026-11-18',
+    });
+
+    // 12. GNews API
+    this.register({
+      providerName: 'gnews',
+      service: 'news',
+      officialDocumentation: 'https://gnews.io/docs/v4',
+      applicableAgreement: 'GNews API Terms of Service',
+      complianceStatus: 'APPROVED',
+      approvedUseCases: ['Global news search', 'Top headline aggregation with source attribution'],
+      allowedOperations: ['search', 'top_headlines'],
+      prohibitedOperations: ['cache_articles_permanently', 'scrape_full_body_without_license'],
+      dataRedistributionPolicy: 'TRANSFORMED_ONLY',
+      dataRetentionPolicy: {
+        maxStorageDays: 7,
+        allowPermanentStorage: false,
+        deletionOnRevocationRequired: false,
+      },
+      cachingPolicy: {
+        allowed: true,
+        maxTtlSeconds: 1800,
+        prohibitedDataTypes: ['raw_full_article_body'],
+        allowPersistentStorage: false,
+      },
+      attributionRequirements: {
+        required: true,
+        displayText: 'News data sourced from GNews',
+        linkUrl: 'https://gnews.io',
+        placement: 'inline',
+      },
+      oauthRequirements: { required: false },
       geographicRestrictions: [],
       clientEligibility: 'all',
       requiredApprovals: [],
