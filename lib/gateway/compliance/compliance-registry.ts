@@ -188,7 +188,47 @@ export class ComplianceRegistry {
       lastReviewedDate: '2026-11-18',
     });
 
-    // 5. TikTok
+    // 5. Open-Meteo Weather Intelligence Service
+    this.register({
+      providerName: 'open_meteo',
+      service: 'weather',
+      officialDocumentation: 'https://open-meteo.com',
+      applicableAgreement: 'Open-Meteo Terms of Service & Open Database License (ODbL)',
+      complianceStatus: 'APPROVED',
+      approvedUseCases: [
+        'Real-time temperature, wind, and atmospheric pressure forecasting',
+        'Multi-day predictive weather forecasting and air quality monitoring',
+      ],
+      allowedOperations: ['current', 'forecast', 'air_quality'],
+      prohibitedOperations: [],
+      dataRedistributionPolicy: 'LICENSED_PERMITTED',
+      dataRetentionPolicy: {
+        maxStorageDays: 30,
+        allowPermanentStorage: true,
+        deletionOnRevocationRequired: false,
+      },
+      cachingPolicy: {
+        allowed: true,
+        maxTtlSeconds: 600, // 10 minutes current weather TTL
+        prohibitedDataTypes: [],
+        allowPersistentStorage: true,
+      },
+      attributionRequirements: {
+        required: true,
+        displayText: 'Weather data by Open-Meteo.com',
+        linkUrl: 'https://open-meteo.com',
+        placement: 'metadata',
+      },
+      oauthRequirements: {
+        required: false,
+      },
+      geographicRestrictions: [],
+      clientEligibility: 'all',
+      requiredApprovals: [],
+      lastReviewedDate: '2026-11-18',
+    });
+
+    // 6. TikTok
     this.register({
       providerName: 'tiktok',
       service: 'tiktok',
@@ -413,7 +453,15 @@ export class ComplianceRegistry {
   }
 
   static getConfig(providerName: string): ProviderComplianceConfig | undefined {
-    return this.registry.get(providerName);
+    const direct = this.registry.get(providerName);
+    if (direct) return direct;
+    const normalized = providerName.toLowerCase().replace(/[-_]/g, '');
+    for (const [key, val] of this.registry.entries()) {
+      if (key.toLowerCase().replace(/[-_]/g, '') === normalized) {
+        return val;
+      }
+    }
+    return undefined;
   }
 
   static getAll(): ProviderComplianceConfig[] {
@@ -421,6 +469,6 @@ export class ComplianceRegistry {
   }
 
   static getAttribution(providerName: string): AttributionRequirement | undefined {
-    return this.registry.get(providerName)?.attributionRequirements;
+    return this.getConfig(providerName)?.attributionRequirements;
   }
 }

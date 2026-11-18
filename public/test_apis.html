@@ -428,12 +428,28 @@
         id: "weather-current",
         category: "Weather",
         icon: "☀️",
-        title: "Current Weather",
+        title: "Current Weather (OpenWeather)",
         method: "GET",
         path: "/api/v1/weather/current",
-        description: "Real-time temperature, humidity, wind, and weather conditions.",
+        description: "Real-time temperature, humidity, wind, and conditions via OpenWeather.",
         defaultParams: [
           { key: "city", value: "Alexandria", desc: "City name" },
+          { key: "provider", value: "openweather", desc: "openweather | open_meteo" },
+          { key: "unit", value: "celsius", desc: "celsius | fahrenheit" }
+        ],
+        body: null
+      },
+      {
+        id: "weather-openmeteo",
+        category: "Weather",
+        icon: "🌤️",
+        title: "Open-Meteo Weather (High-Resolution)",
+        method: "GET",
+        path: "/api/v1/weather/current",
+        description: "Open-source, WMO-compliant weather telemetry via Open-Meteo API.",
+        defaultParams: [
+          { key: "city", value: "Alexandria", desc: "City name" },
+          { key: "provider", value: "open_meteo", desc: "open_meteo" },
           { key: "unit", value: "celsius", desc: "celsius | fahrenheit" }
         ],
         body: null
@@ -1082,15 +1098,25 @@
 
       // 2. WEATHER
       if (endpoint.category === 'Weather' && data.temperature !== undefined) {
+        const providerName = data.source || res.meta?.provider || 'weather';
+        const locationName = data.location?.name || data.location?.city || 'Location';
+        const country = data.location?.country ? ` (${data.location.country})` : '';
+        const condDesc = typeof data.condition === 'object' ? (data.condition?.description || data.condition?.main || 'Clear') : data.condition;
+
         container.innerHTML = `
           <div class="p-5 rounded-2xl bg-gradient-to-br from-blue-900/40 via-morx-900 to-morx-950 border border-blue-500/30 space-y-4">
             <div class="flex items-center justify-between">
               <div>
-                <h3 class="font-bold text-base text-white">${data.location?.city || 'Location'}</h3>
-                <span class="text-xs text-blue-300 capitalize">${data.condition || 'Weather'}</span>
+                <div class="flex items-center gap-2">
+                  <h3 class="font-bold text-base text-white">${locationName}${country}</h3>
+                  <span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-blue-500/20 text-blue-300 border border-blue-500/30">
+                    ${providerName}
+                  </span>
+                </div>
+                <span class="text-xs text-blue-300 capitalize">${condDesc}</span>
               </div>
               <div class="text-3xl font-extrabold text-white font-mono">
-                ${data.temperature}°C
+                ${data.temperature}°${data.unit === 'fahrenheit' ? 'F' : 'C'}
               </div>
             </div>
             <div class="grid grid-cols-3 gap-2 text-center text-xs font-mono pt-2 border-t border-morx-800">
@@ -1100,12 +1126,16 @@
               </div>
               <div class="p-2 rounded bg-morx-900/80">
                 <span class="text-slate-400 text-[10px] block">WIND SPEED</span>
-                <span class="font-bold text-slate-200">${data.wind?.speed || 0} m/s</span>
+                <span class="font-bold text-slate-200">${data.wind?.speed || 0} km/h</span>
               </div>
               <div class="p-2 rounded bg-morx-900/80">
                 <span class="text-slate-400 text-[10px] block">PRESSURE</span>
                 <span class="font-bold text-slate-200">${data.pressure || 0} hPa</span>
               </div>
+            </div>
+            <div class="flex items-center justify-between text-[10px] text-slate-400 pt-1 border-t border-morx-800/60 font-mono">
+              <span>Feels like: ${data.feels_like || data.temperature}°</span>
+              <span class="text-emerald-400">Attribution: ${res.meta?.attribution?.displayText || providerName}</span>
             </div>
           </div>
         `;

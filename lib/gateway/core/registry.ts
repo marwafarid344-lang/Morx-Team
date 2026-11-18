@@ -5,6 +5,7 @@ import {
 } from '../types';
 import { YouTubeProvider } from '../providers/videos/youtube';
 import { OpenWeatherProvider } from '../providers/weather/openweather';
+import { OpenMeteoProvider } from '../providers/weather/open-meteo';
 import { GoogleMapsProvider } from '../providers/maps/google-maps';
 import { MapboxProvider } from '../providers/maps/mapbox';
 import { GoogleRoutesProvider } from '../providers/routing/google-routes';
@@ -21,6 +22,7 @@ export class ProviderRegistry {
     // 1. Register Providers
     this.register(new YouTubeProvider());
     this.register(new OpenWeatherProvider());
+    this.register(new OpenMeteoProvider());
     this.register(new GoogleMapsProvider());
     this.register(new MapboxProvider());
     this.register(new GoogleRoutesProvider());
@@ -57,6 +59,15 @@ export class ProviderRegistry {
       paginationSupported: false,
       quotaCostPerCall: 1,
       notes: 'OpenWeather 2.5 API with metric, imperial, and standard units',
+    });
+
+    this.capabilities.set('open_meteo', {
+      supportedOperations: ['current', 'forecast', 'air_quality'],
+      supportedFilters: ['lat', 'lon', 'city', 'unit'],
+      authType: 'api_key',
+      paginationSupported: false,
+      quotaCostPerCall: 0,
+      notes: 'Open-Meteo open weather API (WMO compliant, no rate limits on standard tier)',
     });
 
     this.capabilities.set('google_maps', {
@@ -160,7 +171,8 @@ export class ProviderRegistry {
 
   static getProvider(service: ServiceCategory, name: string): IProvider | undefined {
     const list = this.providers.get(service) || [];
-    return list.find((p) => p.name === name);
+    const normalized = name.toLowerCase().replace(/[-_]/g, '');
+    return list.find((p) => p.name === name || p.name.toLowerCase().replace(/[-_]/g, '') === normalized);
   }
 
   static getCapabilities(providerName: string): ProviderCapability | undefined {
