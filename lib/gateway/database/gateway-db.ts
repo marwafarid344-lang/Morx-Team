@@ -1,3 +1,5 @@
+import fs from 'fs';
+import path from 'path';
 import { supabaseAdmin } from '@/lib/supabase';
 import {
   ApiClientRecord,
@@ -7,7 +9,11 @@ import {
 } from '@/lib/gateway/types';
 import { generateApiKey } from '@/lib/gateway/security/crypto';
 
-// In-Memory Fallback Storage (activates automatically if Supabase migration is pending)
+// Path to permanent local disk store
+const STORE_DIR = path.join(process.cwd(), 'data');
+const STORE_FILE = path.join(STORE_DIR, 'gateway-store.json');
+
+// In-Memory Storage (synced with permanent disk store + Supabase)
 const memoryClients: Map<string, ApiClientRecord> = new Map();
 const memoryKeys: Map<string, ApiKeyRecord> = new Map();
 const memoryUsage: Array<{
@@ -23,37 +29,61 @@ const memoryUsage: Array<{
 }> = [];
 const memoryHealth: Map<string, ProviderHealth> = new Map();
 
-// Seed a default Graduation Project demo client for immediate testing
-(function seedDemoClient() {
-  const demoClientId = 'client_grad_project_01';
-  const demoRawKey = 'morx_live_grad_project_2026_demo_key';
-  const crypto = require('crypto');
-  const demoHash = crypto.createHash('sha256').update(demoRawKey).digest('hex');
+// Helper to load store from disk
+function loadStoreFromDisk() {
+  try {
+    if (!fs.existsSync(STORE_DIR)) {
+      fs.mkdirSync(STORE_DIR, { recursive: true });
+    }
+    if (fs.existsSync(STORE_FILE)) {
+      const content = fs.readFileSync(STORE_FILE, 'utf8');
+      if (content.trim()) {
+        const data = JSON.parse(content);
+        if (Array.isArray(data.clients)) {
+          memoryClients.clear();
+          data.clients.forEach((c: ApiClientRecord) => {
+            // Exclude obsolete demo client if it exists in old json
+            if (c.id !== 'client_grad_project_01') {
+              memoryClients.set(c.id, c);
+            }
+          });
+        }
+        if (Array.isArray(data.keys)) {
+          memoryKeys.clear();
+          data.keys.forEach((k: ApiKeyRecord) => {
+            if (k.clientId !== 'client_grad_project_01') {
+              memoryKeys.set(k.keyHash, k);
+            }
+          });
+        }
+      }
+    } else {
+      saveStoreToDisk();
+    }
+  } catch (err) {
+    console.error('Failed to load gateway-store.json:', err);
+  }
+}
 
-  const client: ApiClientRecord = {
-    id: demoClientId,
-    name: 'Graduation Project Core Client',
-    description: 'Unified Integration Layer for Graduation Project',
-    status: 'active',
-    rateLimitPerMinute: 300,
-    rateLimitPerHour: 5000,
-    rateLimitPerDay: 50000,
-    allowedServices: ['*'],
-    createdAt: new Date().toISOString(),
-  };
+// Helper to save store to disk atomically
+function saveStoreToDisk() {
+  try {
+    if (!fs.existsSync(STORE_DIR)) {
+      fs.mkdirSync(STORE_DIR, { recursive: true });
+    }
+    const data = {
+      clients: Array.from(memoryClients.values()).filter(c => c.id !== 'client_grad_project_01'),
+      keys: Array.from(memoryKeys.values()).filter(k => k.clientId !== 'client_grad_project_01'),
+      updatedAt: new Date().toISOString(),
+    };
+    fs.writeFileSync(STORE_FILE, JSON.stringify(data, null, 2), 'utf8');
+  } catch (err) {
+    console.error('Failed to save gateway-store.json:', err);
+  }
+}
 
-  const key: ApiKeyRecord = {
-    id: 'key_grad_demo_01',
-    clientId: demoClientId,
-    keyPrefix: 'morx_live_grad_',
-    keyHash: demoHash,
-    status: 'active',
-    createdAt: new Date().toISOString(),
-  };
-
-  memoryClients.set(demoClientId, client);
-  memoryKeys.set(demoHash, key);
-})();
+// Load on initialization
+loadStoreFromDisk();
 
 export class GatewayDatabase {
   /**
@@ -62,8 +92,19 @@ export class GatewayDatabase {
   static async getClientByKeyHash(
     keyHash: string
   ): Promise<{ client: ApiClientRecord; key: ApiKeyRecord } | null> {
+    loadStoreFromDisk();
+
+    // 1. Try local disk-backed memory
+    const memKey = memoryKeys.get(keyHash);
+    if (memKey && memKey.status === 'active') {
+      const memClient = memoryClients.get(memKey.clientId);
+      if (memClient && memClient.status === 'active') {
+        return { client: memClient, key: memKey };
+      }
+    }
+
+    // 2. Fall back to Supabase if available
     try {
-      // 1. Try Supabase
       const { data: keyData, error: keyError } = await supabaseAdmin
         .from('api_keys')
         .select('*')
@@ -80,42 +121,35 @@ export class GatewayDatabase {
           .single();
 
         if (!clientError && clientData) {
-          return {
-            client: {
-              id: clientData.id,
-              name: clientData.name,
-              description: clientData.description,
-              status: clientData.status,
-              rateLimitPerMinute: clientData.rate_limit_per_minute || 120,
-              rateLimitPerHour: clientData.rate_limit_per_hour || 2000,
-              rateLimitPerDay: clientData.rate_limit_per_day || 20000,
-              allowedServices: clientData.allowed_services || ['*'],
-              createdAt: clientData.created_at,
-            },
-            key: {
-              id: keyData.id,
-              clientId: keyData.client_id,
-              keyPrefix: keyData.key_prefix,
-              keyHash: keyData.key_hash,
-              status: keyData.status,
-              expiresAt: keyData.expires_at,
-              createdAt: keyData.created_at,
-              lastUsedAt: keyData.last_used_at,
-            },
+          const client: ApiClientRecord = {
+            id: clientData.id,
+            name: clientData.name,
+            description: clientData.description,
+            status: clientData.status,
+            rateLimitPerMinute: clientData.rate_limit_per_minute || 120,
+            rateLimitPerHour: clientData.rate_limit_per_hour || 2000,
+            rateLimitPerDay: clientData.rate_limit_per_day || 20000,
+            allowedServices: clientData.allowed_services || ['*'],
+            createdAt: clientData.created_at,
           };
+          const key: ApiKeyRecord = {
+            id: keyData.id,
+            clientId: keyData.client_id,
+            keyPrefix: keyData.key_prefix,
+            keyHash: keyData.key_hash,
+            status: keyData.status,
+            expiresAt: keyData.expires_at,
+            createdAt: keyData.created_at,
+            lastUsedAt: keyData.last_used_at,
+          };
+          memoryClients.set(client.id, client);
+          memoryKeys.set(keyHash, key);
+          saveStoreToDisk();
+          return { client, key };
         }
       }
     } catch {
-      // Supabase tables might not exist yet; fall back gracefully
-    }
-
-    // 2. In-Memory fallback
-    const memKey = memoryKeys.get(keyHash);
-    if (memKey && memKey.status === 'active') {
-      const memClient = memoryClients.get(memKey.clientId);
-      if (memClient && memClient.status === 'active') {
-        return { client: memClient, key: memKey };
-      }
+      // Supabase unavailable
     }
 
     return null;
@@ -127,9 +161,11 @@ export class GatewayDatabase {
   static async createClient(params: {
     name: string;
     description?: string;
-    allowedServices?: ServiceCategory[] | ['*'];
+    allowedServices?: (ServiceCategory | '*')[];
     rateLimitPerMinute?: number;
   }): Promise<{ client: ApiClientRecord; rawKey: string }> {
+    loadStoreFromDisk();
+
     const { rawKey, keyPrefix, keyHash } = generateApiKey('live');
     const clientId = `client_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
     const keyId = `key_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
@@ -137,13 +173,14 @@ export class GatewayDatabase {
     const newClient: ApiClientRecord = {
       id: clientId,
       name: params.name,
-      description: params.description,
+      description: params.description || '',
       status: 'active',
       rateLimitPerMinute: params.rateLimitPerMinute || 120,
       rateLimitPerHour: 2000,
       rateLimitPerDay: 20000,
-      allowedServices: params.allowedServices || ['*'],
+      allowedServices: params.allowedServices && params.allowedServices.length > 0 ? params.allowedServices : ['*'],
       createdAt: new Date().toISOString(),
+      rawKey: rawKey,
     };
 
     const newKey: ApiKeyRecord = {
@@ -153,9 +190,15 @@ export class GatewayDatabase {
       keyHash,
       status: 'active',
       createdAt: new Date().toISOString(),
+      rawKey: rawKey,
     };
 
-    // Attempt Supabase insert
+    // Save to memory and disk
+    memoryClients.set(clientId, newClient);
+    memoryKeys.set(keyHash, newKey);
+    saveStoreToDisk();
+
+    // Attempt Supabase mirror in background
     try {
       await supabaseAdmin.from('api_clients').insert({
         id: newClient.id,
@@ -176,42 +219,102 @@ export class GatewayDatabase {
         status: newKey.status,
       });
     } catch {
-      // Fall back to memory
+      // Fall back safely to disk store
     }
 
-    // Always mirror to memory for instant availability
-    memoryClients.set(clientId, newClient);
-    memoryKeys.set(keyHash, newKey);
-
     return { client: newClient, rawKey };
+  }
+
+  /**
+   * Update an existing API Client (name, description, providers/services, rateLimit, status)
+   */
+  static async updateClient(
+    id: string,
+    updates: {
+      name?: string;
+      description?: string;
+      allowedServices?: (ServiceCategory | '*')[];
+      rateLimitPerMinute?: number;
+      status?: 'active' | 'suspended' | 'revoked';
+    }
+  ): Promise<ApiClientRecord | null> {
+    loadStoreFromDisk();
+
+    const client = memoryClients.get(id);
+    if (!client) return null;
+
+    if (updates.name !== undefined) client.name = updates.name;
+    if (updates.description !== undefined) client.description = updates.description;
+    if (updates.allowedServices !== undefined) client.allowedServices = updates.allowedServices;
+    if (updates.rateLimitPerMinute !== undefined) client.rateLimitPerMinute = updates.rateLimitPerMinute;
+    if (updates.status !== undefined) {
+      client.status = updates.status;
+      // synchronize all keys for this client
+      for (const [hash, key] of memoryKeys.entries()) {
+        if (key.clientId === id) {
+          key.status = updates.status === 'active' ? 'active' : 'revoked';
+        }
+      }
+    }
+
+    memoryClients.set(id, client);
+    saveStoreToDisk();
+
+    try {
+      await supabaseAdmin
+        .from('api_clients')
+        .update({
+          name: client.name,
+          description: client.description,
+          allowed_services: client.allowedServices,
+          rate_limit_per_minute: client.rateLimitPerMinute,
+          status: client.status,
+        })
+        .eq('id', id);
+    } catch {}
+
+    return client;
+  }
+
+  /**
+   * Delete / Revoke an API Client and its keys permanently
+   */
+  static async deleteClient(id: string): Promise<boolean> {
+    loadStoreFromDisk();
+
+    if (!memoryClients.has(id)) return false;
+
+    // Remove client
+    memoryClients.delete(id);
+
+    // Remove all associated keys
+    for (const [hash, key] of memoryKeys.entries()) {
+      if (key.clientId === id) {
+        memoryKeys.delete(hash);
+      }
+    }
+
+    saveStoreToDisk();
+
+    try {
+      await supabaseAdmin.from('api_keys').delete().eq('client_id', id);
+      await supabaseAdmin.from('api_clients').delete().eq('id', id);
+    } catch {}
+
+    return true;
   }
 
   /**
    * List all registered API Clients
    */
   static async listClients(): Promise<ApiClientRecord[]> {
-    try {
-      const { data, error } = await supabaseAdmin
-        .from('api_clients')
-        .select('*')
-        .order('created_at', { ascending: false });
+    loadStoreFromDisk();
 
-      if (!error && data && data.length > 0) {
-        return data.map((d: any) => ({
-          id: d.id,
-          name: d.name,
-          description: d.description,
-          status: d.status,
-          rateLimitPerMinute: d.rate_limit_per_minute,
-          rateLimitPerHour: d.rate_limit_per_hour,
-          rateLimitPerDay: d.rate_limit_per_day,
-          allowedServices: d.allowed_services,
-          createdAt: d.created_at,
-        }));
-      }
-    } catch {}
+    const clients = Array.from(memoryClients.values())
+      .filter((c) => c.id !== 'client_grad_project_01')
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 
-    return Array.from(memoryClients.values());
+    return clients;
   }
 
   /**
@@ -239,7 +342,7 @@ export class GatewayDatabase {
     };
 
     memoryUsage.push(record);
-    if (memoryUsage.length > 5000) memoryUsage.shift(); // retain last 5000 in memory
+    if (memoryUsage.length > 5000) memoryUsage.shift();
 
     try {
       await supabaseAdmin.from('api_usage').insert({
@@ -289,7 +392,7 @@ export class GatewayDatabase {
   }
 
   /**
-   * List all providers from the database (or fallback catalog)
+   * List all providers from the database (or catalog)
    */
   static async listProviders() {
     try {
@@ -393,4 +496,3 @@ export class GatewayDatabase {
     };
   }
 }
-

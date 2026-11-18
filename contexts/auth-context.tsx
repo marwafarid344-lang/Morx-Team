@@ -41,6 +41,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           last_name: userData.last_name || userData.lastName || '',
           email: userData.email,
           profile_image: userData.profile_image || userData.profileImage,
+          plan: userData.plan || 'free',
           study_level: userData.study_level,
           department: userData.department,
           faculty: userData.faculty,
@@ -79,6 +80,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           last_name: userData.last_name || userData.lastName || '',
           email: userData.email,
           profile_image: userData.profile_image || userData.profileImage,
+          plan: userData.plan || 'free',
           study_level: userData.study_level,
           department: userData.department,
           faculty: userData.faculty,
@@ -139,6 +141,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         ...prev,
         ...resolvedNewVal,
         // specifically protect these fields
+        plan: resolvedNewVal.plan ?? prev.plan ?? 'free',
         department: resolvedNewVal.department ?? prev.department,
         faculty: resolvedNewVal.faculty ?? prev.faculty,
         governorate: resolvedNewVal.governorate ?? prev.governorate,

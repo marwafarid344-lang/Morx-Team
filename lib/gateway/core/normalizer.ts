@@ -48,6 +48,9 @@ export class Normalizer {
     const responseHeaders = new Headers(params.headers || {});
     responseHeaders.set('x-morx-request-id', requestId);
     responseHeaders.set('x-morx-provider', params.provider);
+    responseHeaders.set('Access-Control-Allow-Origin', '*');
+    responseHeaders.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+    responseHeaders.set('Access-Control-Allow-Headers', 'Content-Type, Authorization, x-api-key, Cache-Control');
     if (params.cached) {
       responseHeaders.set('x-morx-cache', 'HIT');
     } else {
@@ -86,6 +89,9 @@ export class Normalizer {
 
     const responseHeaders = new Headers(params.headers || {});
     responseHeaders.set('x-morx-request-id', requestId);
+    responseHeaders.set('Access-Control-Allow-Origin', '*');
+    responseHeaders.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+    responseHeaders.set('Access-Control-Allow-Headers', 'Content-Type, Authorization, x-api-key, Cache-Control');
 
     return NextResponse.json(body, {
       status: params.statusCode,

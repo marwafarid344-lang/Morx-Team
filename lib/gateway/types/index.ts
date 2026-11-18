@@ -98,6 +98,7 @@ export interface ApiClientRecord {
   rateLimitPerDay: number;
   allowedServices: (ServiceCategory | '*')[];
   createdAt: string;
+  rawKey?: string;
 }
 
 export interface ApiKeyRecord {
@@ -109,6 +110,7 @@ export interface ApiKeyRecord {
   expiresAt?: string;
   createdAt: string;
   lastUsedAt?: string;
+  rawKey?: string;
 }
 
 export interface AuthenticatedClientContext {

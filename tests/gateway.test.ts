@@ -135,12 +135,22 @@ async function runGatewayTests() {
   const reHash = hashApiKey(keyGen.rawKey);
   assert.strictEqual(reHash, keyGen.keyHash, 'Hashed key must match generated hash');
 
-  const demoLookup = await GatewayDatabase.getClientByKeyHash(
-    hashApiKey('morx_live_grad_project_2026_demo_key')
-  );
-  assert.notStrictEqual(demoLookup, null, 'Demo graduation project key must be found in memory');
-  assert.strictEqual(demoLookup?.client.id, 'client_grad_project_01');
-  console.log('   ✓ API Key generation, SHA-256 hashing, and client lookup verified.');
+  // Test dynamic client creation & persistence
+  const createdClient = await GatewayDatabase.createClient({
+    name: 'Dynamic Test Client',
+    allowedServices: ['videos', 'weather'],
+  });
+  const lookup = await GatewayDatabase.getClientByKeyHash(hashApiKey(createdClient.rawKey));
+  assert.notStrictEqual(lookup, null, 'Dynamically created key must be found in database');
+  assert.strictEqual(lookup?.client.id, createdClient.client.id);
+  assert.deepStrictEqual(lookup?.client.allowedServices, ['videos', 'weather']);
+
+  // Test dynamic deletion
+  const deleteResult = await GatewayDatabase.deleteClient(createdClient.client.id);
+  assert.strictEqual(deleteResult, true, 'Client should be successfully deleted');
+  const afterDeleteLookup = await GatewayDatabase.getClientByKeyHash(hashApiKey(createdClient.rawKey));
+  assert.strictEqual(afterDeleteLookup, null, 'Deleted client must not be found');
+  console.log('   ✓ Dynamic API Key creation, hashing, permission scopes, and deletion verified.');
 
   // ── TEST 7: Provider Registry & Catalog ──
   console.log('\n7. Testing Provider Registry & Catalog...');

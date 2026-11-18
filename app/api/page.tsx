@@ -31,8 +31,23 @@ import {
   X
 } from "lucide-react"
 import Link from "next/link"
+import { GatewayDocsView } from "@/components/gateway/gateway-docs-view"
+import { 
+  BookOpen, 
+  Shield, 
+  Activity, 
+  CheckCircle2, 
+  AlertTriangle, 
+  Gauge, 
+  FileJson, 
+  Workflow, 
+  RefreshCw, 
+  Play, 
+  Lightbulb 
+} from "lucide-react"
 import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
+import { ApiAccessGuard } from "@/components/gateway/api-access-guard"
 
 interface Parameter {
   name: string
@@ -92,16 +107,16 @@ const ENDPOINTS: Endpoint[] = [
       "Video Statistics: View counts and likes are enriched automatically in background batches.",
     ],
     curlExample: `curl -X GET "https://YOUR-DOMAIN/api/v1/videos/search?q=Alexandria&limit=5" \\
-  -H "Authorization: Bearer morx_live_grad_project_2026_demo_key"`,
+  -H "Authorization: Bearer YOUR_MORX_API_KEY"`,
     jsExample: `const res = await fetch("https://YOUR-DOMAIN/api/v1/videos/search?q=Alexandria&limit=5", {
-  headers: { "Authorization": "Bearer morx_live_grad_project_2026_demo_key" }
+  headers: { "Authorization": "Bearer YOUR_MORX_API_KEY" }
 });
 const { data } = await res.json();
 console.log(data); // UnifiedVideo[]`,
     pythonExample: `import requests
 res = requests.get(
     "https://YOUR-DOMAIN/api/v1/videos/search",
-    headers={"Authorization": "Bearer morx_live_grad_project_2026_demo_key"},
+    headers={"Authorization": "Bearer YOUR_MORX_API_KEY"},
     params={"q": "Alexandria", "limit": 5}
 )
 print(res.json()["data"])`,
@@ -143,16 +158,16 @@ print(res.json()["data"])`,
       "Cached for 5 minutes to prevent redundant API calls.",
     ],
     curlExample: `curl -X GET "https://YOUR-DOMAIN/api/v1/weather/current?city=Alexandria&unit=celsius" \\
-  -H "Authorization: Bearer morx_live_grad_project_2026_demo_key"`,
+  -H "Authorization: Bearer YOUR_MORX_API_KEY"`,
     jsExample: `const res = await fetch("https://YOUR-DOMAIN/api/v1/weather/current?city=Alexandria", {
-  headers: { "Authorization": "Bearer morx_live_grad_project_2026_demo_key" }
+  headers: { "Authorization": "Bearer YOUR_MORX_API_KEY" }
 });
 const weather = await res.json();
 console.log(weather.data.temperature); // 24°C`,
     pythonExample: `import requests
 res = requests.get(
     "https://YOUR-DOMAIN/api/v1/weather/current",
-    headers={"Authorization": "Bearer morx_live_grad_project_2026_demo_key"},
+    headers={"Authorization": "Bearer YOUR_MORX_API_KEY"},
     params={"city": "Alexandria"}
 )
 print(res.json()["data"])`,
@@ -185,13 +200,13 @@ print(res.json()["data"])`,
       { name: "lon", type: "number", required: false, description: "Longitude coordinate." },
     ],
     curlExample: `curl -X GET "https://YOUR-DOMAIN/api/v1/weather/forecast?city=Alexandria" \\
-  -H "Authorization: Bearer morx_live_grad_project_2026_demo_key"`,
+  -H "Authorization: Bearer YOUR_MORX_API_KEY"`,
     jsExample: `const res = await fetch("https://YOUR-DOMAIN/api/v1/weather/forecast?city=Alexandria", {
-  headers: { "Authorization": "Bearer morx_live_grad_project_2026_demo_key" }
+  headers: { "Authorization": "Bearer YOUR_MORX_API_KEY" }
 });
 const forecast = await res.json();`,
     pythonExample: `import requests
-res = requests.get("https://YOUR-DOMAIN/api/v1/weather/forecast?city=Alexandria", headers={"Authorization": "Bearer morx_live_grad_project_2026_demo_key"})`,
+res = requests.get("https://YOUR-DOMAIN/api/v1/weather/forecast?city=Alexandria", headers={"Authorization": "Bearer YOUR_MORX_API_KEY"})`,
     responseExample: `{
   "success": true,
   "service": "weather",
@@ -217,11 +232,11 @@ res = requests.get("https://YOUR-DOMAIN/api/v1/weather/forecast?city=Alexandria"
       { name: "lon", type: "number", required: true, description: "Longitude coordinate." },
     ],
     curlExample: `curl -X GET "https://YOUR-DOMAIN/api/v1/weather/air-quality?lat=31.2&lon=29.9" \\
-  -H "Authorization: Bearer morx_live_grad_project_2026_demo_key"`,
+  -H "Authorization: Bearer YOUR_MORX_API_KEY"`,
     jsExample: `const res = await fetch("https://YOUR-DOMAIN/api/v1/weather/air-quality?lat=31.2&lon=29.9", {
-  headers: { "Authorization": "Bearer morx_live_grad_project_2026_demo_key" }
+  headers: { "Authorization": "Bearer YOUR_MORX_API_KEY" }
 });`,
-    pythonExample: `res = requests.get("https://YOUR-DOMAIN/api/v1/weather/air-quality?lat=31.2&lon=29.9", headers={"Authorization": "Bearer morx_live_grad_project_2026_demo_key"})`,
+    pythonExample: `res = requests.get("https://YOUR-DOMAIN/api/v1/weather/air-quality?lat=31.2&lon=29.9", headers={"Authorization": "Bearer YOUR_MORX_API_KEY"})`,
     responseExample: `{
   "success": true,
   "service": "weather",
@@ -245,14 +260,14 @@ res = requests.get("https://YOUR-DOMAIN/api/v1/weather/forecast?city=Alexandria"
       { name: "address", type: "string", required: true, description: "Landmark or address (e.g. 'Bibliotheca Alexandrina')." },
     ],
     curlExample: `curl -X GET "https://YOUR-DOMAIN/api/v1/maps/geocode?address=Bibliotheca+Alexandrina" \\
-  -H "Authorization: Bearer morx_live_grad_project_2026_demo_key"`,
+  -H "Authorization: Bearer YOUR_MORX_API_KEY"`,
     jsExample: `const res = await fetch("https://YOUR-DOMAIN/api/v1/maps/geocode?address=Bibliotheca+Alexandrina", {
-  headers: { "Authorization": "Bearer morx_live_grad_project_2026_demo_key" }
+  headers: { "Authorization": "Bearer YOUR_MORX_API_KEY" }
 });
 const { data } = await res.json();
 console.log(data[0].coordinates); // { latitude: 31.2089, longitude: 29.9092 }`,
     pythonExample: `import requests
-res = requests.get("https://YOUR-DOMAIN/api/v1/maps/geocode", headers={"Authorization": "Bearer morx_live_grad_project_2026_demo_key"}, params={"address": "Bibliotheca Alexandrina"})`,
+res = requests.get("https://YOUR-DOMAIN/api/v1/maps/geocode", headers={"Authorization": "Bearer YOUR_MORX_API_KEY"}, params={"address": "Bibliotheca Alexandrina"})`,
     responseExample: `{
   "success": true,
   "service": "maps",
@@ -281,11 +296,11 @@ res = requests.get("https://YOUR-DOMAIN/api/v1/maps/geocode", headers={"Authoriz
       { name: "radius", type: "number", required: false, defaultVal: "5000", description: "Search radius in meters." },
     ],
     curlExample: `curl -X GET "https://YOUR-DOMAIN/api/v1/maps/places?query=Cafe&lat=31.2001&lon=29.9187" \\
-  -H "Authorization: Bearer morx_live_grad_project_2026_demo_key"`,
+  -H "Authorization: Bearer YOUR_MORX_API_KEY"`,
     jsExample: `const res = await fetch("https://YOUR-DOMAIN/api/v1/maps/places?query=Cafe&lat=31.2001&lon=29.9187", {
-  headers: { "Authorization": "Bearer morx_live_grad_project_2026_demo_key" }
+  headers: { "Authorization": "Bearer YOUR_MORX_API_KEY" }
 });`,
-    pythonExample: `res = requests.get("https://YOUR-DOMAIN/api/v1/maps/places?query=Cafe", headers={"Authorization": "Bearer morx_live_grad_project_2026_demo_key"})`,
+    pythonExample: `res = requests.get("https://YOUR-DOMAIN/api/v1/maps/places?query=Cafe", headers={"Authorization": "Bearer YOUR_MORX_API_KEY"})`,
     responseExample: `{
   "success": true,
   "service": "maps",
@@ -309,11 +324,11 @@ res = requests.get("https://YOUR-DOMAIN/api/v1/maps/geocode", headers={"Authoriz
       { name: "mode", type: "string", required: false, defaultVal: "driving", description: "'driving' | 'walking' | 'bicycling'" },
     ],
     curlExample: `curl -X GET "https://YOUR-DOMAIN/api/v1/maps/directions?origin=31.2,29.9&destination=31.21,29.95" \\
-  -H "Authorization: Bearer morx_live_grad_project_2026_demo_key"`,
+  -H "Authorization: Bearer YOUR_MORX_API_KEY"`,
     jsExample: `const res = await fetch("https://YOUR-DOMAIN/api/v1/maps/directions?origin=31.2,29.9&destination=31.21,29.95", {
-  headers: { "Authorization": "Bearer morx_live_grad_project_2026_demo_key" }
+  headers: { "Authorization": "Bearer YOUR_MORX_API_KEY" }
 });`,
-    pythonExample: `res = requests.get("https://YOUR-DOMAIN/api/v1/maps/directions?origin=31.2,29.9&destination=31.21,29.95", headers={"Authorization": "Bearer morx_live_grad_project_2026_demo_key"})`,
+    pythonExample: `res = requests.get("https://YOUR-DOMAIN/api/v1/maps/directions?origin=31.2,29.9&destination=31.21,29.95", headers={"Authorization": "Bearer YOUR_MORX_API_KEY"})`,
     responseExample: `{
   "success": true,
   "service": "maps",
@@ -354,13 +369,13 @@ res = requests.get("https://YOUR-DOMAIN/api/v1/maps/geocode", headers={"Authoriz
   "provider": "internal_tsp"
 }`,
     curlExample: `curl -X POST "https://YOUR-DOMAIN/api/v1/routes/optimize" \\
-  -H "Authorization: Bearer morx_live_grad_project_2026_demo_key" \\
+  -H "Authorization: Bearer YOUR_MORX_API_KEY" \\
   -H "Content-Type: application/json" \\
   -d '{"origin":{"lat":31.2001,"lon":29.9187},"stops":[{"id":"A","lat":31.2089,"lon":29.9092},{"id":"B","lat":31.215,"lon":29.95},{"id":"C","lat":31.19,"lon":29.92}]}'`,
     jsExample: `const res = await fetch("https://YOUR-DOMAIN/api/v1/routes/optimize", {
   method: "POST",
   headers: {
-    "Authorization": "Bearer morx_live_grad_project_2026_demo_key",
+    "Authorization": "Bearer YOUR_MORX_API_KEY",
     "Content-Type": "application/json"
   },
   body: JSON.stringify({
@@ -377,7 +392,7 @@ console.log(opt.data.optimized_order); // ["C", "A", "B"]`,
     pythonExample: `import requests
 res = requests.post(
     "https://YOUR-DOMAIN/api/v1/routes/optimize",
-    headers={"Authorization": "Bearer morx_live_grad_project_2026_demo_key"},
+    headers={"Authorization": "Bearer YOUR_MORX_API_KEY"},
     json={"origin": {"lat": 31.2, "lon": 29.9}, "stops": [{"id": "A", "lat": 31.21, "lon": 29.91}]}
 )
 print(res.json()["data"]["optimized_order"])`,
@@ -444,13 +459,13 @@ print(res.json())`,
       "Responses are normalized into the standard Morx video envelope.",
     ],
     curlExample: `curl -X GET "https://YOUR-DOMAIN/api/v1/tiktok/videos?max_count=10" \\
-  -H "Authorization: Bearer morx_live_grad_project_2026_demo_key"`,
+  -H "Authorization: Bearer YOUR_MORX_API_KEY"`,
     jsExample: `const res = await fetch("https://YOUR-DOMAIN/api/v1/tiktok/videos", {
-  headers: { "Authorization": "Bearer morx_live_grad_project_2026_demo_key" }
+  headers: { "Authorization": "Bearer YOUR_MORX_API_KEY" }
 });
 const videos = await res.json();`,
     pythonExample: `import requests
-res = requests.get("https://YOUR-DOMAIN/api/v1/tiktok/videos", headers={"Authorization": "Bearer morx_live_grad_project_2026_demo_key"})
+res = requests.get("https://YOUR-DOMAIN/api/v1/tiktok/videos", headers={"Authorization": "Bearer YOUR_MORX_API_KEY"})
 print(res.json()["data"])`,
     responseExample: `{
   "success": true,
@@ -484,13 +499,13 @@ print(res.json()["data"])`,
       "Includes permalink, caption, media_type, and engagement metrics.",
     ],
     curlExample: `curl -X GET "https://YOUR-DOMAIN/api/v1/instagram/media?limit=10" \\
-  -H "Authorization: Bearer morx_live_grad_project_2026_demo_key"`,
+  -H "Authorization: Bearer YOUR_MORX_API_KEY"`,
     jsExample: `const res = await fetch("https://YOUR-DOMAIN/api/v1/instagram/media", {
-  headers: { "Authorization": "Bearer morx_live_grad_project_2026_demo_key" }
+  headers: { "Authorization": "Bearer YOUR_MORX_API_KEY" }
 });
 const media = await res.json();`,
     pythonExample: `import requests
-res = requests.get("https://YOUR-DOMAIN/api/v1/instagram/media", headers={"Authorization": "Bearer morx_live_grad_project_2026_demo_key"})
+res = requests.get("https://YOUR-DOMAIN/api/v1/instagram/media", headers={"Authorization": "Bearer YOUR_MORX_API_KEY"})
 print(res.json()["data"])`,
     responseExample: `{
   "success": true,
@@ -508,14 +523,64 @@ print(res.json()["data"])`,
   }
 ]
 
+
+const SERVICE_HUBS = [
+  {
+    id: "videos",
+    title: "Video Discovery",
+    badge: "YouTube Data API v3",
+    desc: "Search YouTube videos & shorts with verified view counts, creator info, and duration filters in < 50ms.",
+    quickEndpoint: "/api/v1/videos/search?q=Alexandria",
+    count: 1,
+    icon: Video,
+  },
+  {
+    id: "weather",
+    title: "Weather Intelligence",
+    badge: "OpenWeather API",
+    desc: "Instant live temperature, 5-day predictive forecasts, and Air Quality Index (AQI with pollutants).",
+    quickEndpoint: "/api/v1/weather/current?city=Alexandria",
+    count: 3,
+    icon: CloudSun,
+  },
+  {
+    id: "maps",
+    title: "Maps & Geolocation",
+    badge: "Google Maps + Mapbox",
+    desc: "Convert addresses to coordinates, explore places of interest, and turn-by-turn routing.",
+    quickEndpoint: "/api/v1/maps/geocode?address=Alexandria",
+    count: 3,
+    icon: Compass,
+  },
+  {
+    id: "routing",
+    title: "Route Optimizer",
+    badge: "Internal 2-Opt TSP (Free)",
+    desc: "Sequence multi-stop delivery or tour routes with an instant zero-cost 2-Opt TSP heuristic solver.",
+    quickEndpoint: "/api/v1/routes/optimize",
+    count: 1,
+    icon: Navigation,
+  },
+  {
+    id: "social",
+    title: "Social Media Feeds",
+    badge: "TikTok & Instagram",
+    desc: "Fetch authorized creator reels, media posts, captions, and engagement metrics into a unified format.",
+    quickEndpoint: "/api/v1/tiktok/videos",
+    count: 2,
+    icon: Share2,
+  },
+];
+
 export default function ApiPage() {
+  const [activeView, setActiveView] = useState<"endpoints" | "docs">("endpoints")
   const [activeCategory, setActiveCategory] = useState("all")
   const [searchQuery, setSearchQuery] = useState("")
   const [copiedKey, setCopiedKey] = useState(false)
   const [copiedText, setCopiedText] = useState<string | null>(null)
   
   // Clean accordion state: only expand one or keep lightweight
-  const [expandedCard, setExpandedCard] = useState<string | null>(ENDPOINTS[0].path)
+  const [expandedCard, setExpandedCard] = useState<string | null>(null)
   const [activeCardTab, setActiveCardTab] = useState<Record<string, "params" | "code" | "response" | "notes">>({})
   const [codeLanguage, setCodeLanguage] = useState<"curl" | "js" | "python">("curl")
 
@@ -544,452 +609,611 @@ export default function ApiPage() {
   return (
     <div className="flex min-h-screen flex-col font-sans bg-background text-foreground antialiased selection:bg-primary/20">
       <Header />
-      <main className="flex-1 pb-24">
+      <ApiAccessGuard>
+        <main className="flex-1 pb-24">
         
-        {/* CREATIVE MINIMALIST HERO */}
-        <section className="relative pt-20 pb-16 px-4 md:px-6 overflow-hidden border-b border-border/40">
+        {/* CLEAN DEVELOPER-FIRST HERO */}
+        <section className="relative pt-20 pb-12 px-4 md:px-6 overflow-hidden border-b border-border/40">
           <div className="max-w-5xl mx-auto text-center space-y-6">
             
-            {/* Soft Pill Tag */}
+            {/* Telemetry Status Badge */}
             <motion.div 
-              initial={{ opacity: 0, y: 10 }}
+              initial={{ opacity: 0, y: -8 }}
               animate={{ opacity: 1, y: 0 }}
-              className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-primary/10 text-primary text-xs font-semibold tracking-wide"
+              transition={{ duration: 0.3 }}
+              className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-card border border-border/80 text-xs font-medium shadow-xs"
             >
-              <Sparkles className="size-3.5" /> Morx Unified API Gateway v1.0
+              <span className="size-2 rounded-full bg-emerald-500 animate-pulse" />
+              <span className="text-muted-foreground font-mono">v1.0 Production Gateway</span>
+              <span className="text-border">•</span>
+              <span className="text-emerald-500 font-semibold font-mono">99.9% Uptime</span>
             </motion.div>
 
-            {/* Creative Headline */}
+            {/* Clean, Non-Generic Headline */}
             <motion.h1 
-              initial={{ opacity: 0, y: 15 }}
+              initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1 }}
-              className="text-4xl md:text-6xl font-extrabold tracking-tight"
+              transition={{ delay: 0.1, duration: 0.35 }}
+              className="text-4xl md:text-6xl font-extrabold tracking-tight text-foreground"
             >
-              Clean. Intelligent. <span className="bg-gradient-to-r from-primary via-indigo-500 to-sky-400 bg-clip-text text-transparent">Unified.</span>
+              The Unified API Gateway for <span className="bg-gradient-to-r from-primary via-indigo-500 to-sky-400 bg-clip-text text-transparent">Modern Apps</span>
             </motion.h1>
 
             <motion.p 
-              initial={{ opacity: 0, y: 15 }}
+              initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
+              transition={{ delay: 0.2, duration: 0.35 }}
               className="text-muted-foreground text-base md:text-lg max-w-2xl mx-auto leading-relaxed"
             >
-              Connect your graduation project or client app to YouTube, Weather, Maps, and Route Optimization with a single API key and standardized JSON responses.
+              One API key. Standardized JSON responses. Integrated providers for Video Discovery, Weather, Maps, Route Optimization, and Social Media feeds.
             </motion.p>
 
             {/* Floating Action Badge & Demo Key */}
             <motion.div 
-              initial={{ opacity: 0, y: 15 }}
+              initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3 }}
+              transition={{ delay: 0.3, duration: 0.35 }}
               className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-3"
             >
-              <div className="flex items-center gap-2 px-4 py-2 rounded-2xl bg-card border border-border/80 shadow-sm text-xs font-mono">
+              <Link
+                href="/gateway"
+                className="flex items-center gap-2 px-4 py-2 rounded-2xl bg-card hover:border-primary/50 transition-all border border-border/80 shadow-sm text-xs font-mono group"
+              >
                 <Key className="size-3.5 text-primary" />
-                <span className="text-muted-foreground">Demo Key:</span>
-                <span className="font-bold text-foreground">morx_live_grad_project_2026_demo_key</span>
-                <button
-                  onClick={() => {
-                    navigator.clipboard.writeText("morx_live_grad_project_2026_demo_key")
-                    setCopiedKey(true)
-                    setTimeout(() => setCopiedKey(false), 2000)
-                  }}
-                  className="ml-1 text-muted-foreground hover:text-foreground p-1 transition-colors"
-                  title="Copy demo key"
-                >
-                  {copiedKey ? <Check className="size-3.5 text-emerald-500" /> : <Copy className="size-3.5" />}
-                </button>
-              </div>
+                <span className="text-muted-foreground">API Access:</span>
+                <span className="font-bold text-foreground group-hover:text-primary transition-colors">Issue & Manage API Keys</span>
+                <ArrowRight className="size-3.5 text-muted-foreground group-hover:text-primary transition-colors" />
+              </Link>
 
               <Link
                 href="/gateway"
                 className="inline-flex items-center gap-1.5 px-4 py-2 rounded-2xl bg-primary text-primary-foreground text-xs font-semibold hover:opacity-90 transition-opacity shadow-sm"
               >
-                <FlaskConical className="size-3.5" /> Interactive Testing Lab <ArrowRight className="size-3.5" />
+                <FlaskConical className="size-3.5" /> Testing Lab & Diagnostics <ArrowRight className="size-3.5" />
               </Link>
+            </motion.div>
+
+            {/* TACTILE SEGMENTED VIEW SWITCHER */}
+            <motion.div
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4, duration: 0.35 }}
+              className="pt-4 flex items-center justify-center"
+            >
+              <div className="p-1 rounded-2xl bg-muted/70 border border-border/80 inline-flex items-center gap-1 shadow-xs">
+                <button
+                  onClick={() => setActiveView("endpoints")}
+                  className={`px-5 py-2.5 rounded-xl text-xs font-bold flex items-center gap-2 transition-all cursor-pointer ${
+                    activeView === "endpoints"
+                      ? "bg-foreground text-background shadow-xs"
+                      : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                  }`}
+                >
+                  <Layers className="size-3.5" />
+                  <span>Endpoints Reference</span>
+                </button>
+
+                <button
+                  onClick={() => setActiveView("docs")}
+                  className={`px-5 py-2.5 rounded-xl text-xs font-bold flex items-center gap-2 transition-all cursor-pointer ${
+                    activeView === "docs"
+                      ? "bg-foreground text-background shadow-xs"
+                      : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                  }`}
+                >
+                  <BookOpen className="size-3.5" />
+                  <span>Gateway Architecture & Specs</span>
+                </button>
+              </div>
             </motion.div>
 
           </div>
         </section>
 
-        {/* STICKY SEARCH & CREATIVE CATEGORY BAR */}
-        <section className="sticky top-16 z-30 bg-background/85 backdrop-blur-xl border-b border-border/40 py-3 transition-all">
-          <div className="max-w-5xl mx-auto px-4 md:px-6 space-y-3">
-            
-            {/* Top Row: Responsive Search Input + Status & Quick Links */}
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
-              {/* Creative Search Bar */}
-              <div className="relative flex-1 sm:max-w-md">
-                <Search className="size-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
-                <input
-                  type="text"
-                  placeholder="Search endpoints, parameters, keywords..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-10 pr-9 py-2 rounded-xl border border-border/60 bg-card/80 backdrop-blur-sm text-xs focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all text-foreground placeholder:text-muted-foreground/70 shadow-xs"
-                />
-                {searchQuery && (
-                  <button
-                    onClick={() => setSearchQuery("")}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground p-0.5"
-                    title="Clear search"
-                  >
-                    <X className="size-3.5" />
-                  </button>
-                )}
-              </div>
+        {/* VIEW 1: GATEWAY ARCHITECTURE & DETAILED DOCS */}
+        {activeView === "docs" && (
+          <section className="max-w-5xl mx-auto px-4 md:px-6 pt-8">
+            <GatewayDocsView />
+          </section>
+        )}
 
-              {/* Status Indicators & Quick Lab Link */}
-              <div className="flex items-center gap-2 text-xs text-muted-foreground justify-between sm:justify-end">
-                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-muted/60 text-[11px] font-medium">
-                  <span className="size-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                  {filteredEndpoints.length} APIs
-                </span>
-                <span className="font-mono text-[11px] bg-muted/40 px-2 py-1 rounded-lg">
-                  Prefix: /api/v1
-                </span>
-                <Link
-                  href="/gateway"
-                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-primary/10 text-primary hover:bg-primary/20 transition-colors text-[11px] font-semibold"
-                >
-                  <FlaskConical className="size-3" /> Testing Lab
-                </Link>
-              </div>
-            </div>
-
-            {/* Bottom Row: Category Navigation Pills (Smooth wrap, zero scrollbar on mobile or desktop) */}
-            <div className="flex items-center gap-1.5 overflow-x-auto sm:flex-wrap no-scrollbar scrollbar-none py-0.5">
-              {CATEGORIES.map((cat) => {
-                const Icon = cat.icon
-                const isActive = activeCategory === cat.id
-                const count = cat.id === "all" 
-                  ? ENDPOINTS.length 
-                  : ENDPOINTS.filter(e => e.category === cat.id).length
-
-                return (
-                  <button
-                    key={cat.id}
-                    onClick={() => setActiveCategory(cat.id)}
-                    className={`px-3.5 py-1.5 rounded-xl text-xs font-medium flex items-center gap-2 shrink-0 transition-all cursor-pointer border ${
-                      isActive
-                        ? "bg-foreground text-background border-foreground font-semibold shadow-xs"
-                        : "bg-card/50 text-muted-foreground hover:text-foreground hover:bg-muted/80 border-border/50"
-                    }`}
-                  >
-                    <Icon className="size-3.5" />
-                    <span>{cat.label}</span>
-                    <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-mono ${
-                      isActive 
-                        ? "bg-background/20 text-background" 
-                        : "bg-muted text-muted-foreground"
-                    }`}>
-                      {count}
+        {/* VIEW 2: CLEAN, ORGANIZED ENDPOINTS EXPLORER */}
+        {activeView === "endpoints" && (
+          <>
+            {/* 30-SECOND QUICKSTART FOR NEW DEVELOPERS */}
+            <section className="max-w-5xl mx-auto px-4 md:px-6 pt-8">
+              <motion.div 
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.25 }}
+                className="p-5 md:p-6 rounded-3xl bg-gradient-to-r from-card to-muted/20 border border-border/70 space-y-4 shadow-xs"
+              >
+                <div className="flex items-center justify-between flex-wrap gap-2">
+                  <div className="flex items-center gap-2">
+                    <span className="flex size-7 items-center justify-center rounded-xl bg-primary/10 text-primary font-bold text-xs">
+                      <Zap className="size-3.5" />
                     </span>
-                  </button>
-                )
-              })}
-            </div>
+                    <h3 className="font-bold text-sm text-foreground">30-Second Quickstart</h3>
+                  </div>
+                  <span className="text-[11px] font-mono text-muted-foreground bg-muted/60 px-2.5 py-1 rounded-lg">
+                    Ready for Instant Integration
+                  </span>
+                </div>
 
-          </div>
-        </section>
-
-        {/* ENDPOINTS LIST (CLEAN & COMFORTABLE CARDS) */}
-        <section className="max-w-5xl mx-auto px-4 md:px-6 pt-8 space-y-4">
-          <div className="flex items-center justify-between text-xs text-muted-foreground px-1 pb-1">
-            <span>Showing {filteredEndpoints.length} available APIs</span>
-            <span className="font-mono">Base: /api/v1</span>
-          </div>
-
-          <div className="space-y-3">
-            {filteredEndpoints.map((ep) => {
-              const isExpanded = expandedCard === ep.path
-              const activeTab = activeCardTab[ep.path] || "params"
-
-              return (
-                <div
-                  key={ep.path}
-                  className={`rounded-2xl border transition-all duration-200 bg-card ${
-                    isExpanded 
-                      ? "border-primary/50 shadow-md ring-1 ring-primary/20" 
-                      : "border-border/60 hover:border-border hover:shadow-sm"
-                  }`}
-                >
-                  {/* Card Bar (Always Visible, Click to Toggle) */}
-                  <div
-                    onClick={() => toggleExpand(ep.path)}
-                    className="p-4 sm:p-5 flex items-center justify-between gap-4 cursor-pointer select-none"
-                  >
-                    <div className="flex items-center gap-3 sm:gap-4 min-w-0">
-                      {/* Method Badge */}
-                      <span
-                        className={`text-[11px] font-mono font-bold px-2.5 py-1 rounded-lg tracking-wider shrink-0 ${
-                          ep.method === "GET"
-                            ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
-                            : "bg-blue-500/10 text-blue-600 dark:text-blue-400"
-                        }`}
-                      >
-                        {ep.method}
-                      </span>
-
-                      {/* Path & Title */}
-                      <div className="min-w-0">
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <code className="text-xs sm:text-sm font-mono font-bold text-foreground">
-                            {ep.path}
-                          </code>
-                          <span className="text-[11px] text-muted-foreground hidden md:inline">
-                            • {ep.title}
-                          </span>
-                        </div>
-                        <p className="text-xs text-muted-foreground line-clamp-1 mt-0.5">
-                          {ep.desc}
-                        </p>
-                      </div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
+                  <div className="p-3.5 rounded-2xl bg-card border border-border/50 space-y-1">
+                    <div className="font-bold text-primary flex items-center gap-1.5">
+                      <span className="size-5 rounded-full bg-primary/15 text-primary flex items-center justify-center text-[10px]">1</span>
+                      Generate API Key
                     </div>
-
-                    {/* Right side tags & Toggle */}
-                    <div className="flex items-center gap-2.5 shrink-0">
-                      <span className="text-[10px] font-medium px-2 py-0.5 rounded-md bg-muted text-muted-foreground hidden sm:inline">
-                        {ep.cacheTtl}
-                      </span>
-                      
-                      <div
-                        className={`size-7 rounded-full flex items-center justify-center transition-transform text-muted-foreground hover:text-foreground ${
-                          isExpanded ? "rotate-180 text-primary" : ""
-                        }`}
-                      >
-                        <ChevronDown className="size-4" />
-                      </div>
-                    </div>
+                    <p className="text-muted-foreground text-[11px] leading-relaxed">
+                      Create an API key in <Link href="/gateway" className="text-primary underline font-mono">Gateway Control</Link> with custom service access.
+                    </p>
                   </div>
 
-                  {/* Expanded Content Drawer */}
-                  <AnimatePresence>
-                    {isExpanded && (
-                      <motion.div
-                        initial={{ opacity: 0, height: 0 }}
-                        animate={{ opacity: 1, height: "auto" }}
-                        exit={{ opacity: 0, height: 0 }}
-                        transition={{ duration: 0.2 }}
-                        className="border-t border-border/50 overflow-hidden"
-                      >
-                        <div className="p-4 sm:p-6 space-y-5 bg-muted/10">
-                          
-                          {/* Inner Tabs Navigation */}
-                          <div className="flex items-center justify-between border-b border-border/50 pb-2.5">
-                            <div className="flex items-center gap-2">
-                              <button
-                                onClick={() => setActiveCardTab({ ...activeCardTab, [ep.path]: "params" })}
-                                className={`text-xs font-semibold px-3 py-1 rounded-lg transition-colors ${
-                                  activeTab === "params"
-                                    ? "bg-primary text-primary-foreground"
-                                    : "text-muted-foreground hover:text-foreground"
-                                }`}
-                              >
-                                Parameters ({ep.params.length})
-                              </button>
-                              <button
-                                onClick={() => setActiveCardTab({ ...activeCardTab, [ep.path]: "code" })}
-                                className={`text-xs font-semibold px-3 py-1 rounded-lg transition-colors flex items-center gap-1 ${
-                                  activeTab === "code"
-                                    ? "bg-primary text-primary-foreground"
-                                    : "text-muted-foreground hover:text-foreground"
-                                }`}
-                              >
-                                <Code2 className="size-3" /> Code Example
-                              </button>
-                              <button
-                                onClick={() => setActiveCardTab({ ...activeCardTab, [ep.path]: "response" })}
-                                className={`text-xs font-semibold px-3 py-1 rounded-lg transition-colors ${
-                                  activeTab === "response"
-                                    ? "bg-primary text-primary-foreground"
-                                    : "text-muted-foreground hover:text-foreground"
-                                }`}
-                              >
-                                Response JSON
-                              </button>
-                              {ep.importantNotes && (
-                                <button
-                                  onClick={() => setActiveCardTab({ ...activeCardTab, [ep.path]: "notes" })}
-                                  className={`text-xs font-semibold px-3 py-1 rounded-lg transition-colors flex items-center gap-1 ${
-                                    activeTab === "notes"
-                                      ? "bg-primary text-primary-foreground"
-                                      : "text-muted-foreground hover:text-foreground"
-                                  }`}
-                                >
-                                  <Info className="size-3" /> Key Details
-                                </button>
-                              )}
-                            </div>
+                  <div className="p-3.5 rounded-2xl bg-card border border-border/50 space-y-1">
+                    <div className="font-bold text-primary flex items-center gap-1.5">
+                      <span className="size-5 rounded-full bg-primary/15 text-primary flex items-center justify-center text-[10px]">2</span>
+                      Send Header
+                    </div>
+                    <p className="text-muted-foreground text-[11px] leading-relaxed font-mono truncate">
+                      Authorization: Bearer &lt;KEY&gt;
+                    </p>
+                  </div>
 
-                            {/* Quick Action: Live Test Link */}
-                            <Link
-                              href="/gateway"
-                              className="text-xs font-medium text-primary hover:underline flex items-center gap-1"
-                            >
-                              <FlaskConical className="size-3.5" /> Test in Lab
-                            </Link>
-                          </div>
-
-                          {/* TAB 1: PARAMETERS (Clean Minimalist Cards) */}
-                          {activeTab === "params" && (
-                            <div className="space-y-2">
-                              {ep.params.map((p, pIdx) => (
-                                <div
-                                  key={pIdx}
-                                  className="p-3 rounded-xl bg-card border border-border/50 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs"
-                                >
-                                  <div className="flex items-center gap-2">
-                                    <code className="font-mono font-bold text-foreground">{p.name}</code>
-                                    <span className="text-[10px] font-mono text-muted-foreground px-1.5 py-0.5 rounded bg-muted">
-                                      {p.type}
-                                    </span>
-                                    {p.required ? (
-                                      <span className="text-[10px] font-bold text-red-500 uppercase tracking-wide">
-                                        Required
-                                      </span>
-                                    ) : (
-                                      <span className="text-[10px] text-muted-foreground">
-                                        Optional
-                                      </span>
-                                    )}
-                                  </div>
-
-                                  <div className="text-muted-foreground text-left sm:text-right">
-                                    <span>{p.description}</span>
-                                    {p.defaultVal && (
-                                      <span className="ml-2 font-mono text-foreground font-semibold">
-                                        (default: {p.defaultVal})
-                                      </span>
-                                    )}
-                                  </div>
-                                </div>
-                              ))}
-                            </div>
-                          )}
-
-                          {/* TAB 2: CODE SNIPPETS */}
-                          {activeTab === "code" && (
-                            <div className="space-y-3">
-                              {/* Sub-tabs: Language selector */}
-                              <div className="flex items-center justify-between text-xs">
-                                <div className="flex items-center gap-1 bg-muted/60 p-1 rounded-xl">
-                                  <button
-                                    onClick={() => setCodeLanguage("curl")}
-                                    className={`px-2.5 py-1 rounded-lg font-mono text-xs transition-colors ${
-                                      codeLanguage === "curl" ? "bg-card text-foreground font-bold shadow-xs" : "text-muted-foreground"
-                                    }`}
-                                  >
-                                    cURL
-                                  </button>
-                                  <button
-                                    onClick={() => setCodeLanguage("js")}
-                                    className={`px-2.5 py-1 rounded-lg font-mono text-xs transition-colors ${
-                                      codeLanguage === "js" ? "bg-card text-foreground font-bold shadow-xs" : "text-muted-foreground"
-                                    }`}
-                                  >
-                                    JavaScript (fetch)
-                                  </button>
-                                  <button
-                                    onClick={() => setCodeLanguage("python")}
-                                    className={`px-2.5 py-1 rounded-lg font-mono text-xs transition-colors ${
-                                      codeLanguage === "python" ? "bg-card text-foreground font-bold shadow-xs" : "text-muted-foreground"
-                                    }`}
-                                  >
-                                    Python (requests)
-                                  </button>
-                                </div>
-
-                                <button
-                                  onClick={() => {
-                                    const code =
-                                      codeLanguage === "curl"
-                                        ? ep.curlExample
-                                        : codeLanguage === "js"
-                                        ? ep.jsExample
-                                        : ep.pythonExample
-                                    handleCopy(code, `${ep.path}-code`)
-                                  }}
-                                  className="text-xs text-muted-foreground hover:text-foreground flex items-center gap-1"
-                                >
-                                  {copiedText === `${ep.path}-code` ? (
-                                    <span className="text-emerald-500 font-bold flex items-center gap-1">
-                                      <Check className="size-3" /> Copied Code!
-                                    </span>
-                                  ) : (
-                                    <>
-                                      <Copy className="size-3" /> Copy
-                                    </>
-                                  )}
-                                </button>
-                              </div>
-
-                              <pre className="p-4 rounded-xl bg-zinc-950 text-emerald-400 font-mono text-xs border border-zinc-800 overflow-x-auto whitespace-pre-wrap">
-                                {codeLanguage === "curl" && ep.curlExample}
-                                {codeLanguage === "js" && ep.jsExample}
-                                {codeLanguage === "python" && ep.pythonExample}
-                              </pre>
-                            </div>
-                          )}
-
-                          {/* TAB 3: RESPONSE PREVIEW */}
-                          {activeTab === "response" && (
-                            <div className="space-y-2">
-                              <div className="flex items-center justify-between text-xs text-muted-foreground">
-                                <span>Standard Normalized Response Envelope</span>
-                                <button
-                                  onClick={() => handleCopy(ep.responseExample, `${ep.path}-resp`)}
-                                  className="hover:text-foreground flex items-center gap-1"
-                                >
-                                  {copiedText === `${ep.path}-resp` ? (
-                                    <span className="text-emerald-500 font-bold flex items-center gap-1">
-                                      <Check className="size-3" /> Copied JSON!
-                                    </span>
-                                  ) : (
-                                    <>
-                                      <Copy className="size-3" /> Copy JSON
-                                    </>
-                                  )}
-                                </button>
-                              </div>
-                              <pre className="p-4 rounded-xl bg-zinc-950 text-zinc-300 font-mono text-xs border border-zinc-800 overflow-x-auto max-h-64">
-                                {ep.responseExample}
-                              </pre>
-                            </div>
-                          )}
-
-                          {/* TAB 4: KEY DETAILS & INSIGHTS */}
-                          {activeTab === "notes" && ep.importantNotes && (
-                            <div className="p-4 rounded-xl bg-amber-500/5 border border-amber-500/20 space-y-2 text-xs">
-                              <p className="font-bold text-amber-600 dark:text-amber-400 flex items-center gap-1.5">
-                                <Zap className="size-3.5" /> Good to Know:
-                              </p>
-                              <ul className="space-y-1.5 text-muted-foreground list-disc list-inside">
-                                {ep.importantNotes.map((note, idx) => (
-                                  <li key={idx}>{note}</li>
-                                ))}
-                              </ul>
-                            </div>
-                          )}
-
-                        </div>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
+                  <div className="p-3.5 rounded-2xl bg-card border border-border/50 space-y-1">
+                    <div className="font-bold text-primary flex items-center gap-1.5">
+                      <span className="size-5 rounded-full bg-primary/15 text-primary flex items-center justify-center text-[10px]">3</span>
+                      Receive Clean JSON
+                    </div>
+                    <p className="text-muted-foreground text-[11px] leading-relaxed">
+                      Normalized envelope with complete telemetry in &lt; 50ms.
+                    </p>
+                  </div>
                 </div>
-              )
-            })}
-          </div>
+              </motion.div>
+            </section>
 
-          {filteredEndpoints.length === 0 && (
-            <div className="text-center py-16 border border-border/50 rounded-2xl bg-card/40 space-y-2">
-              <Search className="size-6 text-muted-foreground mx-auto" />
-              <p className="text-sm font-semibold">No endpoints found</p>
-              <p className="text-xs text-muted-foreground">Try clearing your search query.</p>
-            </div>
-          )}
-        </section>
+            {/* VISUAL SERVICE HUBS (5 TACTILE CARDS) */}
+            <section className="max-w-5xl mx-auto px-4 md:px-6 pt-6">
+              <div className="flex items-center justify-between pb-3 text-xs">
+                <span className="font-bold text-foreground">Integrated Services</span>
+                <span className="text-muted-foreground text-[11px]">Click any card to filter endpoints</span>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                {SERVICE_HUBS.map((hub) => {
+                  const Icon = hub.icon
+                  const isSelected = activeCategory === hub.id
+                  return (
+                    <motion.div
+                      key={hub.id}
+                      whileHover={{ y: -2 }}
+                      transition={{ duration: 0.15 }}
+                      onClick={() => {
+                        setActiveCategory(activeCategory === hub.id ? "all" : hub.id)
+                      }}
+                      className={`p-4 rounded-2xl border transition-all cursor-pointer relative overflow-hidden group ${
+                        isSelected 
+                          ? "bg-card border-primary/50 ring-1 ring-primary/30 shadow-sm" 
+                          : "bg-card/70 border-border/60 hover:border-border hover:shadow-xs"
+                      }`}
+                    >
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="flex items-center gap-2.5">
+                          <div className="size-9 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
+                            <Icon className="size-4" />
+                          </div>
+                          <div>
+                            <h4 className="font-bold text-xs text-foreground group-hover:text-primary transition-colors">{hub.title}</h4>
+                            <span className="text-[10px] text-muted-foreground font-mono">{hub.badge}</span>
+                          </div>
+                        </div>
+                        <span className="text-[10px] font-mono px-2 py-0.5 rounded-md bg-muted text-muted-foreground">
+                          {hub.count} APIs
+                        </span>
+                      </div>
+                      <p className="text-[11px] text-muted-foreground mt-2.5 line-clamp-2 leading-relaxed">
+                        {hub.desc}
+                      </p>
+                      <div className="mt-3 pt-2 border-t border-border/40 flex items-center justify-between text-[10px]">
+                        <span className="text-muted-foreground/80 font-mono">Prefix: /api/v1</span>
+                        <span className="text-primary font-medium group-hover:translate-x-0.5 transition-transform flex items-center gap-0.5">
+                          {isSelected ? "Clear filter ✕" : "Filter &rarr;"}
+                        </span>
+                      </div>
+                    </motion.div>
+                  )
+                })}
+              </div>
+            </section>
+
+            {/* STICKY SEARCH & CATEGORY FILTER BAR */}
+            <section className="sticky top-16 z-30 bg-background/85 backdrop-blur-xl border-b border-border/40 py-3 transition-all mt-4">
+              <div className="max-w-5xl mx-auto px-4 md:px-6 space-y-3">
+                
+                {/* Top Row: Responsive Search Input + Status & Quick Links */}
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+                  {/* Creative Search Bar */}
+                  <div className="relative flex-1 sm:max-w-md">
+                    <Search className="size-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
+                    <input
+                      type="text"
+                      placeholder="Search endpoints by path, keyword, or provider..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="w-full pl-10 pr-9 py-2 rounded-xl border border-border/60 bg-card/80 backdrop-blur-sm text-xs focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all text-foreground placeholder:text-muted-foreground/70 shadow-xs"
+                    />
+                    {searchQuery && (
+                      <button
+                        onClick={() => setSearchQuery("")}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground p-0.5 cursor-pointer"
+                        title="Clear search"
+                      >
+                        <X className="size-3.5" />
+                      </button>
+                    )}
+                  </div>
+
+                  {/* Status Indicators & Quick Lab Link */}
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground justify-between sm:justify-end">
+                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-muted/60 text-[11px] font-medium">
+                      <span className="size-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                      {filteredEndpoints.length} APIs Available
+                    </span>
+                    <span className="font-mono text-[11px] bg-muted/40 px-2 py-1 rounded-lg">
+                      Prefix: /api/v1
+                    </span>
+                    <Link
+                      href="/gateway"
+                      className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-primary/10 text-primary hover:bg-primary/20 transition-colors text-[11px] font-semibold"
+                    >
+                      <FlaskConical className="size-3" /> Testing Lab
+                    </Link>
+                  </div>
+                </div>
+
+                {/* Bottom Row: Category Navigation Pills (Smooth wrap, zero scrollbar on mobile or desktop) */}
+                <div className="flex items-center gap-1.5 overflow-x-auto sm:flex-wrap no-scrollbar scrollbar-none py-0.5">
+                  {CATEGORIES.map((cat) => {
+                    const Icon = cat.icon
+                    const isActive = activeCategory === cat.id
+                    const count = cat.id === "all" 
+                      ? ENDPOINTS.length 
+                      : ENDPOINTS.filter(e => e.category === cat.id).length
+
+                    return (
+                      <button
+                        key={cat.id}
+                        onClick={() => setActiveCategory(cat.id)}
+                        className={`px-3.5 py-1.5 rounded-xl text-xs font-medium flex items-center gap-2 shrink-0 transition-all cursor-pointer border ${
+                          isActive
+                            ? "bg-foreground text-background border-foreground font-semibold shadow-xs"
+                            : "bg-card/50 text-muted-foreground hover:text-foreground hover:bg-muted/80 border-border/50"
+                        }`}
+                      >
+                        <Icon className="size-3.5" />
+                        <span>{cat.label}</span>
+                        <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-mono ${
+                          isActive 
+                            ? "bg-background/20 text-background" 
+                            : "bg-muted text-muted-foreground"
+                        }`}>
+                          {count}
+                        </span>
+                      </button>
+                    )
+                  })}
+                </div>
+
+              </div>
+            </section>
+
+            {/* ENDPOINTS LIST (CLEAN, MINIMALIST CARDS) */}
+            <section className="max-w-5xl mx-auto px-4 md:px-6 pt-6 space-y-4">
+              <div className="flex items-center justify-between text-xs text-muted-foreground px-1 pb-1">
+                <span>Showing {filteredEndpoints.length} available endpoints</span>
+                <span className="font-mono">Base URL: /api/v1</span>
+              </div>
+
+              <div className="space-y-3">
+                {filteredEndpoints.map((ep) => {
+                  const isExpanded = expandedCard === ep.path
+                  const activeTab = activeCardTab[ep.path] || "params"
+
+                  return (
+                    <div
+                      key={ep.path}
+                      className={`rounded-2xl border transition-all duration-200 bg-card ${
+                        isExpanded 
+                          ? "border-primary/50 shadow-md ring-1 ring-primary/20" 
+                          : "border-border/60 hover:border-border hover:shadow-xs"
+                      }`}
+                    >
+                      {/* Card Bar (Minimalist initial row for clean reading) */}
+                      <div
+                        onClick={() => toggleExpand(ep.path)}
+                        className="p-4 sm:p-5 flex items-center justify-between gap-4 cursor-pointer select-none"
+                      >
+                        <div className="flex items-center gap-3 sm:gap-4 min-w-0">
+                          {/* Method Badge */}
+                          <span
+                            className={`text-[11px] font-mono font-bold px-2.5 py-1 rounded-lg tracking-wider shrink-0 ${
+                              ep.method === "GET"
+                                ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
+                                : "bg-blue-500/10 text-blue-600 dark:text-blue-400"
+                            }`}
+                          >
+                            {ep.method}
+                          </span>
+
+                          {/* Path & Title */}
+                          <div className="min-w-0">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <code className="text-xs sm:text-sm font-mono font-bold text-foreground">
+                                {ep.path}
+                              </code>
+                              <span className="text-[11px] text-muted-foreground hidden md:inline">
+                                • {ep.title}
+                              </span>
+                            </div>
+                            <p className="text-xs text-muted-foreground line-clamp-1 mt-0.5">
+                              {ep.desc}
+                            </p>
+                          </div>
+                        </div>
+
+                        {/* Right side tags & Action buttons */}
+                        <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+                          <span className="text-[10px] font-medium px-2 py-0.5 rounded-md bg-muted text-muted-foreground hidden sm:inline">
+                            {ep.cacheTtl}
+                          </span>
+
+                          <Link
+                            href="/gateway"
+                            onClick={(e) => e.stopPropagation()}
+                            className="text-[11px] font-semibold text-primary hover:underline px-2 py-1 rounded-lg hover:bg-primary/10 transition-colors hidden sm:inline-flex items-center gap-1"
+                          >
+                            <span>Test Live</span> &rarr;
+                          </Link>
+                          
+                          <div
+                            className={`size-7 rounded-full flex items-center justify-center transition-transform text-muted-foreground hover:text-foreground ${
+                              isExpanded ? "rotate-180 text-primary" : ""
+                            }`}
+                          >
+                            <ChevronDown className="size-4" />
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Expanded Content Drawer */}
+                      <AnimatePresence>
+                        {isExpanded && (
+                          <motion.div
+                            initial={{ opacity: 0, height: 0 }}
+                            animate={{ opacity: 1, height: "auto" }}
+                            exit={{ opacity: 0, height: 0 }}
+                            transition={{ duration: 0.2 }}
+                            className="border-t border-border/50 overflow-hidden"
+                          >
+                            <div className="p-4 sm:p-6 space-y-5 bg-muted/10">
+                              
+                              {/* Inner Tabs Navigation */}
+                              <div className="flex items-center justify-between border-b border-border/50 pb-2.5">
+                                <div className="flex items-center gap-2">
+                                  <button
+                                    onClick={() => setActiveCardTab({ ...activeCardTab, [ep.path]: "params" })}
+                                    className={`text-xs font-semibold px-3 py-1 rounded-lg transition-colors cursor-pointer ${
+                                      activeTab === "params"
+                                        ? "bg-primary text-primary-foreground"
+                                        : "text-muted-foreground hover:text-foreground"
+                                    }`}
+                                  >
+                                    Parameters ({ep.params.length})
+                                  </button>
+                                  <button
+                                    onClick={() => setActiveCardTab({ ...activeCardTab, [ep.path]: "code" })}
+                                    className={`text-xs font-semibold px-3 py-1 rounded-lg transition-colors flex items-center gap-1 cursor-pointer ${
+                                      activeTab === "code"
+                                        ? "bg-primary text-primary-foreground"
+                                        : "text-muted-foreground hover:text-foreground"
+                                    }`}
+                                  >
+                                    <Code2 className="size-3" /> Code Example
+                                  </button>
+                                  <button
+                                    onClick={() => setActiveCardTab({ ...activeCardTab, [ep.path]: "response" })}
+                                    className={`text-xs font-semibold px-3 py-1 rounded-lg transition-colors cursor-pointer ${
+                                      activeTab === "response"
+                                        ? "bg-primary text-primary-foreground"
+                                        : "text-muted-foreground hover:text-foreground"
+                                    }`}
+                                  >
+                                    Response JSON
+                                  </button>
+                                  {ep.importantNotes && (
+                                    <button
+                                      onClick={() => setActiveCardTab({ ...activeCardTab, [ep.path]: "notes" })}
+                                      className={`text-xs font-semibold px-3 py-1 rounded-lg transition-colors flex items-center gap-1 cursor-pointer ${
+                                        activeTab === "notes"
+                                          ? "bg-primary text-primary-foreground"
+                                          : "text-muted-foreground hover:text-foreground"
+                                      }`}
+                                    >
+                                      <Info className="size-3" /> Key Details
+                                    </button>
+                                  )}
+                                </div>
+
+                                {/* Quick Action: Live Test Link */}
+                                <Link
+                                  href="/gateway"
+                                  className="text-xs font-medium text-primary hover:underline flex items-center gap-1"
+                                >
+                                  <FlaskConical className="size-3.5" /> Test in Lab
+                                </Link>
+                              </div>
+
+                              {/* TAB 1: PARAMETERS */}
+                              {activeTab === "params" && (
+                                <div className="space-y-2">
+                                  {ep.params.map((p, pIdx) => (
+                                    <div
+                                      key={pIdx}
+                                      className="p-3 rounded-xl bg-card border border-border/50 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs"
+                                    >
+                                      <div className="flex items-center gap-2">
+                                        <code className="font-mono font-bold text-foreground">{p.name}</code>
+                                        <span className="text-[10px] font-mono text-muted-foreground px-1.5 py-0.5 rounded bg-muted">
+                                          {p.type}
+                                        </span>
+                                        {p.required ? (
+                                          <span className="text-[10px] font-bold text-red-500 uppercase tracking-wide">
+                                            Required
+                                          </span>
+                                        ) : (
+                                          <span className="text-[10px] text-muted-foreground">
+                                            Optional
+                                          </span>
+                                        )}
+                                      </div>
+
+                                      <div className="text-muted-foreground text-left sm:text-right">
+                                        <span>{p.description}</span>
+                                        {p.defaultVal && (
+                                          <span className="ml-2 font-mono text-foreground font-semibold">
+                                            (default: {p.defaultVal})
+                                          </span>
+                                        )}
+                                      </div>
+                                    </div>
+                                  ))}
+                                </div>
+                              )}
+
+                              {/* TAB 2: CODE SNIPPETS */}
+                              {activeTab === "code" && (
+                                <div className="space-y-3">
+                                  <div className="flex items-center justify-between text-xs">
+                                    <div className="flex items-center gap-1 bg-muted/60 p-1 rounded-xl">
+                                      <button
+                                        onClick={() => setCodeLanguage("curl")}
+                                        className={`px-2.5 py-1 rounded-lg font-mono text-xs transition-colors cursor-pointer ${
+                                          codeLanguage === "curl" ? "bg-card text-foreground font-bold shadow-xs" : "text-muted-foreground"
+                                        }`}
+                                      >
+                                        cURL
+                                      </button>
+                                      <button
+                                        onClick={() => setCodeLanguage("js")}
+                                        className={`px-2.5 py-1 rounded-lg font-mono text-xs transition-colors cursor-pointer ${
+                                          codeLanguage === "js" ? "bg-card text-foreground font-bold shadow-xs" : "text-muted-foreground"
+                                        }`}
+                                      >
+                                        JavaScript (fetch)
+                                      </button>
+                                      <button
+                                        onClick={() => setCodeLanguage("python")}
+                                        className={`px-2.5 py-1 rounded-lg font-mono text-xs transition-colors cursor-pointer ${
+                                          codeLanguage === "python" ? "bg-card text-foreground font-bold shadow-xs" : "text-muted-foreground"
+                                        }`}
+                                      >
+                                        Python (requests)
+                                      </button>
+                                    </div>
+
+                                    <button
+                                      onClick={() => {
+                                        const code =
+                                          codeLanguage === "curl"
+                                            ? ep.curlExample
+                                            : codeLanguage === "js"
+                                            ? ep.jsExample
+                                            : ep.pythonExample
+                                        handleCopy(code, `${ep.path}-code`)
+                                      }}
+                                      className="text-xs text-muted-foreground hover:text-foreground flex items-center gap-1 cursor-pointer"
+                                    >
+                                      {copiedText === `${ep.path}-code` ? (
+                                        <span className="text-emerald-500 font-bold flex items-center gap-1">
+                                          <Check className="size-3" /> Copied Code!
+                                        </span>
+                                      ) : (
+                                        <>
+                                          <Copy className="size-3" /> Copy
+                                        </>
+                                      )}
+                                    </button>
+                                  </div>
+
+                                  <pre className="p-4 rounded-xl bg-zinc-950 text-emerald-400 font-mono text-xs border border-zinc-800 overflow-x-auto whitespace-pre-wrap">
+                                    {codeLanguage === "curl" && ep.curlExample}
+                                    {codeLanguage === "js" && ep.jsExample}
+                                    {codeLanguage === "python" && ep.pythonExample}
+                                  </pre>
+                                </div>
+                              )}
+
+                              {/* TAB 3: RESPONSE PREVIEW */}
+                              {activeTab === "response" && (
+                                <div className="space-y-2">
+                                  <div className="flex items-center justify-between text-xs text-muted-foreground">
+                                    <span>Standard Normalized Response Envelope</span>
+                                    <button
+                                      onClick={() => handleCopy(ep.responseExample, `${ep.path}-resp`)}
+                                      className="hover:text-foreground flex items-center gap-1 cursor-pointer"
+                                    >
+                                      {copiedText === `${ep.path}-resp` ? (
+                                        <span className="text-emerald-500 font-bold flex items-center gap-1">
+                                          <Check className="size-3" /> Copied JSON!
+                                        </span>
+                                      ) : (
+                                        <>
+                                          <Copy className="size-3" /> Copy JSON
+                                        </>
+                                      )}
+                                    </button>
+                                  </div>
+                                  <pre className="p-4 rounded-xl bg-zinc-950 text-zinc-300 font-mono text-xs border border-zinc-800 overflow-x-auto max-h-64">
+                                    {ep.responseExample}
+                                  </pre>
+                                </div>
+                              )}
+
+                              {/* TAB 4: KEY DETAILS & INSIGHTS */}
+                              {activeTab === "notes" && ep.importantNotes && (
+                                <div className="p-4 rounded-xl bg-amber-500/5 border border-amber-500/20 space-y-2 text-xs">
+                                  <p className="font-bold text-amber-600 dark:text-amber-400 flex items-center gap-1.5">
+                                    <Zap className="size-3.5" /> Good to Know:
+                                  </p>
+                                  <ul className="space-y-1.5 text-muted-foreground list-disc list-inside">
+                                    {ep.importantNotes.map((note, idx) => (
+                                      <li key={idx}>{note}</li>
+                                    ))}
+                                  </ul>
+                                </div>
+                              )}
+
+                            </div>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </div>
+                  )
+                })}
+              </div>
+
+              {filteredEndpoints.length === 0 && (
+                <div className="text-center py-16 border border-border/50 rounded-2xl bg-card/40 space-y-2">
+                  <Search className="size-6 text-muted-foreground mx-auto" />
+                  <p className="text-sm font-semibold">No endpoints found</p>
+                  <p className="text-xs text-muted-foreground">Try clearing your search query.</p>
+                </div>
+              )}
+            </section>
+          </>
+        )}
 
         {/* SIMPLE FOOTER CTA */}
         <section className="max-w-5xl mx-auto px-4 md:px-6 pt-16 text-center">
@@ -1008,6 +1232,7 @@ export default function ApiPage() {
         </section>
 
       </main>
+      </ApiAccessGuard>
       <Footer />
     </div>
   )

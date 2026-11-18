@@ -4,7 +4,7 @@
 -- Version: 1.0.0
 -- ==============================================================================
 
--- 1. API Clients (Consuming applications e.g. Graduation Project)
+-- 1. API Clients (Consuming applications)
 CREATE TABLE IF NOT EXISTS public.api_clients (
     id VARCHAR(64) PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
@@ -14,10 +14,14 @@ CREATE TABLE IF NOT EXISTS public.api_clients (
     rate_limit_per_hour INT NOT NULL DEFAULT 2000,
     rate_limit_per_day INT NOT NULL DEFAULT 20000,
     allowed_services JSONB NOT NULL DEFAULT '["*"]'::jsonb,
+    raw_key TEXT,
     metadata JSONB DEFAULT '{}'::jsonb,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
+
+-- Ensure raw_key column exists if table was created previously
+ALTER TABLE public.api_clients ADD COLUMN IF NOT EXISTS raw_key TEXT;
 
 -- 2. API Keys (Hashed with SHA-256)
 CREATE TABLE IF NOT EXISTS public.api_keys (
@@ -25,11 +29,15 @@ CREATE TABLE IF NOT EXISTS public.api_keys (
     client_id VARCHAR(64) NOT NULL REFERENCES public.api_clients(id) ON DELETE CASCADE,
     key_prefix VARCHAR(32) NOT NULL,
     key_hash VARCHAR(128) NOT NULL UNIQUE,
+    raw_key TEXT,
     status VARCHAR(32) NOT NULL DEFAULT 'active' CHECK (status IN ('active', 'revoked')),
     expires_at TIMESTAMP WITH TIME ZONE,
     last_used_at TIMESTAMP WITH TIME ZONE,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
+
+-- Ensure raw_key column exists if table was created previously
+ALTER TABLE public.api_keys ADD COLUMN IF NOT EXISTS raw_key TEXT;
 
 CREATE INDEX IF NOT EXISTS idx_api_keys_hash ON public.api_keys(key_hash);
 CREATE INDEX IF NOT EXISTS idx_api_keys_client ON public.api_keys(client_id);

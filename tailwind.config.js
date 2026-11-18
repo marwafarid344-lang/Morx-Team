@@ -23,6 +23,8 @@ module.exports = {
         rubik: ["var(--font-rubik)"],
         cairo: ["var(--font-cairo)"],
         arabic: ["var(--font-noto-arabic)", "var(--font-cairo)"],
+        "rock-salt": ["var(--font-rock-salt)", "'Rock Salt'", "cursive"],
+        rocksalt: ["var(--font-rock-salt)", "'Rock Salt'", "cursive"],
       },
       colors: {
         border: "hsl(var(--border))",
