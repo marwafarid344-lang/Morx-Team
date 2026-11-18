@@ -130,6 +130,8 @@ export class GatewayDatabase {
             rateLimitPerHour: clientData.rate_limit_per_hour || 2000,
             rateLimitPerDay: clientData.rate_limit_per_day || 20000,
             allowedServices: clientData.allowed_services || ['*'],
+            allowedProviders: clientData.allowed_providers || ['*'],
+            allowedEndpoints: clientData.allowed_endpoints || ['*'],
             createdAt: clientData.created_at,
           };
           const key: ApiKeyRecord = {
@@ -162,6 +164,8 @@ export class GatewayDatabase {
     name: string;
     description?: string;
     allowedServices?: (ServiceCategory | '*')[];
+    allowedProviders?: (string | '*')[];
+    allowedEndpoints?: (string | '*')[];
     rateLimitPerMinute?: number;
   }): Promise<{ client: ApiClientRecord; rawKey: string }> {
     loadStoreFromDisk();
@@ -179,6 +183,8 @@ export class GatewayDatabase {
       rateLimitPerHour: 2000,
       rateLimitPerDay: 20000,
       allowedServices: params.allowedServices && params.allowedServices.length > 0 ? params.allowedServices : ['*'],
+      allowedProviders: params.allowedProviders && params.allowedProviders.length > 0 ? params.allowedProviders : ['*'],
+      allowedEndpoints: params.allowedEndpoints && params.allowedEndpoints.length > 0 ? params.allowedEndpoints : ['*'],
       createdAt: new Date().toISOString(),
       rawKey: rawKey,
     };
@@ -234,6 +240,8 @@ export class GatewayDatabase {
       name?: string;
       description?: string;
       allowedServices?: (ServiceCategory | '*')[];
+      allowedProviders?: (string | '*')[];
+      allowedEndpoints?: (string | '*')[];
       rateLimitPerMinute?: number;
       status?: 'active' | 'suspended' | 'revoked';
     }
@@ -246,6 +254,8 @@ export class GatewayDatabase {
     if (updates.name !== undefined) client.name = updates.name;
     if (updates.description !== undefined) client.description = updates.description;
     if (updates.allowedServices !== undefined) client.allowedServices = updates.allowedServices;
+    if (updates.allowedProviders !== undefined) client.allowedProviders = updates.allowedProviders;
+    if (updates.allowedEndpoints !== undefined) client.allowedEndpoints = updates.allowedEndpoints;
     if (updates.rateLimitPerMinute !== undefined) client.rateLimitPerMinute = updates.rateLimitPerMinute;
     if (updates.status !== undefined) {
       client.status = updates.status;

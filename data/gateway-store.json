@@ -11,6 +11,40 @@
       "allowedServices": [
         "*"
       ],
+      "allowedProviders": [
+        "youtube",
+        "openweather",
+        "open_meteo",
+        "google_maps",
+        "mapbox",
+        "google_routes",
+        "internal_tsp",
+        "osrmroute",
+        "ip_geolocation",
+        "frankfurter",
+        "gnews"
+      ],
+      "allowedEndpoints": [
+        "/api/v1/videos/search",
+        "/api/v1/weather/current",
+        "/api/v1/weather/forecast",
+        "/api/v1/weather/air-quality",
+        "/api/v1/maps/geocode",
+        "/api/v1/maps/reverse-geocode",
+        "/api/v1/maps/places",
+        "/api/v1/maps/directions",
+        "/api/v1/maps/isochrone",
+        "/api/v1/maps/distance-matrix",
+        "/api/v1/routes/directions",
+        "/api/v1/routes/optimize",
+        "/api/v1/routes/matrix",
+        "/api/v1/utils/ip-lookup",
+        "/api/v1/finance/exchange",
+        "/api/v1/news/search",
+        "/api/v1/gateway/clients",
+        "/api/v1/gateway/metrics",
+        "/api/v1/gateway/health"
+      ],
       "createdAt": "2026-11-18T13:36:22.506Z",
       "rawKey": "morx_live_rrB1bQF_oamh5_fF-lriEXpuMruNbrg4Q"
     },
@@ -31,8 +65,62 @@
         "news",
         "utils"
       ],
+      "allowedProviders": [
+        "youtube",
+        "openweather",
+        "open_meteo",
+        "google_maps",
+        "mapbox",
+        "google_routes",
+        "internal_tsp",
+        "osrmroute",
+        "ip_geolocation",
+        "frankfurter",
+        "gnews"
+      ],
+      "allowedEndpoints": [
+        "/api/v1/videos/search",
+        "/api/v1/weather/current",
+        "/api/v1/weather/forecast",
+        "/api/v1/weather/air-quality",
+        "/api/v1/maps/geocode",
+        "/api/v1/maps/reverse-geocode",
+        "/api/v1/maps/places",
+        "/api/v1/maps/directions",
+        "/api/v1/maps/isochrone",
+        "/api/v1/maps/distance-matrix",
+        "/api/v1/routes/directions",
+        "/api/v1/routes/optimize",
+        "/api/v1/routes/matrix",
+        "/api/v1/utils/ip-lookup",
+        "/api/v1/finance/exchange",
+        "/api/v1/news/search",
+        "/api/v1/gateway/clients",
+        "/api/v1/gateway/metrics",
+        "/api/v1/gateway/health"
+      ],
       "createdAt": "2026-11-18T13:13:29.717Z",
       "rawKey": "morx_live_e3kbbRj_fyXuW0kQviJvJpIEQFO4WNABD"
+    },
+    {
+      "id": "client_1795019899043_1pvm0",
+      "name": "Restricted Allowable Client",
+      "description": "",
+      "status": "active",
+      "rateLimitPerMinute": 120,
+      "rateLimitPerHour": 2000,
+      "rateLimitPerDay": 20000,
+      "allowedServices": [
+        "weather"
+      ],
+      "allowedProviders": [
+        "open_meteo"
+      ],
+      "allowedEndpoints": [
+        "/api/v1/weather/current"
+      ],
+      "createdAt": "2026-11-18T16:38:19.043Z",
+      "rawKey": "morx_live_qGoM_gQ_BuR2h7kAgsqVOZkPvGPOxcWqU"
     }
   ],
   "keys": [
@@ -53,7 +141,16 @@
       "status": "active",
       "createdAt": "2026-11-18T13:13:29.717Z",
       "rawKey": "morx_live_e3kbbRj_fyXuW0kQviJvJpIEQFO4WNABD"
+    },
+    {
+      "id": "key_1795019899043_ago4v",
+      "clientId": "client_1795019899043_1pvm0",
+      "keyPrefix": "morx_live_qGoM_gQ",
+      "keyHash": "1ec215074717adf4bbba740b5f7e3a6aa7fe9d8de9df4302da6afb7751b64173",
+      "status": "active",
+      "createdAt": "2026-11-18T16:38:19.043Z",
+      "rawKey": "morx_live_qGoM_gQ_BuR2h7kAgsqVOZkPvGPOxcWqU"
     }
   ],
-  "updatedAt": "2026-11-18T16:17:36.163Z"
+  "updatedAt": "2026-11-18T16:38:19.043Z"
 }

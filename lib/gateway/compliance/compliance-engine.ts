@@ -8,6 +8,8 @@ export interface ClientContext {
   isFirstParty?: boolean;
   requestedCanvas?: 'google_maps' | 'mapbox' | 'none';
   origin?: string;
+  allowedProviders?: (string | '*')[];
+  allowedEndpoints?: (string | '*')[];
 }
 
 export class ComplianceEngine {
@@ -83,6 +85,23 @@ export class ComplianceEngine {
           errorCode: 'PROVIDER_COMPLIANCE_RESTRICTION',
           errorMessage: `Provider "${providerName}" requires a contracted Enterprise compliance agreement.`,
           violationDetails: 'Standard third-party developer access is restricted.',
+        };
+      }
+    }
+
+    // 5b. Client Allowable Providers Check
+    if (clientContext.allowedProviders && clientContext.allowedProviders.length > 0 && !clientContext.allowedProviders.includes('*')) {
+      const norm = providerName.toLowerCase().replace(/[-_]/g, '');
+      const isAllowed = clientContext.allowedProviders.some(
+        (p) => p === providerName || p.toLowerCase().replace(/[-_]/g, '') === norm
+      );
+      if (!isAllowed) {
+        return {
+          allowed: false,
+          complianceStatus: config.complianceStatus,
+          errorCode: 'PROVIDER_NOT_ALLOWED',
+          errorMessage: `Provider "${providerName}" is not on the allowable providers list for this client.`,
+          violationDetails: `Client allowable providers: ${clientContext.allowedProviders.join(', ')}`,
         };
       }
     }

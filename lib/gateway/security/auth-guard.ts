@@ -1,24 +1,28 @@
 import { NextRequest } from 'next/server';
 import { hashApiKey } from './crypto';
 import { GatewayDatabase } from '../database/gateway-db';
+import { AllowableCatalog } from './allowable-catalog';
 import {
   AuthenticatedClientContext,
   ServiceCategory,
   UnifiedError,
 } from '../types';
 
+export interface AuthVerificationResult {
+  authenticated: boolean;
+  statusCode?: 401 | 403;
+  context?: AuthenticatedClientContext;
+  error?: UnifiedError;
+}
+
 export class AuthGuard {
   /**
-   * Verify an incoming request's API Key and validate scope
+   * Verify an incoming request's API Key and validate scope, allowable endpoints, and providers
    */
   static async verify(
     request: NextRequest,
     requiredService?: ServiceCategory
-  ): Promise<{
-    authenticated: boolean;
-    context?: AuthenticatedClientContext;
-    error?: UnifiedError;
-  }> {
+  ): Promise<AuthVerificationResult> {
     // 1. Extract Bearer token or x-api-key
     const authHeader = request.headers.get('authorization');
     const xApiKey = request.headers.get('x-api-key');
@@ -33,6 +37,7 @@ export class AuthGuard {
     if (!rawKey) {
       return {
         authenticated: false,
+        statusCode: 401,
         error: {
           code: 'UNAUTHORIZED',
           message:
@@ -56,6 +61,8 @@ export class AuthGuard {
             rateLimitPerHour: 100000,
             rateLimitPerDay: 1000000,
             allowedServices: ['*'],
+            allowedProviders: ['*'],
+            allowedEndpoints: ['*'],
             createdAt: new Date().toISOString(),
           },
           keyId: 'key_master',
@@ -71,6 +78,7 @@ export class AuthGuard {
     if (!clientRecord) {
       return {
         authenticated: false,
+        statusCode: 401,
         error: {
           code: 'INVALID_API_KEY',
           message:
@@ -86,6 +94,7 @@ export class AuthGuard {
     if (key.expiresAt && new Date(key.expiresAt).getTime() < Date.now()) {
       return {
         authenticated: false,
+        statusCode: 401,
         error: {
           code: 'API_KEY_EXPIRED',
           message: 'The provided API Key has expired. Please generate a new key.',
@@ -96,7 +105,7 @@ export class AuthGuard {
 
     // 4. Verify Service Category permissions
     if (requiredService) {
-      const allowed = client.allowedServices;
+      const allowed = client.allowedServices || ['*'];
       const hasPermission =
         allowed.includes('*') ||
         allowed.includes(requiredService as ServiceCategory);
@@ -104,9 +113,47 @@ export class AuthGuard {
       if (!hasPermission) {
         return {
           authenticated: false,
+          statusCode: 403,
           error: {
             code: 'FORBIDDEN_SERVICE',
             message: `API Client "${client.name}" does not have permission to access the "${requiredService}" service.`,
+            retryable: false,
+          },
+        };
+      }
+    }
+
+    // 5. Verify Allowed Endpoints list
+    const pathname = request.nextUrl ? request.nextUrl.pathname : new URL(request.url).pathname;
+    if (client.allowedEndpoints && client.allowedEndpoints.length > 0) {
+      const isEndpointAllowed = AllowableCatalog.isAllowableEndpoint(pathname, client.allowedEndpoints);
+      if (!isEndpointAllowed) {
+        return {
+          authenticated: false,
+          statusCode: 403,
+          error: {
+            code: 'FORBIDDEN_ENDPOINT',
+            message: `Endpoint "${pathname}" is not on the allowable endpoints list for this client.`,
+            retryable: false,
+          },
+        };
+      }
+    }
+
+    // 6. Verify Allowed Providers list if specific provider requested
+    const requestedProvider = request.nextUrl 
+      ? request.nextUrl.searchParams.get('provider') 
+      : new URL(request.url).searchParams.get('provider') || request.headers.get('x-morx-provider');
+
+    if (requestedProvider) {
+      const isProviderAllowed = AllowableCatalog.isAllowableProvider(requestedProvider, client.allowedProviders);
+      if (!isProviderAllowed) {
+        return {
+          authenticated: false,
+          statusCode: 403,
+          error: {
+            code: 'FORBIDDEN_PROVIDER',
+            message: `Provider "${requestedProvider}" is not in the allowable providers list for this client.`,
             retryable: false,
           },
         };
@@ -118,9 +165,8 @@ export class AuthGuard {
       context: {
         client,
         keyId: key.id,
-        scopes: client.allowedServices,
+        scopes: client.allowedServices as string[],
       },
     };
   }
 }
-

@@ -109,6 +109,8 @@ export interface ApiClientRecord {
   rateLimitPerHour: number;
   rateLimitPerDay: number;
   allowedServices: (ServiceCategory | '*')[];
+  allowedProviders?: (string | '*')[];
+  allowedEndpoints?: (string | '*')[];
   createdAt: string;
   rawKey?: string;
 }

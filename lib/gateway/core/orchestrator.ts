@@ -126,6 +126,32 @@ export class ProviderOrchestrator {
       candidateProviders = [...providers];
     }
 
+    // 2b. Strictly filter candidate providers by Client's allowable providers list
+    if (options.allowedProviders && options.allowedProviders.length > 0 && !options.allowedProviders.includes('*')) {
+      const isAllowed = (pName: string) => {
+        const norm = pName.toLowerCase().replace(/[-_]/g, '');
+        return options.allowedProviders!.some(
+          (ap) => ap === pName || ap.toLowerCase().replace(/[-_]/g, '') === norm
+        );
+      };
+
+      candidateProviders = candidateProviders.filter((p) => isAllowed(p.name));
+
+      if (candidateProviders.length === 0) {
+        return {
+          success: false,
+          data: null,
+          providerName: options.specificProvider || 'none',
+          latencyMs: 0,
+          error: {
+            code: 'PROVIDER_NOT_ALLOWED',
+            message: `No allowable providers configured for service "${service}". Allowed providers: ${options.allowedProviders.join(', ')}`,
+            retryable: false,
+          },
+        };
+      }
+    }
+
     // 3. Execute with Coalescing & Fallback
     return GatewayCache.coalesce(cacheKey, async () => {
       const errorsCollected: UnifiedError[] = [];
@@ -139,6 +165,8 @@ export class ProviderOrchestrator {
           clientTier: options.clientTier,
           isFirstParty: options.isFirstParty,
           requestedCanvas: options.requestedCanvas,
+          allowedProviders: options.allowedProviders,
+          allowedEndpoints: options.allowedEndpoints,
         });
 
         if (!compliance.allowed) {

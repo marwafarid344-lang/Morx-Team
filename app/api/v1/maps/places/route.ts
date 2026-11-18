@@ -12,7 +12,7 @@ export async function GET(request: NextRequest) {
   if (!auth.authenticated || !auth.context) {
     return Normalizer.error({
       service: 'maps',
-      statusCode: 401,
+      statusCode: auth.statusCode || 401,
       errors: [auth.error!],
     });
   }
@@ -61,6 +61,8 @@ export async function GET(request: NextRequest) {
     },
     {
       specificProvider: provider || undefined,
+      allowedProviders: auth.context.client.allowedProviders,
+      allowedEndpoints: auth.context.client.allowedEndpoints,
       bypassCache,
       clientId: auth.context.client.id,
       endpoint: '/api/v1/maps/places',

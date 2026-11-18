@@ -33,6 +33,8 @@ import { GatewayDatabase } from '../lib/gateway/database/gateway-db';
 import { ComplianceRegistry } from '../lib/gateway/compliance/compliance-registry';
 import { ComplianceEngine } from '../lib/gateway/compliance/compliance-engine';
 import { ProviderOrchestrator } from '../lib/gateway/core/orchestrator';
+import { AllowableCatalog } from '../lib/gateway/security/allowable-catalog';
+import { AuthGuard } from '../lib/gateway/security/auth-guard';
 
 async function runGatewayTests() {
   console.log('🧪 Starting Morx Gateway Test Suite...\n');
@@ -269,7 +271,101 @@ async function runGatewayTests() {
   assert.strictEqual(Array.isArray(gnewsRes.data), true);
   console.log('   ✓ All 4 new providers verified and executing cleanly.');
 
-  console.log('\n🎉 ALL 10 GATEWAY TEST SUITES PASSED CLEANLY!\n');
+  // ── TEST 11: Strict Allowable Providers & Allowable Endpoints Enforcement ──
+  console.log('\n11. Testing Strict Allowable Providers & Allowable Endpoints Enforcement...');
+
+  // 11.1 Check Catalog contains all newly added providers
+  assert.strictEqual(AllowableCatalog.isAllowableProvider('isochrone') || AllowableCatalog.isAllowableProvider('mapbox'), true, 'Mapbox / isochrone must be in allowable catalog');
+  assert.strictEqual(AllowableCatalog.isAllowableProvider('ip_geolocation'), true, 'ip_geolocation must be in allowable catalog');
+  assert.strictEqual(AllowableCatalog.isAllowableProvider('frankfurter'), true, 'frankfurter must be in allowable catalog');
+  assert.strictEqual(AllowableCatalog.isAllowableProvider('gnews'), true, 'gnews must be in allowable catalog');
+
+  // 11.2 Check Catalog contains all endpoints
+  assert.strictEqual(AllowableCatalog.isAllowableEndpoint('/api/v1/maps/isochrone'), true);
+  assert.strictEqual(AllowableCatalog.isAllowableEndpoint('/api/v1/utils/ip-lookup'), true);
+  assert.strictEqual(AllowableCatalog.isAllowableEndpoint('/api/v1/finance/exchange'), true);
+  assert.strictEqual(AllowableCatalog.isAllowableEndpoint('/api/v1/news/search'), true);
+
+  // 11.3 Reject unallowable endpoint via AllowableCatalog
+  assert.strictEqual(AllowableCatalog.isAllowableEndpoint('/api/v1/unauthorized/leak-data'), false, 'Unauthorized endpoint must be rejected');
+
+  // 11.4 Test Client with Restricted Allowable Providers
+  const restrictedClient = await GatewayDatabase.createClient({
+    name: 'Restricted Allowable Client',
+    allowedServices: ['weather'],
+    allowedProviders: ['open_meteo'], // Only open_meteo allowed!
+    allowedEndpoints: ['/api/v1/weather/current'], // Only current weather allowed!
+  });
+
+  // Verify that an endpoint NOT in allowedEndpoints is strictly blocked
+  const mockUnallowedEndpointReq = {
+    headers: new Headers({
+      'x-api-key': restrictedClient.rawKey,
+    }),
+    nextUrl: {
+      pathname: '/api/v1/maps/directions', // NOT in allowedEndpoints
+      searchParams: new URLSearchParams(),
+    },
+    url: 'http://localhost:3000/api/v1/maps/directions',
+  } as any;
+
+  const endpointCheck = await AuthGuard.verify(mockUnallowedEndpointReq, 'maps');
+  assert.strictEqual(endpointCheck.authenticated, false, 'Unallowed endpoint must be blocked');
+  assert.strictEqual(endpointCheck.statusCode, 403, 'Must return HTTP 403');
+  assert.strictEqual(endpointCheck.error?.code, 'FORBIDDEN_SERVICE', 'Blocked by service/endpoint restriction');
+
+  // Verify that an allowed service but forbidden endpoint is blocked
+  const mockUnallowedWeatherForecast = {
+    headers: new Headers({
+      'x-api-key': restrictedClient.rawKey,
+    }),
+    nextUrl: {
+      pathname: '/api/v1/weather/forecast', // Service is weather, but endpoint is NOT in allowedEndpoints!
+      searchParams: new URLSearchParams(),
+    },
+    url: 'http://localhost:3000/api/v1/weather/forecast',
+  } as any;
+
+  const forecastCheck = await AuthGuard.verify(mockUnallowedWeatherForecast, 'weather');
+  assert.strictEqual(forecastCheck.authenticated, false, 'Forecast endpoint must be blocked because it is not on allowable list');
+  assert.strictEqual(forecastCheck.statusCode, 403, 'Must return HTTP 403');
+  assert.strictEqual(forecastCheck.error?.code, 'FORBIDDEN_ENDPOINT', 'Must return FORBIDDEN_ENDPOINT');
+
+  // Verify that requesting an unallowed provider is blocked
+  const mockUnallowedProviderReq = {
+    headers: new Headers({
+      'x-api-key': restrictedClient.rawKey,
+    }),
+    nextUrl: {
+      pathname: '/api/v1/weather/current',
+      searchParams: new URLSearchParams({ provider: 'openweather' }), // openweather NOT in allowedProviders!
+    },
+    url: 'http://localhost:3000/api/v1/weather/current?provider=openweather',
+  } as any;
+
+  const providerCheck = await AuthGuard.verify(mockUnallowedProviderReq, 'weather');
+  assert.strictEqual(providerCheck.authenticated, false, 'Unallowable provider must be blocked');
+  assert.strictEqual(providerCheck.statusCode, 403, 'Must return HTTP 403');
+  assert.strictEqual(providerCheck.error?.code, 'FORBIDDEN_PROVIDER', 'Must return FORBIDDEN_PROVIDER');
+
+  // Verify that an allowable endpoint AND allowable provider succeeds
+  const mockAllowedReq = {
+    headers: new Headers({
+      'x-api-key': restrictedClient.rawKey,
+    }),
+    nextUrl: {
+      pathname: '/api/v1/weather/current',
+      searchParams: new URLSearchParams({ provider: 'open_meteo' }),
+    },
+    url: 'http://localhost:3000/api/v1/weather/current?provider=open_meteo',
+  } as any;
+
+  const allowedCheck = await AuthGuard.verify(mockAllowedReq, 'weather');
+  assert.strictEqual(allowedCheck.authenticated, true, 'Allowable endpoint and provider must be permitted');
+
+  console.log('   ✓ Strict allowable endpoints and allowable providers enforcement verified.');
+
+  console.log('\n🎉 ALL 11 GATEWAY TEST SUITES PASSED CLEANLY!\n');
 }
 
 runGatewayTests().catch((err) => {
