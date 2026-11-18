@@ -1,12 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { GatewayDatabase } from '@/lib/gateway/database/gateway-db';
 import { Normalizer } from '@/lib/gateway/core/normalizer';
+import { requireAuth } from '@/lib/middleware/auth';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
 export async function GET(request: NextRequest) {
-  const clients = await GatewayDatabase.listClients();
+  const authResult = await requireAuth(request);
+  const authUser = authResult && !('status' in authResult) ? (authResult as any) : null;
+  const { searchParams } = new URL(request.url);
+  const userId = authUser?.id || searchParams.get('userId') || undefined;
+  const userEmail = authUser?.email || searchParams.get('userEmail') || undefined;
+
+  const clients = await GatewayDatabase.listClients({ userId, userEmail });
   const response = NextResponse.json({
     success: true,
     service: 'gateway',
@@ -18,6 +25,8 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
+  const authResult = await requireAuth(request);
+  const authUser = authResult && !('status' in authResult) ? (authResult as any) : null;
   let body: any;
   try {
     body = await request.json();
@@ -29,7 +38,7 @@ export async function POST(request: NextRequest) {
     });
   }
 
-  const { name, description, allowed_services, rate_limit_per_minute } = body;
+  const { name, description, allowed_services, allowed_providers, allowed_endpoints, rate_limit_per_minute } = body;
   if (!name || typeof name !== 'string' || !name.trim()) {
     return Normalizer.error({
       service: 'gateway',
@@ -38,11 +47,18 @@ export async function POST(request: NextRequest) {
     });
   }
 
+  const userId = authUser?.id || body.userId;
+  const userEmail = authUser?.email || body.userEmail;
+
   const { client, rawKey } = await GatewayDatabase.createClient({
     name: name.trim(),
     description: description || '',
     allowedServices: Array.isArray(allowed_services) && allowed_services.length > 0 ? allowed_services : ['*'],
+    allowedProviders: Array.isArray(allowed_providers) && allowed_providers.length > 0 ? allowed_providers : ['*'],
+    allowedEndpoints: Array.isArray(allowed_endpoints) && allowed_endpoints.length > 0 ? allowed_endpoints : ['*'],
     rateLimitPerMinute: rate_limit_per_minute ? Number(rate_limit_per_minute) : 120,
+    userId,
+    userEmail,
   });
 
   const response = NextResponse.json({
@@ -70,7 +86,7 @@ export async function PUT(request: NextRequest) {
     });
   }
 
-  const { id, name, description, allowed_services, rate_limit_per_minute, status } = body;
+  const { id, name, description, allowed_services, allowed_providers, allowed_endpoints, rate_limit_per_minute, status } = body;
   if (!id) {
     return Normalizer.error({
       service: 'gateway',
@@ -83,6 +99,8 @@ export async function PUT(request: NextRequest) {
     name: name?.trim(),
     description: description !== undefined ? description : undefined,
     allowedServices: Array.isArray(allowed_services) ? allowed_services : undefined,
+    allowedProviders: Array.isArray(allowed_providers) ? allowed_providers : undefined,
+    allowedEndpoints: Array.isArray(allowed_endpoints) ? allowed_endpoints : undefined,
     rateLimitPerMinute: rate_limit_per_minute ? Number(rate_limit_per_minute) : undefined,
     status: status,
   });
@@ -136,7 +154,7 @@ export async function DELETE(request: NextRequest) {
   const response = NextResponse.json({
     success: true,
     service: 'gateway',
-    message: `Client "${id}" and all associated API keys have been revoked and deleted.`,
+    message: `Client "${id}" and all associated API keys have been revoked and deleted permanently.`,
   });
   response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
   return response;

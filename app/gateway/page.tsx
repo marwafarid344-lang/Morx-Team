@@ -33,6 +33,7 @@ import {
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
 import { ApiAccessGuard } from "@/components/gateway/api-access-guard";
+import { useAuth } from "@/contexts/auth-context";
 
 const GATEWAY_SERVICES = [
   { id: "videos", label: "Video Discovery", provider: "YouTube Data API v3", icon: Video, color: "text-red-400" },
@@ -97,6 +98,7 @@ const QUICK_ENDPOINTS = [
 ];
 
 export default function GatewayAdminPage() {
+  const { user } = useAuth();
   const [activeTab, setActiveTab] = useState<"overview" | "providers" | "clients" | "lab">("clients");
   const [analytics, setAnalytics] = useState<any>(null);
   const [providers, setProviders] = useState<any[]>([]);
@@ -133,10 +135,15 @@ export default function GatewayAdminPage() {
   const fetchData = async () => {
     try {
       setLoading(true);
+      const userParams = new URLSearchParams();
+      if (user?.auth_user_id) userParams.set("userId", user.auth_user_id);
+      if (user?.email) userParams.set("userEmail", user.email);
+      const queryString = userParams.toString() ? `?${userParams.toString()}` : "";
+
       const [analyticsRes, providersRes, clientsRes] = await Promise.all([
         fetch("/api/v1/gateway/analytics", { cache: "no-store" }).then((r) => r.json()).catch(() => ({})),
         fetch("/api/v1/gateway/providers", { cache: "no-store" }).then((r) => r.json()).catch(() => ({})),
-        fetch("/api/v1/gateway/clients", { cache: "no-store" }).then((r) => r.json()).catch(() => ({})),
+        fetch(`/api/v1/gateway/clients${queryString}`, { cache: "no-store" }).then((r) => r.json()).catch(() => ({})),
       ]);
 
       setAnalytics(analyticsRes?.data || null);
@@ -158,7 +165,7 @@ export default function GatewayAdminPage() {
 
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [user]);
 
   // CREATE CLIENT
   const handleCreateClient = async (e: React.FormEvent) => {
@@ -174,6 +181,8 @@ export default function GatewayAdminPage() {
           description: newClientDesc.trim(),
           allowed_services: newClientServices.length === GATEWAY_SERVICES.length ? ["*"] : newClientServices,
           rate_limit_per_minute: newClientRateLimit,
+          userId: user?.auth_user_id,
+          userEmail: user?.email,
         }),
       });
 
@@ -240,6 +249,9 @@ export default function GatewayAdminPage() {
       return;
     }
 
+    // Optimistically update UI immediately
+    setClients((prev) => prev.filter((c) => c.id !== id));
+
     try {
       const res = await fetch(`/api/v1/gateway/clients?id=${id}`, {
         method: "DELETE",
@@ -249,9 +261,11 @@ export default function GatewayAdminPage() {
         fetchData();
       } else {
         alert(data.errors?.[0]?.message || "Failed to delete client");
+        fetchData();
       }
     } catch (err: any) {
       alert("Error deleting client: " + err.message);
+      fetchData();
     }
   };
 
@@ -641,6 +655,7 @@ export default function GatewayAdminPage() {
                         <th className="p-3.5">Allowed Providers</th>
                         <th className="p-3.5">Status</th>
                         <th className="p-3.5">API Key</th>
+                        <th className="p-3.5">Last Used</th>
                         <th className="p-3.5">Rate Limit</th>
                         <th className="p-3.5 text-right">Actions</th>
                       </tr>
@@ -705,6 +720,10 @@ export default function GatewayAdminPage() {
                               ) : (
                                 <span className="text-muted-foreground text-[10px]">Active in Store</span>
                               )}
+                            </td>
+
+                            <td className="p-3.5 text-muted-foreground font-mono text-[11px]">
+                              {c.lastUsedAt ? new Date(c.lastUsedAt).toLocaleDateString() : "Never"}
                             </td>
 
                             <td className="p-3.5 text-muted-foreground font-mono text-[11px]">

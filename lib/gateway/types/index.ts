@@ -113,6 +113,10 @@ export interface ApiClientRecord {
   allowedEndpoints?: (string | '*')[];
   createdAt: string;
   rawKey?: string;
+  expiresAt?: string;
+  lastUsedAt?: string;
+  userId?: string;
+  userEmail?: string;
 }
 
 export interface ApiKeyRecord {
