@@ -88,8 +88,8 @@ export class ProviderRegistry {
     });
 
     this.capabilities.set('mapbox', {
-      supportedOperations: ['geocode', 'reverse_geocode', 'directions'],
-      supportedFilters: ['address', 'lat', 'lon', 'origin', 'destination'],
+      supportedOperations: ['geocode', 'reverse_geocode', 'directions', 'places'],
+      supportedFilters: ['address', 'lat', 'lon', 'origin', 'destination', 'query'],
       authType: 'bearer',
       paginationSupported: false,
       quotaCostPerCall: 1,
