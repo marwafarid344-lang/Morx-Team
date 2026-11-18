@@ -846,7 +846,7 @@ export default function ApiPage() {
               transition={{ delay: 0.1, duration: 0.35 }}
               className="text-4xl md:text-6xl font-extrabold tracking-tight text-foreground"
             >
-              The Unified API Gateway for <span className="bg-gradient-to-r from-primary via-indigo-500 to-sky-400 bg-clip-text text-transparent">VoyageMind</span>
+              The API Gateway for <span className="bg-gradient-to-r from-primary via-indigo-500 to-sky-400 bg-clip-text text-transparent">VoyageMind</span>
             </motion.h1>
 
             <motion.p 
