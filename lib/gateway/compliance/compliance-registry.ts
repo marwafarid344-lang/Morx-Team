@@ -326,7 +326,49 @@ export class ComplianceRegistry {
       lastReviewedDate: '2026-11-18',
     });
 
-    // 8. Internal TSP Routing Engine (Proprietary Morx)
+    // 8. OSRMRoute
+    this.register({
+      providerName: 'osrmroute',
+      service: 'routing',
+      officialDocumentation: 'https://osrmroute.com',
+      applicableAgreement: 'OSRMRoute Hosted Service Terms & OpenStreetMap License (ODbL)',
+      complianceStatus: 'APPROVED',
+      approvedUseCases: [
+        'Point-to-point and multi-coordinate turn-by-turn road navigation',
+        'Travel duration and route distance estimation with OpenStreetMap road networks',
+      ],
+      allowedOperations: ['directions', 'route'],
+      prohibitedOperations: [
+        'reverse_compile_proprietary_hosting_architecture',
+      ],
+      dataRedistributionPolicy: 'LICENSED_PERMITTED',
+      dataRetentionPolicy: {
+        maxStorageDays: 30,
+        allowPermanentStorage: true,
+        deletionOnRevocationRequired: false,
+      },
+      cachingPolicy: {
+        allowed: true,
+        maxTtlSeconds: 86400 * 3,
+        prohibitedDataTypes: [],
+        allowPersistentStorage: true,
+      },
+      attributionRequirements: {
+        required: true,
+        displayText: 'Routing by OSRMRoute © OpenStreetMap contributors',
+        linkUrl: 'https://osrmroute.com',
+        placement: 'metadata',
+      },
+      oauthRequirements: {
+        required: false,
+      },
+      geographicRestrictions: [],
+      clientEligibility: 'all',
+      requiredApprovals: [],
+      lastReviewedDate: '2026-11-18',
+    });
+
+    // 9. Internal TSP Routing Engine (Proprietary Morx)
     this.register({
       providerName: 'internal_tsp',
       service: 'routing',

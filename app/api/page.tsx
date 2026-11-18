@@ -413,6 +413,62 @@ print(res.json()["data"]["optimized_order"])`,
 }`
   },
   {
+    path: "/api/v1/routes/directions",
+    method: "GET",
+    title: "OSRMRoute Turn-by-Turn Directions",
+    desc: "Computes turn-by-turn routing with distance, duration, steps, and GeoJSON geometry via OSRMRoute.",
+    category: "routing",
+    providers: ["OSRMRoute"],
+    cacheTtl: "5m Cache",
+    rateLimit: "120 req/min",
+    params: [
+      { name: "coordinates", type: "string", required: false, description: "Semicolon-separated lon,lat pairs: 'lon1,lat1;lon2,lat2'." },
+      { name: "origin", type: "string", required: false, description: "Start coordinate: 'lat,lon' or 'lon,lat'." },
+      { name: "destination", type: "string", required: false, description: "End coordinate: 'lat,lon' or 'lon,lat'." },
+      { name: "profile", type: "string", required: false, defaultVal: "driving", description: "'driving' | 'cycling' | 'walking'" },
+      { name: "overview", type: "string", required: false, defaultVal: "full", description: "'full' | 'simplified' | 'false'" },
+      { name: "steps", type: "boolean", required: false, defaultVal: "true", description: "Whether to return turn-by-turn maneuvers." },
+    ],
+    importantNotes: [
+      "OpenStreetMap compliance: Attribution 'Routing by OSRMRoute © OpenStreetMap contributors' included.",
+      "High-throughput routing without external rate-limit throttling.",
+    ],
+    curlExample: `curl -X GET "https://YOUR-DOMAIN/api/v1/routes/directions?coordinates=29.9187,31.2001;29.9500,31.2200&profile=driving" \\
+  -H "Authorization: Bearer YOUR_MORX_API_KEY"`,
+    jsExample: `const res = await fetch("https://YOUR-DOMAIN/api/v1/routes/directions?coordinates=29.9187,31.2001;29.9500,31.2200&profile=driving", {
+  headers: { "Authorization": "Bearer YOUR_MORX_API_KEY" }
+});
+const { data } = await res.json();
+console.log(data.distance_meters, data.duration_seconds);`,
+    pythonExample: `import requests
+res = requests.get(
+    "https://YOUR-DOMAIN/api/v1/routes/directions",
+    headers={"Authorization": "Bearer YOUR_MORX_API_KEY"},
+    params={"coordinates": "29.9187,31.2001;29.9500,31.2200", "profile": "driving"}
+)
+print(res.json()["data"])`,
+    responseExample: `{
+  "success": true,
+  "service": "routing",
+  "data": {
+    "distance_meters": 4520,
+    "duration_seconds": 320,
+    "summary": "Route via El-Geish Rd",
+    "steps": [
+      {
+        "instruction": "Head north on Corniche",
+        "distance_meters": 450,
+        "duration_seconds": 45
+      }
+    ]
+  },
+  "meta": {
+    "provider": "osrmroute",
+    "attribution": "Routing by OSRMRoute © OpenStreetMap contributors"
+  }
+}`
+  },
+  {
     path: "/api/cron/keep-alive",
     method: "GET",
     title: "Database Keep-Alive (Cron)",

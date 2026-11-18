@@ -119,7 +119,7 @@
             <input 
               type="text" 
               id="apiKeyInput" 
-              value="morx_live_p5CtHN3_-R8GnhaHyU1C9b6I-zOJlifYn" 
+              value="morx_live_rrB1bQF_oamh5_fF-lriEXpuMruNbrg4Q" 
               class="w-full bg-morx-900 border border-morx-700/80 rounded-lg px-3 py-1.5 font-mono text-[11px] text-emerald-400 focus:outline-none focus:border-blue-500 pr-16"
               onchange="updateCurlPreview()"
               oninput="updateCurlPreview()"
@@ -139,12 +139,20 @@
           <input 
             type="text" 
             id="baseUrlInput" 
-            value="" 
-            placeholder="http://localhost:3000"
-            class="bg-morx-900 border border-morx-700/80 rounded-lg px-2.5 py-1.5 font-mono text-[11px] text-slate-200 w-48 focus:outline-none focus:border-blue-500"
+            value="https://morx-team.vercel.app" 
+            placeholder="https://morx-team.vercel.app"
+            class="bg-morx-900 border border-morx-700/80 rounded-lg px-2.5 py-1.5 font-mono text-[11px] text-slate-200 w-56 focus:outline-none focus:border-blue-500"
             onchange="updateCurlPreview()"
             oninput="updateCurlPreview()"
           />
+          <div class="flex items-center gap-1">
+            <button type="button" onclick="setBaseUrlPreset('https://morx-team.vercel.app')" class="px-2 py-1 rounded bg-morx-800 hover:bg-morx-700 border border-morx-700 text-[10px] font-mono text-blue-400 hover:border-blue-500/50">
+              Vercel
+            </button>
+            <button type="button" onclick="setBaseUrlPreset('http://localhost:3000')" class="px-2 py-1 rounded bg-morx-800 hover:bg-morx-700 border border-morx-700 text-[10px] font-mono text-slate-300 hover:border-slate-500/50">
+              Local
+            </button>
+          </div>
         </div>
 
       </div>
@@ -157,13 +165,13 @@
       <div class="flex items-center gap-2">
         <span class="text-base shrink-0">⚠️</span>
         <span class="leading-relaxed">
-          <strong>أنت فاتح الصفحة عبر Live Server (بورت 5500):</strong>
-          سيرفر الـ API الخاص بـ Morx شغال على <strong>http://localhost:3000</strong>. تم توجيه الطلبات تلقائياً إلى بورت 3000 لتجنب خطأ 404.
+          <strong>Opened via Live Server (Port 5500):</strong>
+          The Morx API Gateway is active at <strong>http://localhost:3000</strong>. Requests are automatically redirected to avoid 404 errors.
         </span>
       </div>
       <div class="flex items-center gap-2 shrink-0">
         <button onclick="setBaseUrlToNextJs()" class="px-3 py-1 rounded-md bg-blue-600 hover:bg-blue-500 text-white font-bold text-[11px] transition-colors shadow">
-          تأكيد Base URL = http://localhost:3000
+          Switch Base URL to http://localhost:3000
         </button>
       </div>
     </div>
@@ -175,11 +183,11 @@
       <div class="flex items-center justify-between">
         <h3 class="font-bold text-xs text-white flex items-center gap-2">
           <span>⚡ 1-Click Multi-Endpoint Health Verification</span>
-          <span id="batchProgress" class="font-mono text-slate-400 text-[11px]">Testing 5 services...</span>
+          <span id="batchProgress" class="font-mono text-slate-400 text-[11px]">Testing 6 services...</span>
         </h3>
         <button onclick="closeBatchDrawer()" class="text-slate-400 hover:text-white text-xs">✕ Close</button>
       </div>
-      <div id="batchResultsGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-2.5 text-xs font-mono">
+      <div id="batchResultsGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-6 gap-2.5 text-xs font-mono">
         <!-- populated dynamically -->
       </div>
     </div>
@@ -502,6 +510,23 @@
         body: null
       },
       {
+        id: "routes-directions-osrm",
+        category: "Routing",
+        icon: "🚗",
+        title: "OSRMRoute Turn-by-Turn Route",
+        method: "GET",
+        path: "/api/v1/routes/directions",
+        description: "High-performance turn-by-turn routing via OSRMRoute with geometry and maneuvers.",
+        defaultParams: [
+          { key: "coordinates", value: "29.9187,31.2001;29.9500,31.2200", desc: "lon1,lat1;lon2,lat2" },
+          { key: "profile", value: "driving", desc: "driving | cycling | walking" },
+          { key: "overview", value: "full", desc: "full | simplified | false" },
+          { key: "steps", value: "true", desc: "true | false" },
+          { key: "provider", value: "osrmroute", desc: "osrmroute" }
+        ],
+        body: null
+      },
+      {
         id: "routes-optimize",
         category: "Optimizer",
         icon: "⚡",
@@ -807,6 +832,12 @@
       setTimeout(() => label.innerText = 'Copy', 1500);
     }
 
+    function setBaseUrlPreset(url) {
+      const baseUrlInput = document.getElementById('baseUrlInput');
+      baseUrlInput.value = url;
+      updateCurlPreview();
+    }
+
     function setBaseUrlToNextJs() {
       const baseUrlInput = document.getElementById('baseUrlInput');
       baseUrlInput.value = 'http://localhost:3000';
@@ -942,20 +973,20 @@
             output.innerHTML = `
               <div class="p-4 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-200 text-xs space-y-3 font-sans">
                 <div class="font-bold flex items-center gap-2 text-amber-300 text-sm">
-                  <span>🚨 تنبيه: خطأ 404 صادر من سيرفر Live Server!</span>
+                  <span>🚨 Warning: 404 Error from Static Server</span>
                 </div>
                 <p class="leading-relaxed text-slate-300">
-                  أنت ترسل الطلب إلى سيرفر الملفات الثابتة <code class="px-1.5 py-0.5 rounded bg-black/50 font-mono text-emerald-400 font-bold">${url.split('/api/')[0]}</code> (VS Code Live Server على بورت 5500) وهو لا يحتوي على مسارات الـ API.
+                  You are sending requests to a static file host <code class="px-1.5 py-0.5 rounded bg-black/50 font-mono text-emerald-400 font-bold">${url.split('/api/')[0]}</code> (e.g. VS Code Live Server on port 5500) which does not run the API gateway.
                 </p>
                 <div class="p-3.5 rounded-lg bg-black/50 border border-amber-500/20 space-y-2.5">
-                  <div class="font-bold text-white text-xs">الحل السريع بضغطة زر:</div>
+                  <div class="font-bold text-white text-xs">Quick One-Click Solution:</div>
                   <div class="flex items-center gap-2 flex-wrap">
                     <button onclick="setBaseUrlToNextJs()" class="px-3.5 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs transition-colors shadow-md flex items-center gap-1.5">
-                      <span>🔧 تحويل Base URL تلقائياً إلى http://localhost:3000 وإعادة الإرسال</span>
+                      <span>🔧 Auto-switch Base URL to http://localhost:3000 and Retry</span>
                     </button>
                   </div>
                   <div class="text-[11px] text-slate-400">
-                    أو افتح الصفحة مباشرة على سيرفر المشروع: <a href="http://localhost:3000/api-test.html" target="_blank" class="text-blue-400 underline font-mono">http://localhost:3000/api-test.html</a>
+                    Or open directly on the Next.js host: <a href="http://localhost:3000/api-test.html" target="_blank" class="text-blue-400 underline font-mono">http://localhost:3000/api-test.html</a>
                   </div>
                 </div>
               </div>
@@ -1109,6 +1140,48 @@
         return;
       }
 
+      // 4. TURN-BY-TURN ROUTING (OSRMRoute / Directions)
+      if ((endpoint.category === 'Routing' || endpoint.id === 'maps-directions') && (data.distance_meters !== undefined || data.distanceKm !== undefined)) {
+        const distKm = data.distance_meters !== undefined ? (data.distance_meters / 1000).toFixed(2) : (data.distanceKm || 0);
+        const durMins = data.duration_seconds !== undefined ? Math.round(data.duration_seconds / 60) : (data.durationMinutes || 0);
+        const steps = data.steps || [];
+        const attribution = res.meta?.attribution || 'Routing by OSRMRoute © OpenStreetMap contributors';
+
+        let html = `
+          <div class="p-4 rounded-xl bg-morx-950 border border-morx-800 space-y-3">
+            <div class="flex items-center justify-between border-b border-morx-800 pb-2">
+              <div>
+                <span class="font-bold text-xs text-white">🚗 Turn-by-Turn Route:</span>
+                <p class="text-[10px] text-slate-400 mt-0.5">${data.summary || 'Optimal routing computed'}</p>
+              </div>
+              <div class="text-right">
+                <span class="font-mono text-emerald-400 text-xs font-bold">${distKm} km</span>
+                <span class="text-slate-500 text-xs"> · </span>
+                <span class="font-mono text-blue-400 text-xs font-bold">${durMins} mins</span>
+              </div>
+            </div>
+            ${steps.length > 0 ? `
+              <div class="space-y-1.5 max-h-48 overflow-y-auto pr-1">
+                ${steps.slice(0, 8).map((st, i) => `
+                  <div class="flex items-start gap-2 p-1.5 rounded bg-morx-900 border border-morx-800/80 text-[11px]">
+                    <span class="font-mono text-slate-500 shrink-0 text-[10px] mt-0.5">${i + 1}.</span>
+                    <span class="text-slate-200 flex-1">${st.instruction || st.name || 'Maneuver'}</span>
+                    <span class="font-mono text-[10px] text-slate-400 shrink-0">${st.distance_meters ? (st.distance_meters >= 1000 ? (st.distance_meters/1000).toFixed(1) + ' km' : Math.round(st.distance_meters) + ' m') : ''}</span>
+                  </div>
+                `).join('')}
+                ${steps.length > 8 ? `<div class="text-[10px] text-slate-500 italic text-center">+ ${steps.length - 8} additional maneuvers</div>` : ''}
+              </div>
+            ` : ''}
+            <div class="pt-2 border-t border-morx-800/60 flex items-center justify-between text-[10px]">
+              <span class="text-slate-500">Provider: <strong class="text-slate-300 font-mono">${res.provider || 'osrmroute'}</strong></span>
+              <span class="text-emerald-400/80 font-mono text-[9px]">${attribution}</span>
+            </div>
+          </div>
+        `;
+        container.innerHTML = html;
+        return;
+      }
+
       // Fallback
       container.innerHTML = `<div class="p-4 rounded-xl bg-morx-950 border border-morx-800 text-xs text-slate-300">Received valid response envelope with ${Object.keys(data).length} top-level fields. Switch to JSON Viewer for full details.</div>`;
     }
@@ -1141,12 +1214,13 @@
 
       drawer.classList.remove('hidden');
       grid.innerHTML = '';
-      progress.innerText = 'Executing 5 live API calls...';
+      progress.innerText = 'Executing 6 live API calls...';
 
       const tests = [
         { name: "Videos", path: "/api/v1/videos/search?q=Alexandria&limit=2", method: "GET" },
         { name: "Weather", path: "/api/v1/weather/current?city=Alexandria", method: "GET" },
         { name: "Maps", path: "/api/v1/maps/geocode?address=Alexandria", method: "GET" },
+        { name: "OSRMRoute", path: "/api/v1/routes/directions?coordinates=29.9187,31.2001;29.9500,31.2200&profile=driving", method: "GET" },
         { name: "Optimizer", path: "/api/v1/routes/optimize", method: "POST", body: CATALOG.find(e => e.id === 'routes-optimize').body },
         { name: "TikTok", path: "/api/v1/tiktok/videos?limit=2", method: "GET" },
       ];

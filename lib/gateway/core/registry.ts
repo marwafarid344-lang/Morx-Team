@@ -9,6 +9,7 @@ import { GoogleMapsProvider } from '../providers/maps/google-maps';
 import { MapboxProvider } from '../providers/maps/mapbox';
 import { GoogleRoutesProvider } from '../providers/routing/google-routes';
 import { InternalTspProvider } from '../providers/routing/internal-tsp';
+import { OSRMRouteProvider } from '../providers/routing/osrmroute';
 import { TikTokProvider } from '../providers/social/tiktok';
 import { InstagramProvider } from '../providers/social/instagram';
 
@@ -24,6 +25,7 @@ export class ProviderRegistry {
     this.register(new MapboxProvider());
     this.register(new GoogleRoutesProvider());
     this.register(new InternalTspProvider());
+    this.register(new OSRMRouteProvider());
     this.register(new TikTokProvider());
     this.register(new InstagramProvider());
 
@@ -110,6 +112,15 @@ export class ProviderRegistry {
       paginationSupported: false,
       quotaCostPerCall: 0,
       notes: 'Zero-cost local 2-opt Traveling Salesperson heuristic optimizer',
+    });
+
+    this.capabilities.set('osrmroute', {
+      supportedOperations: ['directions', 'route'],
+      supportedFilters: ['coordinates', 'origin', 'destination', 'profile', 'overview', 'geometries', 'steps'],
+      authType: 'bearer',
+      paginationSupported: false,
+      quotaCostPerCall: 1,
+      notes: 'OSRMRoute high-performance hosted turn-by-turn routing with OpenStreetMap road networks',
     });
 
     this.capabilities.set('tiktok', {

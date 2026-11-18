@@ -1,6 +1,20 @@
 {
   "clients": [
     {
+      "id": "client_morx_production_core",
+      "name": "Morx Core Production Client",
+      "description": "Main production key for morx-team.vercel.app",
+      "status": "active",
+      "rateLimitPerMinute": 300,
+      "rateLimitPerHour": 10000,
+      "rateLimitPerDay": 100000,
+      "allowedServices": [
+        "*"
+      ],
+      "createdAt": "2026-11-18T13:36:22.506Z",
+      "rawKey": "morx_live_rrB1bQF_oamh5_fF-lriEXpuMruNbrg4Q"
+    },
+    {
       "id": "client_1795007609717_2gihe",
       "name": "Testing Suite Client",
       "description": "Automated verification client",
@@ -20,6 +34,15 @@
   ],
   "keys": [
     {
+      "id": "key_morx_production_core",
+      "clientId": "client_morx_production_core",
+      "keyPrefix": "morx_live_rrB1bQ",
+      "keyHash": "efe10ba144d4c115c1f755ca6b3def8c9dec5b655d723cbc4c0b6483dbfaada4",
+      "status": "active",
+      "createdAt": "2026-11-18T13:36:22.507Z",
+      "rawKey": "morx_live_rrB1bQF_oamh5_fF-lriEXpuMruNbrg4Q"
+    },
+    {
       "id": "key_1795007609717_fv0c4",
       "clientId": "client_1795007609717_2gihe",
       "keyPrefix": "morx_live_e3kbbRj",
@@ -29,5 +52,5 @@
       "rawKey": "morx_live_e3kbbRj_fyXuW0kQviJvJpIEQFO4WNABD"
     }
   ],
-  "updatedAt": "2026-11-18T13:25:56.914Z"
+  "updatedAt": "2026-11-18T13:43:25.909Z"
 }

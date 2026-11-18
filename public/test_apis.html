@@ -1,0 +1,1296 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MORX — API Testing Lab & Playground</title>
+  <!-- Primary Local Tailwind Stylesheet (100% immune to CSP blocks & works offline) -->
+  <link rel="stylesheet" href="./tailwind.min.css" />
+  <!-- Secondary Tailwind CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <script>
+    if (window.tailwind) {
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+              mono: ['"JetBrains Mono"', 'monospace'],
+            },
+            colors: {
+              morx: {
+                950: '#07090e',
+                900: '#0d1117',
+                850: '#131822',
+                800: '#1a2230',
+                700: '#283347',
+                600: '#3d4d6b',
+                accent: '#3b82f6',
+                emerald: '#10b981',
+                amber: '#f59e0b',
+                rose: '#f43f5e',
+              }
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    /* Bulletproof Base Colors (works even without Tailwind runtime) */
+    body {
+      background-color: #07090e !important;
+      color: #f1f5f9 !important;
+      font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif !important;
+    }
+    .bg-morx-950 { background-color: #07090e !important; }
+    .bg-morx-900 { background-color: #0d1117 !important; }
+    .bg-morx-850 { background-color: #131822 !important; }
+    .bg-morx-800 { background-color: #1a2230 !important; }
+    .bg-morx-700 { background-color: #283347 !important; }
+    .border-morx-800 { border-color: #1a2230 !important; }
+    .border-morx-700 { border-color: #283347 !important; }
+
+    /* Custom sleek scrollbar */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.12); border-radius: 9999px; }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(59, 130, 246, 0.6); }
+    ::-webkit-scrollbar-button { display: none !important; }
+
+    /* Code syntax highlight colors */
+    .json-key { color: #60a5fa; }
+    .json-string { color: #34d399; }
+    .json-number { color: #fbbf24; }
+    .json-boolean { color: #c084fc; }
+    .json-null { color: #94a3b8; }
+  </style>
+</head>
+<body class="bg-morx-950 text-slate-100 min-h-screen font-sans antialiased flex flex-col selection:bg-blue-600 selection:text-white">
+
+  <!-- TOP HEADER -->
+  <header class="border-b border-morx-800 bg-morx-900/90 backdrop-blur-xl sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex flex-wrap items-center justify-between gap-3">
+      <!-- Brand & Status -->
+      <div class="flex items-center gap-3">
+        <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center font-bold text-white shadow-lg shadow-blue-500/20 text-sm">
+          M
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="font-extrabold text-sm tracking-tight text-white">MORX API LAB</span>
+            <span class="px-2 py-0.5 rounded-full text-[10px] font-mono font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center gap-1">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+              Live Gateway v1
+            </span>
+          </div>
+          <p class="text-[11px] text-slate-400">Interactive Test Bench for Morx Unified API</p>
+        </div>
+      </div>
+
+      <!-- Quick Actions -->
+      <div class="flex items-center gap-2">
+        <button onclick="runBatchHealthCheck()" id="batchTestBtn" class="px-3 py-1.5 rounded-lg bg-morx-800 hover:bg-morx-700 border border-morx-700 text-xs font-semibold text-slate-200 transition-all flex items-center gap-1.5 hover:border-blue-500/50">
+          <span>⚡ Test All Endpoints</span>
+        </button>
+        <a href="/api" target="_blank" class="px-3 py-1.5 rounded-lg bg-blue-600/20 hover:bg-blue-600/30 border border-blue-500/30 text-xs font-semibold text-blue-400 transition-all flex items-center gap-1">
+          <span>📖 Docs & Specs</span>
+          <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+        </a>
+      </div>
+    </div>
+
+    <!-- API KEY & BASE URL TOOLBAR -->
+    <div class="border-t border-morx-800/60 bg-morx-950/60 px-4 sm:px-6 py-2.5">
+      <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3 text-xs">
+        
+        <!-- API Key Input -->
+        <div class="flex items-center gap-2 flex-1 min-w-[320px]">
+          <span class="text-slate-400 font-mono text-[11px] shrink-0 flex items-center gap-1">
+            <svg class="w-3.5 h-3.5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/></svg>
+            API Key:
+          </span>
+          <div class="relative flex-1">
+            <input 
+              type="text" 
+              id="apiKeyInput" 
+              value="morx_live_rrB1bQF_oamh5_fF-lriEXpuMruNbrg4Q" 
+              class="w-full bg-morx-900 border border-morx-700/80 rounded-lg px-3 py-1.5 font-mono text-[11px] text-emerald-400 focus:outline-none focus:border-blue-500 pr-16"
+              onchange="updateCurlPreview()"
+              oninput="updateCurlPreview()"
+            />
+            <button onclick="copyApiKey()" class="absolute right-1.5 top-1/2 -translate-y-1/2 px-2 py-0.5 rounded text-[10px] font-mono bg-morx-800 hover:bg-morx-700 text-slate-300 border border-morx-700">
+              <span id="copyKeyLabel">Copy</span>
+            </button>
+          </div>
+          <span class="px-2 py-0.5 rounded text-[10px] font-mono font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 shrink-0">
+            ✓ Authorized
+          </span>
+        </div>
+
+        <!-- Host URL Input -->
+        <div class="flex items-center gap-2 shrink-0">
+          <span class="text-slate-400 font-mono text-[11px]">Base URL:</span>
+          <input 
+            type="text" 
+            id="baseUrlInput" 
+            value="https://morx-team.vercel.app" 
+            placeholder="https://morx-team.vercel.app"
+            class="bg-morx-900 border border-morx-700/80 rounded-lg px-2.5 py-1.5 font-mono text-[11px] text-slate-200 w-56 focus:outline-none focus:border-blue-500"
+            onchange="updateCurlPreview()"
+            oninput="updateCurlPreview()"
+          />
+          <div class="flex items-center gap-1">
+            <button type="button" onclick="setBaseUrlPreset('https://morx-team.vercel.app')" class="px-2 py-1 rounded bg-morx-800 hover:bg-morx-700 border border-morx-700 text-[10px] font-mono text-blue-400 hover:border-blue-500/50">
+              Vercel
+            </button>
+            <button type="button" onclick="setBaseUrlPreset('http://localhost:3000')" class="px-2 py-1 rounded bg-morx-800 hover:bg-morx-700 border border-morx-700 text-[10px] font-mono text-slate-300 hover:border-slate-500/50">
+              Local
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </header>
+
+  <!-- LIVE SERVER DETECTION & WARNING BANNER -->
+  <div id="liveServerBanner" class="hidden border-b border-amber-500/30 bg-amber-500/10 px-4 sm:px-6 py-2.5 text-xs text-amber-200">
+    <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3 font-sans">
+      <div class="flex items-center gap-2">
+        <span class="text-base shrink-0">⚠️</span>
+        <span class="leading-relaxed">
+          <strong>Opened via Live Server (Port 5500):</strong>
+          The Morx API Gateway is active at <strong>http://localhost:3000</strong>. Requests are automatically redirected to avoid 404 errors.
+        </span>
+      </div>
+      <div class="flex items-center gap-2 shrink-0">
+        <button onclick="setBaseUrlToNextJs()" class="px-3 py-1 rounded-md bg-blue-600 hover:bg-blue-500 text-white font-bold text-[11px] transition-colors shadow">
+          Switch Base URL to http://localhost:3000
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- BATCH HEALTH CHECK TOAST/DRAWER -->
+  <div id="batchDrawer" class="hidden border-b border-morx-800 bg-morx-900/95 px-4 sm:px-6 py-4">
+    <div class="max-w-7xl mx-auto space-y-3">
+      <div class="flex items-center justify-between">
+        <h3 class="font-bold text-xs text-white flex items-center gap-2">
+          <span>⚡ 1-Click Multi-Endpoint Health Verification</span>
+          <span id="batchProgress" class="font-mono text-slate-400 text-[11px]">Testing 6 services...</span>
+        </h3>
+        <button onclick="closeBatchDrawer()" class="text-slate-400 hover:text-white text-xs">✕ Close</button>
+      </div>
+      <div id="batchResultsGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-6 gap-2.5 text-xs font-mono">
+        <!-- populated dynamically -->
+      </div>
+    </div>
+  </div>
+
+  <!-- MAIN TWO-COLUMN WORKSPACE -->
+  <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 grid grid-cols-1 lg:grid-cols-12 gap-5">
+    
+    <!-- LEFT PANEL: ENDPOINTS CATALOG (4 cols) -->
+    <div class="lg:col-span-4 flex flex-col gap-3">
+      
+      <!-- Catalog Header & Search -->
+      <div class="p-3.5 rounded-xl bg-morx-900 border border-morx-800 space-y-3">
+        <div class="flex items-center justify-between">
+          <span class="font-bold text-xs text-white uppercase tracking-wider">Endpoints Catalog</span>
+          <span class="text-[10px] font-mono text-slate-400 bg-morx-800 px-2 py-0.5 rounded-full" id="endpointCountBadge">10 Available</span>
+        </div>
+        <div class="relative">
+          <input 
+            type="text" 
+            id="searchEndpointsInput" 
+            placeholder="Filter endpoints (e.g. weather, tsp, video)..." 
+            oninput="filterEndpoints()"
+            class="w-full bg-morx-950 border border-morx-800 rounded-lg px-3 py-1.5 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-blue-500"
+          />
+        </div>
+      </div>
+
+      <!-- Endpoints List -->
+      <div class="space-y-4 max-h-[calc(100vh-270px)] overflow-y-auto pr-1" id="endpointsListContainer">
+        <!-- Rendered by JS -->
+      </div>
+
+    </div>
+
+    <!-- RIGHT PANEL: REQUEST BUILDER & RESPONSE VIEWER (8 cols) -->
+    <div class="lg:col-span-8 flex flex-col gap-4">
+      
+      <!-- REQUEST BUILDER BOX -->
+      <div class="rounded-xl bg-morx-900 border border-morx-800 overflow-hidden shadow-xl">
+        
+        <!-- URL & Send Bar -->
+        <div class="p-3.5 bg-morx-850 border-b border-morx-800 flex flex-wrap items-center gap-2">
+          <span id="selectedMethodBadge" class="px-2.5 py-1 rounded-md text-[11px] font-mono font-bold bg-blue-600/20 text-blue-400 border border-blue-500/30">
+            GET
+          </span>
+          <div class="flex-1 min-w-[200px] flex items-center bg-morx-950 border border-morx-700/80 rounded-lg overflow-hidden focus-within:border-blue-500">
+            <span class="px-2.5 text-xs text-slate-500 font-mono select-none" id="pathBaseLabel">/</span>
+            <input 
+              type="text" 
+              id="requestPathInput" 
+              value="/api/v1/videos/search?q=Alexandria&limit=5" 
+              class="w-full bg-transparent py-1.5 text-xs font-mono text-slate-200 focus:outline-none"
+              oninput="syncFromPathInput()"
+            />
+          </div>
+          <button 
+            id="sendBtn" 
+            onclick="sendActiveRequest()" 
+            class="px-4 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-semibold text-xs transition-all shadow-md shadow-blue-600/20 flex items-center gap-1.5 shrink-0"
+          >
+            <span id="sendBtnIcon">🚀</span>
+            <span id="sendBtnText">Send Request</span>
+            <span class="text-[10px] text-blue-200 font-mono hidden sm:inline opacity-75">↵</span>
+          </button>
+        </div>
+
+        <!-- Request Sub-Tabs -->
+        <div class="px-4 border-b border-morx-800 flex items-center gap-4 text-xs font-medium">
+          <button onclick="switchReqTab('params')" id="tabBtn-params" class="py-2.5 border-b-2 border-blue-500 text-blue-400 font-semibold">
+            Query Params (<span id="paramCountBadge">2</span>)
+          </button>
+          <button onclick="switchReqTab('headers')" id="tabBtn-headers" class="py-2.5 border-b-2 border-transparent text-slate-400 hover:text-slate-200">
+            Headers
+          </button>
+          <button onclick="switchReqTab('body')" id="tabBtn-body" class="py-2.5 border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center gap-1">
+            <span>Body (JSON)</span>
+            <span id="bodyActiveIndicator" class="hidden w-1.5 h-1.5 rounded-full bg-amber-400"></span>
+          </button>
+          <button onclick="switchReqTab('curl')" id="tabBtn-curl" class="py-2.5 border-b-2 border-transparent text-slate-400 hover:text-slate-200">
+            cURL Code
+          </button>
+        </div>
+
+        <!-- Request Sub-Tab Contents -->
+        <div class="p-4 text-xs">
+          
+          <!-- TAB 1: PARAMS -->
+          <div id="reqTab-params" class="space-y-3">
+            <div class="text-[11px] text-slate-400 flex items-center justify-between">
+              <span>Query parameters are automatically encoded into the request URL:</span>
+              <button onclick="addCustomParamRow()" class="text-blue-400 hover:underline font-mono">+ Add Param</button>
+            </div>
+            <div id="paramsList" class="space-y-2">
+              <!-- Dynamically populated -->
+            </div>
+          </div>
+
+          <!-- TAB 2: HEADERS -->
+          <div id="reqTab-headers" class="hidden space-y-3">
+            <div class="space-y-2 font-mono text-[11px]">
+              <div class="flex items-center gap-2 p-2 rounded-lg bg-morx-950 border border-morx-800">
+                <span class="text-slate-400 w-32 shrink-0">Authorization:</span>
+                <span class="text-emerald-400 flex-1 truncate" id="headersAuthPreview">Bearer morx_live_p5CtHN3_-R8GnhaHyU1C9b6I-zOJlifYn</span>
+              </div>
+              <div class="flex items-center gap-2 p-2 rounded-lg bg-morx-950 border border-morx-800">
+                <span class="text-slate-400 w-32 shrink-0">Accept:</span>
+                <span class="text-slate-200 flex-1">application/json</span>
+              </div>
+              <div class="flex items-center gap-2 p-2 rounded-lg bg-morx-950 border border-morx-800">
+                <span class="text-slate-400 w-32 shrink-0">Content-Type:</span>
+                <span class="text-slate-200 flex-1">application/json</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- TAB 3: BODY (JSON) -->
+          <div id="reqTab-body" class="hidden space-y-2">
+            <div class="flex items-center justify-between text-[11px]">
+              <span class="text-slate-400">Request Payload (for POST / PUT requests):</span>
+              <button onclick="formatRequestBodyJson()" class="text-blue-400 hover:underline font-mono">Format JSON</button>
+            </div>
+            <textarea 
+              id="requestBodyInput" 
+              rows="6" 
+              class="w-full bg-morx-950 border border-morx-800 rounded-lg p-3 font-mono text-xs text-emerald-300 focus:outline-none focus:border-blue-500"
+              placeholder="{}"
+              oninput="updateCurlPreview()"
+            ></textarea>
+          </div>
+
+          <!-- TAB 4: CURL PREVIEW -->
+          <div id="reqTab-curl" class="hidden space-y-2">
+            <div class="flex items-center justify-between text-[11px]">
+              <span class="text-slate-400">Live cURL command (Copy & paste into terminal):</span>
+              <button onclick="copyCurlCommand()" class="text-blue-400 hover:underline font-mono" id="copyCurlLabel">Copy cURL</button>
+            </div>
+            <pre id="curlPreviewText" class="p-3 bg-morx-950 border border-morx-800 rounded-lg font-mono text-[11px] text-slate-300 overflow-x-auto whitespace-pre-wrap break-all"></pre>
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- RESPONSE VIEWER BOX -->
+      <div class="rounded-xl bg-morx-900 border border-morx-800 overflow-hidden shadow-xl flex-1 flex flex-col min-h-[420px]">
+        
+        <!-- Response Header / Status Bar -->
+        <div class="p-3 bg-morx-850 border-b border-morx-800 flex flex-wrap items-center justify-between gap-3 text-xs">
+          <div class="flex items-center gap-3">
+            <span class="font-bold text-white uppercase tracking-wider text-[11px]">Response</span>
+            <div id="resStatusBadge" class="px-2 py-0.5 rounded-full font-mono font-bold text-[11px] bg-slate-800 text-slate-400 border border-slate-700">
+              IDLE — Waiting
+            </div>
+            <span id="resTimeBadge" class="font-mono text-[11px] text-slate-400">
+              0 ms
+            </span>
+            <span id="resSizeBadge" class="font-mono text-[11px] text-slate-500">
+              0 KB
+            </span>
+          </div>
+
+          <div class="flex items-center gap-2">
+            <button onclick="copyResponseJson()" id="copyResBtn" class="px-2.5 py-1 rounded bg-morx-800 hover:bg-morx-700 border border-morx-700 text-slate-300 font-mono text-[11px] transition-colors">
+              Copy JSON
+            </button>
+            <button onclick="clearResponse()" class="px-2.5 py-1 rounded bg-morx-800 hover:bg-morx-700 border border-morx-700 text-slate-400 hover:text-slate-200 font-mono text-[11px] transition-colors">
+              Clear
+            </button>
+          </div>
+        </div>
+
+        <!-- Response View Mode Tabs -->
+        <div class="px-4 border-b border-morx-800 flex items-center gap-4 text-xs font-medium">
+          <button onclick="switchResTab('json')" id="resTabBtn-json" class="py-2 border-b-2 border-blue-500 text-blue-400 font-semibold">
+            JSON Viewer
+          </button>
+          <button onclick="switchResTab('visual')" id="resTabBtn-visual" class="py-2 border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center gap-1.5">
+            <span>Visual Preview</span>
+            <span class="px-1.5 py-0.2 rounded bg-purple-500/20 text-purple-300 text-[9px] font-mono">Dynamic</span>
+          </button>
+          <button onclick="switchResTab('headers')" id="resTabBtn-headers" class="py-2 border-b-2 border-transparent text-slate-400 hover:text-slate-200">
+            Headers
+          </button>
+        </div>
+
+        <!-- Response Content Area -->
+        <div class="p-4 flex-1 overflow-auto max-h-[500px]">
+          
+          <!-- TAB 1: JSON PRETTY -->
+          <div id="resTab-json" class="font-mono text-[12px] leading-relaxed select-text">
+            <pre id="responseJsonOutput" class="text-slate-400">// Select an endpoint on the left and click "Send Request" to test the live API with your key morx_live_p5CtHN3_...
+// All responses adhere to the standard Morx envelope: { success, service, data, meta, errors }</pre>
+          </div>
+
+          <!-- TAB 2: VISUAL PREVIEW -->
+          <div id="resTab-visual" class="hidden">
+            <div id="visualPreviewContainer" class="space-y-4">
+              <div class="text-center py-12 text-slate-500 text-xs">
+                Send a request to see visual cards (e.g. video thumbnails, weather widgets, or routing stops).
+              </div>
+            </div>
+          </div>
+
+          <!-- TAB 3: RESPONSE HEADERS -->
+          <div id="resTab-headers" class="hidden">
+            <pre id="responseHeadersOutput" class="font-mono text-[11px] text-slate-300">// Headers will appear here after request</pre>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- JAVASCRIPT LOGIC -->
+  <script>
+    // 1. ENDPOINTS CATALOG DEFINITION
+    const CATALOG = [
+      {
+        id: "videos-search",
+        category: "Videos",
+        icon: "🎥",
+        title: "Video Discovery",
+        method: "GET",
+        path: "/api/v1/videos/search",
+        description: "Search videos & shorts with verified view counts and creator details.",
+        defaultParams: [
+          { key: "q", value: "Alexandria", desc: "Keyword query" },
+          { key: "limit", value: "5", desc: "Max items" },
+          { key: "duration", value: "any", desc: "any | short | medium | long" }
+        ],
+        body: null
+      },
+      {
+        id: "weather-current",
+        category: "Weather",
+        icon: "☀️",
+        title: "Current Weather",
+        method: "GET",
+        path: "/api/v1/weather/current",
+        description: "Real-time temperature, humidity, wind, and weather conditions.",
+        defaultParams: [
+          { key: "city", value: "Alexandria", desc: "City name" },
+          { key: "unit", value: "celsius", desc: "celsius | fahrenheit" }
+        ],
+        body: null
+      },
+      {
+        id: "weather-forecast",
+        category: "Weather",
+        icon: "📅",
+        title: "5-Day Forecast",
+        method: "GET",
+        path: "/api/v1/weather/forecast",
+        description: "Multi-day predictive weather forecasts with daily high/low.",
+        defaultParams: [
+          { key: "city", value: "Alexandria", desc: "City name" },
+          { key: "days", value: "3", desc: "Forecast days (1-5)" }
+        ],
+        body: null
+      },
+      {
+        id: "weather-aqi",
+        category: "Weather",
+        icon: "💨",
+        title: "Air Quality Index (AQI)",
+        method: "GET",
+        path: "/api/v1/weather/air-quality",
+        description: "Pollution index (PM2.5, PM10, CO, NO2) and health assessment.",
+        defaultParams: [
+          { key: "lat", value: "31.2001", desc: "Latitude" },
+          { key: "lon", value: "29.9187", desc: "Longitude" }
+        ],
+        body: null
+      },
+      {
+        id: "maps-geocode",
+        category: "Maps",
+        icon: "📍",
+        title: "Geocoding",
+        method: "GET",
+        path: "/api/v1/maps/geocode",
+        description: "Converts text addresses into high-precision GPS coordinates.",
+        defaultParams: [
+          { key: "address", value: "Bibliotheca Alexandrina", desc: "Physical address" }
+        ],
+        body: null
+      },
+      {
+        id: "maps-places",
+        category: "Maps",
+        icon: "☕",
+        title: "Places of Interest",
+        method: "GET",
+        path: "/api/v1/maps/places",
+        description: "Search points of interest, ratings, and locations.",
+        defaultParams: [
+          { key: "query", value: "Cafe", desc: "Search query" },
+          { key: "lat", value: "31.2001", desc: "Center lat" },
+          { key: "lon", value: "29.9187", desc: "Center lon" }
+        ],
+        body: null
+      },
+      {
+        id: "maps-directions",
+        category: "Maps",
+        icon: "🧭",
+        title: "Directions & Navigation",
+        method: "GET",
+        path: "/api/v1/maps/directions",
+        description: "Turn-by-turn routing with distance, duration, and geometry.",
+        defaultParams: [
+          { key: "origin", value: "31.2001,29.9187", desc: "lat,lon" },
+          { key: "destination", value: "31.2139,29.8856", desc: "lat,lon" },
+          { key: "mode", value: "driving", desc: "driving | walking" }
+        ],
+        body: null
+      },
+      {
+        id: "routes-directions-osrm",
+        category: "Routing",
+        icon: "🚗",
+        title: "OSRMRoute Turn-by-Turn Route",
+        method: "GET",
+        path: "/api/v1/routes/directions",
+        description: "High-performance turn-by-turn routing via OSRMRoute with geometry and maneuvers.",
+        defaultParams: [
+          { key: "coordinates", value: "29.9187,31.2001;29.9500,31.2200", desc: "lon1,lat1;lon2,lat2" },
+          { key: "profile", value: "driving", desc: "driving | cycling | walking" },
+          { key: "overview", value: "full", desc: "full | simplified | false" },
+          { key: "steps", value: "true", desc: "true | false" },
+          { key: "provider", value: "osrmroute", desc: "osrmroute" }
+        ],
+        body: null
+      },
+      {
+        id: "routes-optimize",
+        category: "Optimizer",
+        icon: "⚡",
+        title: "Route Optimizer (TSP)",
+        method: "POST",
+        path: "/api/v1/routes/optimize",
+        description: "Sequence multi-stop delivery routes with 2-Opt TSP heuristic.",
+        defaultParams: [],
+        body: JSON.stringify({
+          "origin": { "lat": 31.2001, "lon": 29.9187, "name": "Bibliotheca Alexandrina" },
+          "stops": [
+            { "id": "stop_1", "lat": 31.2139, "lon": 29.8856, "name": "Citadel of Qaitbay" },
+            { "id": "stop_2", "lat": 31.2843, "lon": 30.0163, "name": "Montaza Palace" },
+            { "id": "stop_3", "lat": 31.1871, "lon": 29.8965, "name": "Pompey's Pillar" }
+          ],
+          "destination": { "lat": 31.2001, "lon": 29.9187, "name": "Bibliotheca Alexandrina" }
+        }, null, 2)
+      },
+      {
+        id: "social-tiktok",
+        category: "Social Feeds",
+        icon: "🎵",
+        title: "TikTok Videos",
+        method: "GET",
+        path: "/api/v1/tiktok/videos",
+        description: "Fetch authorized creator video items and engagement metrics.",
+        defaultParams: [
+          { key: "limit", value: "6", desc: "Max videos" }
+        ],
+        body: null
+      },
+      {
+        id: "social-instagram",
+        category: "Social Feeds",
+        icon: "📸",
+        title: "Instagram Media Feed",
+        method: "GET",
+        path: "/api/v1/instagram/media",
+        description: "Fetch Instagram feed media, reels, and captions.",
+        defaultParams: [
+          { key: "limit", value: "6", desc: "Max items" }
+        ],
+        body: null
+      }
+    ];
+
+    // State
+    let activeEndpoint = CATALOG[0];
+    let currentParams = JSON.parse(JSON.stringify(CATALOG[0].defaultParams));
+    let lastResponseData = null;
+
+    // Initialization
+    window.addEventListener('DOMContentLoaded', () => {
+      // Auto-detect Base URL:
+      // If served directly from Next.js (port 3000/3001), use origin.
+      // If served from VS Code Live Server (port 5500), file://, or any other port, default to http://localhost:3000
+      const baseUrlInput = document.getElementById('baseUrlInput');
+      const isNextJsServer = window.location.port === '3000' || window.location.port === '3001';
+      
+      if (window.location.protocol.startsWith('http') && isNextJsServer) {
+        baseUrlInput.value = window.location.origin;
+      } else {
+        baseUrlInput.value = 'http://localhost:3000';
+      }
+
+      // Check if running on Live Server (port 5500)
+      if (window.location.port === '5500' || window.location.port === '5501') {
+        const liveServerBanner = document.getElementById('liveServerBanner');
+        if (liveServerBanner) liveServerBanner.classList.remove('hidden');
+      }
+
+      renderCatalog();
+      selectEndpoint(CATALOG[0].id);
+
+      // Auto-fetch registered client keys to auto-fill latest user key
+      fetch(`${baseUrlInput.value}/api/v1/gateway/clients`)
+        .then(r => r.json())
+        .then(d => {
+          if (d.success && Array.isArray(d.data) && d.data.length > 0) {
+            const first = d.data.find(c => c.rawKey);
+            if (first) {
+              document.getElementById('apiKeyInput').value = first.rawKey;
+              updateCurlPreview();
+            }
+          }
+        })
+        .catch(() => {});
+
+      // Keyboard shortcut Ctrl+Enter to send
+      document.addEventListener('keydown', (e) => {
+        if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+          e.preventDefault();
+          sendActiveRequest();
+        }
+      });
+    });
+
+    // Render Catalog
+    function renderCatalog(filterText = '') {
+      const container = document.getElementById('endpointsListContainer');
+      container.innerHTML = '';
+
+      const query = filterText.toLowerCase().trim();
+      const filtered = CATALOG.filter(ep => 
+        ep.title.toLowerCase().includes(query) ||
+        ep.path.toLowerCase().includes(query) ||
+        ep.category.toLowerCase().includes(query)
+      );
+
+      document.getElementById('endpointCountBadge').innerText = `${filtered.length} Available`;
+
+      // Group by Category
+      const groups = {};
+      filtered.forEach(ep => {
+        if (!groups[ep.category]) groups[ep.category] = [];
+        groups[ep.category].push(ep);
+      });
+
+      for (const [category, items] of Object.entries(groups)) {
+        const catHeader = document.createElement('div');
+        catHeader.className = 'text-[11px] font-bold text-slate-400 uppercase tracking-wider px-1 pt-1';
+        catHeader.innerText = category;
+        container.appendChild(catHeader);
+
+        items.forEach(ep => {
+          const isSelected = activeEndpoint.id === ep.id;
+          const card = document.createElement('div');
+          card.className = `p-3 rounded-xl border cursor-pointer transition-all ${
+            isSelected 
+              ? 'bg-blue-600/15 border-blue-500/50 shadow-sm shadow-blue-500/10' 
+              : 'bg-morx-900 border-morx-800/80 hover:border-morx-700'
+          }`;
+          card.onclick = () => selectEndpoint(ep.id);
+
+          card.innerHTML = `
+            <div class="flex items-center justify-between gap-2">
+              <div class="flex items-center gap-2">
+                <span class="text-base">${ep.icon}</span>
+                <span class="font-bold text-xs ${isSelected ? 'text-blue-300' : 'text-slate-200'}">${ep.title}</span>
+              </div>
+              <span class="px-1.5 py-0.5 rounded text-[9px] font-mono font-bold ${
+                ep.method === 'GET' ? 'bg-blue-500/15 text-blue-400' : 'bg-emerald-500/15 text-emerald-400'
+              }">${ep.method}</span>
+            </div>
+            <div class="font-mono text-[10px] text-slate-400 mt-1 truncate">${ep.path}</div>
+          `;
+          container.appendChild(card);
+        });
+      }
+    }
+
+    function filterEndpoints() {
+      const q = document.getElementById('searchEndpointsInput').value;
+      renderCatalog(q);
+    }
+
+    // Select Endpoint
+    function selectEndpoint(id) {
+      activeEndpoint = CATALOG.find(e => e.id === id) || CATALOG[0];
+      currentParams = JSON.parse(JSON.stringify(activeEndpoint.defaultParams));
+
+      // Update Method badge
+      const methodBadge = document.getElementById('selectedMethodBadge');
+      methodBadge.innerText = activeEndpoint.method;
+      if (activeEndpoint.method === 'GET') {
+        methodBadge.className = 'px-2.5 py-1 rounded-md text-[11px] font-mono font-bold bg-blue-600/20 text-blue-400 border border-blue-500/30';
+      } else {
+        methodBadge.className = 'px-2.5 py-1 rounded-md text-[11px] font-mono font-bold bg-emerald-600/20 text-emerald-400 border border-emerald-500/30';
+      }
+
+      // Update Body input
+      const bodyInput = document.getElementById('requestBodyInput');
+      const bodyIndicator = document.getElementById('bodyActiveIndicator');
+      if (activeEndpoint.body) {
+        bodyInput.value = activeEndpoint.body;
+        bodyIndicator.classList.remove('hidden');
+      } else {
+        bodyInput.value = '';
+        bodyIndicator.classList.add('hidden');
+      }
+
+      // Render params
+      renderParams();
+      reconstructUrlPath();
+      updateCurlPreview();
+      renderCatalog(document.getElementById('searchEndpointsInput').value);
+
+      // Auto-switch to body tab if POST
+      if (activeEndpoint.method === 'POST') {
+        switchReqTab('body');
+      } else {
+        switchReqTab('params');
+      }
+    }
+
+    // Render Query Params Table
+    function renderParams() {
+      const container = document.getElementById('paramsList');
+      container.innerHTML = '';
+      document.getElementById('paramCountBadge').innerText = currentParams.length;
+
+      if (currentParams.length === 0) {
+        container.innerHTML = '<div class="text-slate-500 italic text-[11px] py-2">No query parameters required for this endpoint.</div>';
+        return;
+      }
+
+      currentParams.forEach((p, idx) => {
+        const row = document.createElement('div');
+        row.className = 'flex items-center gap-2';
+        row.innerHTML = `
+          <input 
+            type="text" 
+            value="${p.key}" 
+            placeholder="key" 
+            class="w-32 bg-morx-950 border border-morx-800 rounded px-2.5 py-1 text-xs font-mono text-slate-300 focus:outline-none focus:border-blue-500"
+            oninput="updateParamKey(${idx}, this.value)"
+          />
+          <span class="text-slate-500 font-mono text-xs">=</span>
+          <input 
+            type="text" 
+            value="${p.value}" 
+            placeholder="value" 
+            class="flex-1 bg-morx-950 border border-morx-800 rounded px-2.5 py-1 text-xs font-mono text-emerald-300 focus:outline-none focus:border-blue-500"
+            oninput="updateParamValue(${idx}, this.value)"
+          />
+          ${p.desc ? `<span class="text-[10px] text-slate-500 hidden sm:inline max-w-[120px] truncate">(${p.desc})</span>` : ''}
+          <button onclick="removeParam(${idx})" class="text-slate-500 hover:text-rose-400 text-xs px-1">✕</button>
+        `;
+        container.appendChild(row);
+      });
+    }
+
+    function updateParamKey(idx, key) {
+      currentParams[idx].key = key;
+      reconstructUrlPath();
+      updateCurlPreview();
+    }
+
+    function updateParamValue(idx, val) {
+      currentParams[idx].value = val;
+      reconstructUrlPath();
+      updateCurlPreview();
+    }
+
+    function removeParam(idx) {
+      currentParams.splice(idx, 1);
+      renderParams();
+      reconstructUrlPath();
+      updateCurlPreview();
+    }
+
+    function addCustomParamRow() {
+      currentParams.push({ key: "param", value: "value", desc: "custom" });
+      renderParams();
+      reconstructUrlPath();
+      updateCurlPreview();
+    }
+
+    // URL Reconstructor
+    function reconstructUrlPath() {
+      const qParts = [];
+      currentParams.forEach(p => {
+        if (p.key.trim()) {
+          qParts.push(`${encodeURIComponent(p.key.trim())}=${encodeURIComponent(p.value.trim())}`);
+        }
+      });
+      const qs = qParts.length > 0 ? `?${qParts.join('&')}` : '';
+      document.getElementById('requestPathInput').value = `${activeEndpoint.path}${qs}`;
+    }
+
+    function syncFromPathInput() {
+      const fullPath = document.getElementById('requestPathInput').value;
+      updateCurlPreview();
+    }
+
+    // cURL Command Generator
+    function getFullRequestUrl() {
+      const base = document.getElementById('baseUrlInput').value.replace(/\/+$/, '');
+      const path = document.getElementById('requestPathInput').value;
+      return `${base}${path.startsWith('/') ? path : '/' + path}`;
+    }
+
+    function updateCurlPreview() {
+      const apiKey = document.getElementById('apiKeyInput').value.trim();
+      const fullUrl = getFullRequestUrl();
+      const method = activeEndpoint.method;
+      const body = document.getElementById('requestBodyInput').value.trim();
+
+      document.getElementById('headersAuthPreview').innerText = `Bearer ${apiKey}`;
+
+      let curl = `curl -X ${method} "${fullUrl}" \\\n  -H "Authorization: Bearer ${apiKey}" \\\n  -H "Accept: application/json"`;
+      if (method === 'POST' && body) {
+        curl += ` \\\n  -H "Content-Type: application/json" \\\n  -d '${body.replace(/'/g, "'\\''")}'`;
+      }
+      document.getElementById('curlPreviewText').innerText = curl;
+    }
+
+    function copyApiKey() {
+      const key = document.getElementById('apiKeyInput').value;
+      navigator.clipboard.writeText(key);
+      const label = document.getElementById('copyKeyLabel');
+      label.innerText = 'Copied!';
+      setTimeout(() => label.innerText = 'Copy', 1500);
+    }
+
+    function setBaseUrlPreset(url) {
+      const baseUrlInput = document.getElementById('baseUrlInput');
+      baseUrlInput.value = url;
+      updateCurlPreview();
+    }
+
+    function setBaseUrlToNextJs() {
+      const baseUrlInput = document.getElementById('baseUrlInput');
+      baseUrlInput.value = 'http://localhost:3000';
+      updateCurlPreview();
+      const banner = document.getElementById('liveServerBanner');
+      if (banner) banner.classList.add('hidden');
+      sendActiveRequest();
+    }
+
+    function copyCurlCommand() {
+      const text = document.getElementById('curlPreviewText').innerText;
+      navigator.clipboard.writeText(text);
+      const label = document.getElementById('copyCurlLabel');
+      label.innerText = 'Copied!';
+      setTimeout(() => label.innerText = 'Copy cURL', 1500);
+    }
+
+    function formatRequestBodyJson() {
+      const textarea = document.getElementById('requestBodyInput');
+      try {
+        const parsed = JSON.parse(textarea.value);
+        textarea.value = JSON.stringify(parsed, null, 2);
+        updateCurlPreview();
+      } catch (e) {
+        alert('Invalid JSON in request body: ' + e.message);
+      }
+    }
+
+    // Tabs Switchers
+    function switchReqTab(tab) {
+      ['params', 'headers', 'body', 'curl'].forEach(t => {
+        document.getElementById(`reqTab-${t}`).classList.add('hidden');
+        document.getElementById(`tabBtn-${t}`).className = 'py-2.5 border-b-2 border-transparent text-slate-400 hover:text-slate-200';
+      });
+      document.getElementById(`reqTab-${tab}`).classList.remove('hidden');
+      document.getElementById(`tabBtn-${tab}`).className = 'py-2.5 border-b-2 border-blue-500 text-blue-400 font-semibold';
+      if (tab === 'curl') updateCurlPreview();
+    }
+
+    function switchResTab(tab) {
+      ['json', 'visual', 'headers'].forEach(t => {
+        document.getElementById(`resTab-${t}`).classList.add('hidden');
+        document.getElementById(`resTabBtn-${t}`).className = 'py-2 border-b-2 border-transparent text-slate-400 hover:text-slate-200';
+      });
+      document.getElementById(`resTab-${tab}`).classList.remove('hidden');
+      document.getElementById(`resTabBtn-${tab}`).className = 'py-2 border-b-2 border-blue-500 text-blue-400 font-semibold';
+    }
+
+    // SEND REQUEST
+    async function sendActiveRequest() {
+      const sendBtn = document.getElementById('sendBtn');
+      const sendBtnIcon = document.getElementById('sendBtnIcon');
+      const sendBtnText = document.getElementById('sendBtnText');
+      const statusBadge = document.getElementById('resStatusBadge');
+      const timeBadge = document.getElementById('resTimeBadge');
+      const sizeBadge = document.getElementById('resSizeBadge');
+      const output = document.getElementById('responseJsonOutput');
+
+      const apiKey = document.getElementById('apiKeyInput').value.trim();
+      const url = getFullRequestUrl();
+      const method = activeEndpoint.method;
+      const bodyText = document.getElementById('requestBodyInput').value.trim();
+
+      // UI Loading state
+      sendBtn.disabled = true;
+      sendBtnIcon.innerText = '⏳';
+      sendBtnText.innerText = 'Calling API...';
+      statusBadge.innerText = 'SENDING...';
+      statusBadge.className = 'px-2 py-0.5 rounded-full font-mono font-bold text-[11px] bg-blue-500/20 text-blue-400 border border-blue-500/30';
+      output.innerText = `// Sending ${method} request to ${url} ...`;
+
+      const startTime = performance.now();
+
+      try {
+        const headers = {
+          'Authorization': `Bearer ${apiKey}`,
+          'Accept': 'application/json'
+        };
+
+        const fetchOptions = { method, headers };
+        if (method === 'POST' && bodyText) {
+          headers['Content-Type'] = 'application/json';
+          fetchOptions.body = bodyText;
+        }
+
+        const response = await fetch(url, fetchOptions);
+        const durationMs = Math.round(performance.now() - startTime);
+
+        // Capture response headers
+        let headersFormatted = '';
+        response.headers.forEach((val, key) => {
+          headersFormatted += `${key}: ${val}\n`;
+        });
+        document.getElementById('responseHeadersOutput').innerText = headersFormatted || '(No custom headers returned)';
+
+        // Capture Body
+        const rawText = await response.text();
+        const payloadKb = (new Blob([rawText]).size / 1024).toFixed(1);
+
+        timeBadge.innerText = `${durationMs} ms`;
+        sizeBadge.innerText = `${payloadKb} KB`;
+
+        let jsonData = null;
+        try {
+          jsonData = JSON.parse(rawText);
+          lastResponseData = jsonData;
+        } catch {
+          lastResponseData = null;
+        }
+
+        // Status badge formatting
+        if (response.ok) {
+          statusBadge.innerText = `${response.status} OK`;
+          statusBadge.className = 'px-2 py-0.5 rounded-full font-mono font-bold text-[11px] bg-emerald-500/20 text-emerald-400 border border-emerald-500/30';
+        } else if (response.status === 401) {
+          statusBadge.innerText = `401 UNAUTHORIZED`;
+          statusBadge.className = 'px-2 py-0.5 rounded-full font-mono font-bold text-[11px] bg-rose-500/20 text-rose-400 border border-rose-500/30';
+        } else if (response.status === 429) {
+          statusBadge.innerText = `429 RATE LIMIT`;
+          statusBadge.className = 'px-2 py-0.5 rounded-full font-mono font-bold text-[11px] bg-amber-500/20 text-amber-400 border border-amber-500/30';
+        } else {
+          statusBadge.innerText = `${response.status} ERROR`;
+          statusBadge.className = 'px-2 py-0.5 rounded-full font-mono font-bold text-[11px] bg-rose-500/20 text-rose-400 border border-rose-500/30';
+        }
+
+        // Render Syntax Highlighted JSON
+        if (jsonData) {
+          output.innerHTML = syntaxHighlightJson(jsonData);
+          renderVisualCards(activeEndpoint, jsonData);
+        } else {
+          // Check if this is a Live Server 404 error
+          if (rawText.includes('Cannot GET') || rawText.includes('Cannot POST') || (response.status === 404 && rawText.includes('<html'))) {
+            output.innerHTML = `
+              <div class="p-4 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-200 text-xs space-y-3 font-sans">
+                <div class="font-bold flex items-center gap-2 text-amber-300 text-sm">
+                  <span>🚨 Warning: 404 Error from Static Server</span>
+                </div>
+                <p class="leading-relaxed text-slate-300">
+                  You are sending requests to a static file host <code class="px-1.5 py-0.5 rounded bg-black/50 font-mono text-emerald-400 font-bold">${url.split('/api/')[0]}</code> (e.g. VS Code Live Server on port 5500) which does not run the API gateway.
+                </p>
+                <div class="p-3.5 rounded-lg bg-black/50 border border-amber-500/20 space-y-2.5">
+                  <div class="font-bold text-white text-xs">Quick One-Click Solution:</div>
+                  <div class="flex items-center gap-2 flex-wrap">
+                    <button onclick="setBaseUrlToNextJs()" class="px-3.5 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs transition-colors shadow-md flex items-center gap-1.5">
+                      <span>🔧 Auto-switch Base URL to http://localhost:3000 and Retry</span>
+                    </button>
+                  </div>
+                  <div class="text-[11px] text-slate-400">
+                    Or open directly on the Next.js host: <a href="http://localhost:3000/api-test.html" target="_blank" class="text-blue-400 underline font-mono">http://localhost:3000/api-test.html</a>
+                  </div>
+                </div>
+              </div>
+            `;
+          } else {
+            output.innerText = rawText;
+          }
+        }
+
+      } catch (err) {
+        const durationMs = Math.round(performance.now() - startTime);
+        timeBadge.innerText = `${durationMs} ms`;
+        statusBadge.innerText = 'NETWORK / CORS ERROR';
+        statusBadge.className = 'px-2 py-0.5 rounded-full font-mono font-bold text-[11px] bg-rose-500/20 text-rose-400 border border-rose-500/30';
+        output.innerText = `Error: ${err.message}\n\nTroubleshooting:\n1. Make sure Next.js is running (e.g. localhost:3000).\n2. If opening directly via file://, set Base URL to "http://localhost:3000".\n3. Verify your endpoint path exists in app/api/v1/.`;
+      } finally {
+        sendBtn.disabled = false;
+        sendBtnIcon.innerText = '🚀';
+        sendBtnText.innerText = 'Send Request';
+      }
+    }
+
+    // Syntax Highlight JSON
+    function syntaxHighlightJson(json) {
+      if (typeof json !== 'string') {
+        json = JSON.stringify(json, null, 2);
+      }
+      json = json.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      return json.replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, function (match) {
+        let cls = 'json-number';
+        if (/^"/.test(match)) {
+          if (/:$/.test(match)) {
+            cls = 'json-key font-bold';
+          } else {
+            cls = 'json-string';
+          }
+        } else if (/true|false/.test(match)) {
+          cls = 'json-boolean font-semibold';
+        } else if (/null/.test(match)) {
+          cls = 'json-null italic';
+        }
+        return '<span class="' + cls + '">' + match + '</span>';
+      });
+    }
+
+    // Render Dynamic Visual Cards
+    function renderVisualCards(endpoint, res) {
+      const container = document.getElementById('visualPreviewContainer');
+      container.innerHTML = '';
+
+      if (!res.success && res.errors) {
+        container.innerHTML = `
+          <div class="p-4 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs space-y-2">
+            <div class="font-bold">⚠️ Gateway Error Response:</div>
+            ${res.errors.map(e => `<div>• <span class="font-mono font-bold">${e.code}</span>: ${e.message}</div>`).join('')}
+          </div>
+        `;
+        return;
+      }
+
+      const data = res.data;
+      if (!data) {
+        container.innerHTML = '<div class="text-slate-500 text-xs">No visual data payload returned.</div>';
+        return;
+      }
+
+      // 1. VIDEOS / SHORTS
+      if (endpoint.category === 'Videos' && Array.isArray(data)) {
+        let html = '<div class="grid grid-cols-1 sm:grid-cols-2 gap-3">';
+        data.forEach(v => {
+          html += `
+            <div class="p-3 rounded-xl bg-morx-950 border border-morx-800 flex flex-col justify-between gap-2">
+              <div class="relative aspect-video rounded-lg overflow-hidden bg-morx-900">
+                <img src="${v.thumbnail || ''}" class="w-full h-full object-cover" onerror="this.src='https://via.placeholder.com/320x180?text=No+Thumbnail'" />
+                <span class="absolute bottom-1.5 right-1.5 px-1.5 py-0.5 rounded bg-black/80 font-mono text-[9px] text-white">
+                  ${v.duration_seconds ? Math.floor(v.duration_seconds / 60) + ':' + String(v.duration_seconds % 60).padStart(2, '0') : 'VIDEO'}
+                </span>
+              </div>
+              <div>
+                <h4 class="font-bold text-xs text-white line-clamp-1">${v.title}</h4>
+                <div class="text-[10px] text-slate-400 mt-1 flex items-center justify-between">
+                  <span>${v.creator?.name || 'Creator'}</span>
+                  <span class="font-mono text-emerald-400">${(v.statistics?.views || 0).toLocaleString()} views</span>
+                </div>
+              </div>
+            </div>
+          `;
+        });
+        html += '</div>';
+        container.innerHTML = html;
+        return;
+      }
+
+      // 2. WEATHER
+      if (endpoint.category === 'Weather' && data.temperature !== undefined) {
+        container.innerHTML = `
+          <div class="p-5 rounded-2xl bg-gradient-to-br from-blue-900/40 via-morx-900 to-morx-950 border border-blue-500/30 space-y-4">
+            <div class="flex items-center justify-between">
+              <div>
+                <h3 class="font-bold text-base text-white">${data.location?.city || 'Location'}</h3>
+                <span class="text-xs text-blue-300 capitalize">${data.condition || 'Weather'}</span>
+              </div>
+              <div class="text-3xl font-extrabold text-white font-mono">
+                ${data.temperature}°C
+              </div>
+            </div>
+            <div class="grid grid-cols-3 gap-2 text-center text-xs font-mono pt-2 border-t border-morx-800">
+              <div class="p-2 rounded bg-morx-900/80">
+                <span class="text-slate-400 text-[10px] block">HUMIDITY</span>
+                <span class="font-bold text-slate-200">${data.humidity || 0}%</span>
+              </div>
+              <div class="p-2 rounded bg-morx-900/80">
+                <span class="text-slate-400 text-[10px] block">WIND SPEED</span>
+                <span class="font-bold text-slate-200">${data.wind?.speed || 0} m/s</span>
+              </div>
+              <div class="p-2 rounded bg-morx-900/80">
+                <span class="text-slate-400 text-[10px] block">PRESSURE</span>
+                <span class="font-bold text-slate-200">${data.pressure || 0} hPa</span>
+              </div>
+            </div>
+          </div>
+        `;
+        return;
+      }
+
+      // 3. ROUTE OPTIMIZATION (TSP)
+      if (endpoint.id === 'routes-optimize' && (data.optimized_order || data.stops)) {
+        const distKm = data.total_distance_meters ? (data.total_distance_meters / 1000).toFixed(1) : (data.totalDistanceKm || 0);
+        const durMins = data.total_duration_seconds ? Math.round(data.total_duration_seconds / 60) : (data.estimatedDurationMinutes || 0);
+        const stopsList = data.stops || (data.optimized_order ? data.optimized_order.map(id => ({ id })) : []);
+        
+        let html = `
+          <div class="p-4 rounded-xl bg-morx-950 border border-morx-800 space-y-3">
+            <div class="flex items-center justify-between border-b border-morx-800 pb-2">
+              <span class="font-bold text-xs text-white">⚡ 2-Opt TSP Optimized Sequence:</span>
+              <span class="font-mono text-emerald-400 text-xs font-bold">${distKm} km · ${durMins} mins</span>
+            </div>
+            <div class="space-y-2">
+        `;
+        stopsList.forEach((s, idx) => {
+          html += `
+            <div class="flex items-center gap-2 p-2 rounded-lg bg-morx-900 border border-morx-800 text-xs">
+              <span class="w-5 h-5 rounded-full bg-blue-600/30 text-blue-400 flex items-center justify-center font-mono font-bold text-[10px]">${idx + 1}</span>
+              <span class="font-medium text-slate-200 flex-1">${s.name || s.id}</span>
+              ${s.lat ? `<span class="font-mono text-[10px] text-slate-400">${s.lat.toFixed(3)}, ${s.lon?.toFixed(3)}</span>` : ''}
+            </div>
+          `;
+        });
+        html += '</div></div>';
+        container.innerHTML = html;
+        return;
+      }
+
+      // 4. TURN-BY-TURN ROUTING (OSRMRoute / Directions)
+      if ((endpoint.category === 'Routing' || endpoint.id === 'maps-directions') && (data.distance_meters !== undefined || data.distanceKm !== undefined)) {
+        const distKm = data.distance_meters !== undefined ? (data.distance_meters / 1000).toFixed(2) : (data.distanceKm || 0);
+        const durMins = data.duration_seconds !== undefined ? Math.round(data.duration_seconds / 60) : (data.durationMinutes || 0);
+        const steps = data.steps || [];
+        const attribution = res.meta?.attribution || 'Routing by OSRMRoute © OpenStreetMap contributors';
+
+        let html = `
+          <div class="p-4 rounded-xl bg-morx-950 border border-morx-800 space-y-3">
+            <div class="flex items-center justify-between border-b border-morx-800 pb-2">
+              <div>
+                <span class="font-bold text-xs text-white">🚗 Turn-by-Turn Route:</span>
+                <p class="text-[10px] text-slate-400 mt-0.5">${data.summary || 'Optimal routing computed'}</p>
+              </div>
+              <div class="text-right">
+                <span class="font-mono text-emerald-400 text-xs font-bold">${distKm} km</span>
+                <span class="text-slate-500 text-xs"> · </span>
+                <span class="font-mono text-blue-400 text-xs font-bold">${durMins} mins</span>
+              </div>
+            </div>
+            ${steps.length > 0 ? `
+              <div class="space-y-1.5 max-h-48 overflow-y-auto pr-1">
+                ${steps.slice(0, 8).map((st, i) => `
+                  <div class="flex items-start gap-2 p-1.5 rounded bg-morx-900 border border-morx-800/80 text-[11px]">
+                    <span class="font-mono text-slate-500 shrink-0 text-[10px] mt-0.5">${i + 1}.</span>
+                    <span class="text-slate-200 flex-1">${st.instruction || st.name || 'Maneuver'}</span>
+                    <span class="font-mono text-[10px] text-slate-400 shrink-0">${st.distance_meters ? (st.distance_meters >= 1000 ? (st.distance_meters/1000).toFixed(1) + ' km' : Math.round(st.distance_meters) + ' m') : ''}</span>
+                  </div>
+                `).join('')}
+                ${steps.length > 8 ? `<div class="text-[10px] text-slate-500 italic text-center">+ ${steps.length - 8} additional maneuvers</div>` : ''}
+              </div>
+            ` : ''}
+            <div class="pt-2 border-t border-morx-800/60 flex items-center justify-between text-[10px]">
+              <span class="text-slate-500">Provider: <strong class="text-slate-300 font-mono">${res.provider || 'osrmroute'}</strong></span>
+              <span class="text-emerald-400/80 font-mono text-[9px]">${attribution}</span>
+            </div>
+          </div>
+        `;
+        container.innerHTML = html;
+        return;
+      }
+
+      // Fallback
+      container.innerHTML = `<div class="p-4 rounded-xl bg-morx-950 border border-morx-800 text-xs text-slate-300">Received valid response envelope with ${Object.keys(data).length} top-level fields. Switch to JSON Viewer for full details.</div>`;
+    }
+
+    function copyResponseJson() {
+      if (!lastResponseData) return;
+      navigator.clipboard.writeText(JSON.stringify(lastResponseData, null, 2));
+      const btn = document.getElementById('copyResBtn');
+      btn.innerText = 'Copied!';
+      setTimeout(() => btn.innerText = 'Copy JSON', 1500);
+    }
+
+    function clearResponse() {
+      lastResponseData = null;
+      document.getElementById('responseJsonOutput').innerText = '// Cleared.';
+      document.getElementById('resStatusBadge').innerText = 'IDLE';
+      document.getElementById('resStatusBadge').className = 'px-2 py-0.5 rounded-full font-mono font-bold text-[11px] bg-slate-800 text-slate-400 border border-slate-700';
+      document.getElementById('resTimeBadge').innerText = '0 ms';
+      document.getElementById('resSizeBadge').innerText = '0 KB';
+      document.getElementById('visualPreviewContainer').innerHTML = '<div class="text-center py-12 text-slate-500 text-xs">Cleared.</div>';
+    }
+
+    // 1-CLICK BATCH HEALTH CHECK RUNNER
+    async function runBatchHealthCheck() {
+      const drawer = document.getElementById('batchDrawer');
+      const grid = document.getElementById('batchResultsGrid');
+      const progress = document.getElementById('batchProgress');
+      const apiKey = document.getElementById('apiKeyInput').value.trim();
+      const base = document.getElementById('baseUrlInput').value.replace(/\/+$/, '');
+
+      drawer.classList.remove('hidden');
+      grid.innerHTML = '';
+      progress.innerText = 'Executing 6 live API calls...';
+
+      const tests = [
+        { name: "Videos", path: "/api/v1/videos/search?q=Alexandria&limit=2", method: "GET" },
+        { name: "Weather", path: "/api/v1/weather/current?city=Alexandria", method: "GET" },
+        { name: "Maps", path: "/api/v1/maps/geocode?address=Alexandria", method: "GET" },
+        { name: "OSRMRoute", path: "/api/v1/routes/directions?coordinates=29.9187,31.2001;29.9500,31.2200&profile=driving", method: "GET" },
+        { name: "Optimizer", path: "/api/v1/routes/optimize", method: "POST", body: CATALOG.find(e => e.id === 'routes-optimize').body },
+        { name: "TikTok", path: "/api/v1/tiktok/videos?limit=2", method: "GET" },
+      ];
+
+      for (const t of tests) {
+        const itemBox = document.createElement('div');
+        itemBox.className = 'p-2.5 rounded-xl bg-morx-950 border border-morx-800 flex flex-col justify-between gap-1';
+        itemBox.innerHTML = `
+          <div class="flex items-center justify-between">
+            <span class="font-bold text-white text-xs">${t.name}</span>
+            <span class="text-[10px] text-blue-400 animate-pulse">Running...</span>
+          </div>
+          <span class="text-[10px] text-slate-500 truncate">${t.path}</span>
+        `;
+        grid.appendChild(itemBox);
+
+        const tStart = performance.now();
+        try {
+          const fetchOpts = {
+            method: t.method,
+            headers: {
+              'Authorization': `Bearer ${apiKey}`,
+              'Accept': 'application/json'
+            }
+          };
+          if (t.method === 'POST') {
+            fetchOpts.headers['Content-Type'] = 'application/json';
+            fetchOpts.body = t.body;
+          }
+
+          const res = await fetch(`${base}${t.path}`, fetchOpts);
+          const ms = Math.round(performance.now() - tStart);
+
+          if (res.ok) {
+            itemBox.className = 'p-2.5 rounded-xl bg-emerald-950/30 border border-emerald-500/40 flex flex-col justify-between gap-1';
+            itemBox.innerHTML = `
+              <div class="flex items-center justify-between">
+                <span class="font-bold text-white text-xs">${t.name}</span>
+                <span class="px-1.5 py-0.2 rounded bg-emerald-500/20 text-emerald-400 font-bold text-[10px]">${res.status} OK</span>
+              </div>
+              <span class="text-[10px] text-emerald-400/80 font-mono">${ms} ms</span>
+            `;
+          } else {
+            itemBox.className = 'p-2.5 rounded-xl bg-rose-950/30 border border-rose-500/40 flex flex-col justify-between gap-1';
+            itemBox.innerHTML = `
+              <div class="flex items-center justify-between">
+                <span class="font-bold text-white text-xs">${t.name}</span>
+                <span class="px-1.5 py-0.2 rounded bg-rose-500/20 text-rose-400 font-bold text-[10px]">${res.status}</span>
+              </div>
+              <span class="text-[10px] text-rose-400/80 font-mono">${ms} ms</span>
+            `;
+          }
+        } catch (err) {
+          itemBox.className = 'p-2.5 rounded-xl bg-rose-950/30 border border-rose-500/40 flex flex-col justify-between gap-1';
+          itemBox.innerHTML = `
+            <div class="flex items-center justify-between">
+              <span class="font-bold text-white text-xs">${t.name}</span>
+              <span class="text-rose-400 font-bold text-[10px]">ERR</span>
+            </div>
+            <span class="text-[10px] text-rose-400/80 font-mono">Network / Offline</span>
+          `;
+        }
+      }
+
+      progress.innerText = '✓ Batch Test Completed';
+    }
+
+    function closeBatchDrawer() {
+      document.getElementById('batchDrawer').classList.add('hidden');
+    }
+  </script>
+</body>
+</html>
