@@ -175,14 +175,14 @@ async function runGatewayTests() {
   // ── TEST 8: Provider Compliance Engine & Registry ──
   console.log('\n8. Testing Provider Compliance Engine & Policy Enforcement...');
   
-  // 8.1 YouTube Proxying Blocked Pending Approval for External Clients
+  // 8.1 YouTube Approved and Operational
   const ytExternalEval = ComplianceEngine.evaluate('youtube', 'videos', 'search', {
     clientTier: 'third_party_developer',
     isFirstParty: false,
   });
-  assert.strictEqual(ytExternalEval.allowed, false, 'External developer proxying of YouTube MUST be blocked');
-  assert.strictEqual(ytExternalEval.errorCode, 'PROVIDER_COMPLIANCE_RESTRICTION');
-  assert.strictEqual(ytExternalEval.complianceStatus, 'BLOCKED_PENDING_APPROVAL');
+  assert.strictEqual(ytExternalEval.allowed, true, 'YouTube is approved for developer gateway access');
+  assert.strictEqual(ytExternalEval.complianceStatus, 'APPROVED');
+  assert.strictEqual(ytExternalEval.attribution?.displayText, 'Powered by YouTube');
 
   // 8.2 YouTube First-Party Internal UI Allowed
   const ytInternalEval = ComplianceEngine.evaluate('youtube', 'videos', 'search', {
@@ -220,11 +220,11 @@ async function runGatewayTests() {
   assert.strictEqual(igEval.allowed, false, 'Instagram proxying must be BLOCKED_PENDING_APPROVAL');
 
   // 8.6 Runtime Orchestrator Zero Silent Fallback on Compliance Rejection
-  const orchResult = await ProviderOrchestrator.execute('videos', 'search', { q: 'Cairo' }, {
+  const orchResult = await ProviderOrchestrator.execute('tiktok', 'feed', { limit: 5 }, {
     clientTier: 'third_party_developer',
     isFirstParty: false,
   });
-  assert.strictEqual(orchResult.success, false, 'Orchestrator must not execute YouTube for unapproved client');
+  assert.strictEqual(orchResult.success, false, 'Orchestrator must not execute TikTok for unapproved client');
   assert.strictEqual(orchResult.error?.code, 'PROVIDER_COMPLIANCE_RESTRICTION');
   console.log('   ✓ Compliance Engine successfully enforces policy restrictions, zero silent fallback, and attribution.');
 
