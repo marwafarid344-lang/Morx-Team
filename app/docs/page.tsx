@@ -1,1546 +1,1391 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import { motion } from "framer-motion"
+import { useState, useMemo } from "react"
+import { motion, AnimatePresence } from "framer-motion"
+import Link from "next/link"
 import { 
   BookOpen, 
+  Search, 
+  Key, 
+  Copy, 
+  Check, 
+  ExternalLink, 
+  ShieldCheck, 
+  Layers, 
+  Terminal, 
+  Code2, 
+  Sparkles, 
   ChevronRight, 
-  Users, 
-  FolderLock, 
-  CheckSquare, 
-  Bell, 
-  LayoutTemplate, 
-  BarChart4, 
-  Settings, 
-  HelpCircle,
-  Code,
-  LogIn,
-  UserPlus,
-  ShieldCheck,
-  Trash2,
-  LogOut,
-  Sparkles,
-  Calendar,
-  LayoutGrid,
-  FileText,
-  MessageSquare,
-  Upload,
-  Shield,
-  Crown,
-  Palette,
-  Clock,
-  Search,
-  Bot,
-  Zap,
-  Lock,
-  Briefcase,
-  GraduationCap,
-  Globe,
-  Star,
-  Github
+  Zap, 
+  Globe, 
+  CheckCircle2, 
+  AlertTriangle,
+  ArrowRight,
+  Server,
+  Activity,
+  FileJson,
+  Navigation,
+  Compass,
+  CloudSun,
+  Video,
+  Share2,
+  DollarSign,
+  Newspaper,
+  Cpu
 } from "lucide-react"
 import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
-import Link from "next/link"
+import { Badge } from "@/components/ui/badge"
+import {
+  YouTubeLogo,
+  TikTokLogo,
+  InstagramLogo,
+  GoogleMapsLogo,
+  OpenWeatherLogo,
+  OSRMRouteLogo,
+  FrankfurterLogo,
+  GNewsLogo,
+  IpGeolocationLogo,
+  ProviderBrandLogo,
+} from "@/components/gateway/provider-logos"
 
-const sections = [
-  { 
-    id: "getting-started", 
-    title: "Getting Started", 
-    icon: <BookOpen className="size-4" />,
-    content: (
-      <div className="space-y-6">
-        <h2 className="text-3xl font-black italic">🚀 Getting Started</h2>
-        <p className="text-muted-foreground">Welcome to <strong>Morx</strong>! We've built an advanced reports and statistics platform designed for modern teams who want to move fast with precision.</p>
-        
-        <div className="rounded-2xl overflow-hidden border bg-muted/20">
-          <img src="./Morx/Home.png" alt="Morx Dashboard" className="w-full object-cover shadow-2xl" />
-        </div>
+// =============================================================================
+// API ENDPOINTS DOCUMENTATION DATA MODEL
+// =============================================================================
 
-        <div className="p-4 bg-primary/5 rounded-xl border-l-4 border-primary">
-          <p className="font-bold">The Morx Vision</p>
-          <p className="text-sm mt-1">Our platform isn't just about checkboxes; it seeks to provide a complete ecosystem where data-driven decisions meet seamless collaboration.</p>
-        </div>
+interface ParamDoc {
+  name: string
+  type: string
+  required: boolean
+  defaultVal?: string
+  desc: string
+  example?: string
+}
 
-        <div className="grid sm:grid-cols-2 gap-4">
-          <button 
-            onClick={() => {
-              const element = document.getElementById('auth-scroll');
-              if (element) element.scrollIntoView({ behavior: 'smooth' });
-              const authSection = document.querySelector('[data-section-id="auth"]');
-              if (authSection) (authSection as HTMLElement).click();
-            }}
-            className="p-4 border rounded-xl bg-background hover:border-primary/50 transition-colors text-left group"
-          >
-             <div className="size-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary mb-3 group-hover:bg-primary group-hover:text-white transition-colors">1</div>
-             <p className="text-sm font-bold">Create Account</p>
-             <p className="text-xs text-muted-foreground">Sign up with your academic or professional email to join the network.</p>
-             <p className="text-[10px] text-primary mt-2 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">Learn how <ChevronRight className="size-2" /></p>
-          </button>
-          <button 
-            onClick={() => {
-              const teamSection = document.querySelector('[data-section-id="teams"]');
-              if (teamSection) (teamSection as HTMLElement).click();
-            }}
-            className="p-4 border rounded-xl bg-background hover:border-primary/50 transition-colors text-left group"
-          >
-             <div className="size-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary mb-3 group-hover:bg-primary group-hover:text-white transition-colors">2</div>
-             <p className="text-sm font-bold">Join or Create Team</p>
-             <p className="text-xs text-muted-foreground">Start your own department or join an existing workforce.</p>
-             <p className="text-[10px] text-primary mt-2 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">Explore teams <ChevronRight className="size-2" /></p>
-          </button>
-        </div>
+interface EndpointDoc {
+  id: string
+  path: string
+  method: "GET" | "POST"
+  title: string
+  category: "videos" | "weather" | "maps" | "routing" | "finance" | "news" | "utils" | "social" | "system"
+  serviceName: string
+  providers: string[]
+  cacheTtl: string
+  rateLimit: string
+  summary: string
+  detailsText: string
+  params: ParamDoc[]
+  bodySchema?: string
+  responseExplanation: string
+  responseSample: Record<string, any>
+  curlSnippet: string
+  jsSnippet: string
+  pythonSnippet: string
+  dartSnippet: string
+}
 
-        <div className="p-5 bg-gradient-to-r from-primary/5 to-primary/10 rounded-2xl border border-primary/20 mt-6">
-          <h3 className="font-bold text-lg mb-3 flex items-center gap-2"><Zap className="size-5 text-primary" /> Quick Overview</h3>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
-            <div className="p-3 bg-background rounded-lg border">
-              <p className="text-2xl font-black text-primary">Teams</p>
-              <p className="text-xs text-muted-foreground">Create & manage teams</p>
-            </div>
-            <div className="p-3 bg-background rounded-lg border">
-              <p className="text-2xl font-black text-primary">Projects</p>
-              <p className="text-xs text-muted-foreground">Organize your work</p>
-            </div>
-            <div className="p-3 bg-background rounded-lg border">
-              <p className="text-2xl font-black text-primary">Tasks</p>
-              <p className="text-xs text-muted-foreground">Track progress</p>
-            </div>
-            <div className="p-3 bg-background rounded-lg border">
-              <p className="text-2xl font-black text-primary">AI</p>
-              <p className="text-xs text-muted-foreground">Smart suggestions</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    )
+const ENDPOINTS_DOCUMENTATION: EndpointDoc[] = [
+  // ---------------------------------------------------------------------------
+  // 1. VIDEOS SERVICE
+  // ---------------------------------------------------------------------------
+  {
+    id: "videos-search",
+    path: "/api/v1/videos/search",
+    method: "GET",
+    title: "Video Search & Metadata Discovery",
+    category: "videos",
+    serviceName: "Video Discovery",
+    providers: ["YouTube Data API v3"],
+    cacheTtl: "10m Cache",
+    rateLimit: "120 req/min",
+    summary: "Searches YouTube videos with unified metadata, view counts, creator info, and duration filters.",
+    detailsText: "This endpoint proxies searches to YouTube Data API v3 while stripping out unnecessary wrapper structures and enriching results with batch-fetched video statistics (view counts, like counts, durations). Identical search queries are cached in memory for 10 minutes to save upstream YouTube quotas. Perfect for VoyageMind destination video guides and visual travel recommendations.",
+    params: [
+      { name: "q", type: "string", required: true, desc: "Search query keyword or topic (e.g., 'Alexandria Egypt Tourism').", example: "Alexandria Egypt" },
+      { name: "limit", type: "number", required: false, defaultVal: "20", desc: "Maximum number of video items to return (1 to 50).", example: "5" },
+      { name: "page", type: "string", required: false, desc: "Pagination token from a previous call's meta.next_page.", example: "CAUQAA" },
+      { name: "sort", type: "string", required: false, defaultVal: "relevance", desc: "Sorting order: 'relevance' | 'date' | 'rating' | 'viewCount'.", example: "viewCount" },
+      { name: "duration", type: "string", required: false, defaultVal: "any", desc: "Duration filter: 'any' | 'short' (<4m) | 'medium' (4-20m) | 'long' (>20m).", example: "medium" },
+    ],
+    responseExplanation: "Returns an array of standardized video items inside `data`. Each item includes `id`, `title`, `description`, `published_at`, `channel: { id, title }`, `thumbnails: { default, medium, high }`, and enriched `statistics: { view_count, like_count }`.",
+    responseSample: {
+      success: true,
+      service: "videos",
+      data: [
+        {
+          id: "W_v1v0kF17E",
+          title: "Top 10 Things to Do in Alexandria, Egypt",
+          description: "Discover the Citadel of Qaitbay, Bibliotheca Alexandrina, and Mediterranean corniche.",
+          published_at: "2026-05-12T14:30:00Z",
+          channel: { id: "UC12345678", title: "Travel Guides International" },
+          thumbnails: {
+            medium: "https://i.ytimg.com/vi/W_v1v0kF17E/mqdefault.jpg",
+            high: "https://i.ytimg.com/vi/W_v1v0kF17E/hqdefault.jpg"
+          },
+          statistics: { view_count: 342100, like_count: 14200, duration_seconds: 524 }
+        }
+      ],
+      meta: { provider: "youtube", cached: true, latency_ms: 18, request_id: "req_vid_8912", timestamp: "2026-11-19T12:00:00Z" },
+      errors: []
+    },
+    curlSnippet: `curl -X GET "https://morx-team.vercel.app/api/v1/videos/search?q=Alexandria+Egypt&limit=5" \\
+  -H "Authorization: Bearer YOUR_MORX_API_KEY"`,
+    jsSnippet: `const response = await fetch("https://morx-team.vercel.app/api/v1/videos/search?q=Alexandria+Egypt&limit=5", {
+  headers: {
+    "Authorization": "Bearer YOUR_MORX_API_KEY",
+    "Content-Type": "application/json"
+  }
+});
+const { data, meta } = await response.json();
+console.log(data); // Array of normalized video items`,
+    pythonSnippet: `import requests
+
+url = "https://morx-team.vercel.app/api/v1/videos/search"
+headers = {"Authorization": "Bearer YOUR_MORX_API_KEY"}
+params = {"q": "Alexandria Egypt", "limit": 5}
+
+response = requests.get(url, headers=headers, params=params)
+data = response.json()["data"]`,
+    dartSnippet: `import 'dart:convert';
+import 'package:http/http.dart' as http;
+
+Future<void> searchVideos() async {
+  final url = Uri.parse('https://morx-team.vercel.app/api/v1/videos/search?q=Alexandria+Egypt&limit=5');
+  final res = await http.get(url, headers: {
+    'Authorization': 'Bearer YOUR_MORX_API_KEY',
+  });
+  final json = jsonDecode(res.body);
+  print(json['data']);
+}`
   },
-  { 
-    id: "auth", 
-    title: "Authentication", 
-    icon: <LogIn className="size-4" />,
-    content: (
-      <div id="auth-scroll" className="space-y-6">
-        <h2 className="text-3xl font-black italic">🔐 Authentication</h2>
-        <p className="text-muted-foreground">Getting started with Morx is simple. Whether you're creating a new account or signing back in, we've optimized the flow for speed and security.</p>
-        
-        <Accordion type="single" collapsible className="w-full">
-          <AccordionItem value="signup" className="border-none">
-            <AccordionTrigger className="hover:no-underline py-4">
-              <div className="flex items-center gap-3">
-                 <div className="size-8 rounded-lg bg-orange-500/10 flex items-center justify-center text-orange-500"><UserPlus className="size-4" /></div>
-                 <div className="text-left">
-                    <p className="text-sm font-bold">Sign Up Workflow</p>
-                <p className="text-xs text-muted-foreground font-normal">A multi-step process to set up your professional profile. You can also skip the manual steps using <strong>GitHub</strong> or <strong>Google</strong> for instant identity creation.</p>
-                 </div>
-              </div>
-            </AccordionTrigger>
-            <AccordionContent>
-              <div className="space-y-6 pt-4">
-                <div className="grid gap-4">
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2">
-                      <Badge variant="outline">Step 1</Badge>
-                      <p className="text-sm font-bold">Basic Information</p>
-                    </div>
-                    <p className="text-xs text-muted-foreground">Enter your first name, last name, and email address.</p>
-                    <div className="rounded-xl overflow-hidden border bg-muted/20">
-                      <img src="/Morx/sign up 1.png" alt="Sign Up Step 1" className="w-full object-cover" />
-                    </div>
-                  </div>
 
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2">
-                      <Badge variant="outline">Step 2</Badge>
-                      <p className="text-sm font-bold">Email Verification</p>
-                    </div>
-                    <p className="text-xs text-muted-foreground">Verify your email address to continue the registration process.</p>
-                    <div className="rounded-xl overflow-hidden border bg-muted/20">
-                      <img src="/Morx/sign up 2.png" alt="Sign Up Step 2" className="w-full object-cover" />
-                    </div>
-                  </div>
+  // ---------------------------------------------------------------------------
+  // 2. WEATHER SERVICE: CURRENT
+  // ---------------------------------------------------------------------------
+  {
+    id: "weather-current",
+    path: "/api/v1/weather/current",
+    method: "GET",
+    title: "Current Weather Conditions",
+    category: "weather",
+    serviceName: "Weather Intelligence",
+    providers: ["OpenWeather API", "Open-Meteo (Failover)"],
+    cacheTtl: "15m Cache",
+    rateLimit: "120 req/min",
+    summary: "Fetches live temperature, weather code, humidity, wind, and atmospheric conditions.",
+    detailsText: "Provides real-time weather observations by city name or exact latitude/longitude coordinates. The Morx Gateway dynamically queries OpenWeather with automatic zero-downtime failover to Open-Meteo. You can specify `provider=open_meteo` or `provider=openweather` in query params if you prefer a specific backend. Results are cached for 15 minutes.",
+    params: [
+      { name: "city", type: "string", required: false, desc: "City name to query (e.g. 'Alexandria', 'Cairo', 'London').", example: "Alexandria" },
+      { name: "lat", type: "number", required: false, desc: "Latitude coordinate (-90 to 90). Used if city is omitted.", example: "31.2001" },
+      { name: "lon", type: "number", required: false, desc: "Longitude coordinate (-180 to 180). Required if lat is passed.", example: "29.9187" },
+      { name: "unit", type: "string", required: false, defaultVal: "metric", desc: "Temperature unit: 'metric' (Celsius) or 'imperial' (Fahrenheit).", example: "metric" },
+      { name: "provider", type: "string", required: false, defaultVal: "auto", desc: "Specific provider override: 'openweather' | 'open_meteo'.", example: "open_meteo" },
+    ],
+    responseExplanation: "Returns a normalized `data` object with location details (`city`, `country`, `coordinates`), current observation (`temperature`, `feels_like`, `temp_min`, `temp_max`, `humidity`, `pressure`, `wind: { speed, deg }`, `condition: { main, description, icon }`), and daylight markers (`sunrise`, `sunset`).",
+    responseSample: {
+      success: true,
+      service: "weather",
+      data: {
+        location: { city: "Alexandria", country: "EG", coordinates: { lat: 31.2001, lon: 29.9187 } },
+        current: {
+          temperature: 24.5,
+          feels_like: 25.1,
+          temp_min: 22.0,
+          temp_max: 26.2,
+          humidity: 62,
+          pressure: 1014,
+          wind: { speed: 4.8, deg: 320, unit: "m/s" },
+          condition: { main: "Clear", description: "clear sky", code: 800, icon: "01d" }
+        },
+        daylight: { sunrise: "2026-11-19T04:35:00Z", sunset: "2026-11-19T15:02:00Z" }
+      },
+      meta: { provider: "open_meteo", cached: false, latency_ms: 65, request_id: "req_wth_2145", timestamp: "2026-11-19T12:00:00Z" },
+      errors: []
+    },
+    curlSnippet: `curl -X GET "https://morx-team.vercel.app/api/v1/weather/current?city=Alexandria" \\
+  -H "Authorization: Bearer YOUR_MORX_API_KEY"`,
+    jsSnippet: `const res = await fetch("https://morx-team.vercel.app/api/v1/weather/current?city=Alexandria", {
+  headers: { "Authorization": "Bearer YOUR_MORX_API_KEY" }
+});
+const { data } = await res.json();
+console.log(\`Current Temp: \${data.current.temperature}°C, \${data.current.condition.description}\`);`,
+    pythonSnippet: `import requests
 
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2">
-                      <Badge variant="outline">Step 3</Badge>
-                      <p className="text-sm font-bold">Academic Details</p>
-                    </div>
-                    <p className="text-xs text-muted-foreground">Select your faculty, study level, and department (for FCDS members).</p>
-                    <div className="rounded-xl overflow-hidden border bg-muted/20">
-                      <img src="/Morx/sign up 3.png" alt="Sign Up Step 3" className="w-full object-cover" />
-                    </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2">
-                      <Badge variant="outline">Step 4</Badge>
-                      <p className="text-sm font-bold">Security & Password</p>
-                    </div>
-                    <p className="text-xs text-muted-foreground">Create a secure password with confirmation validation.</p>
-                    <div className="rounded-xl overflow-hidden border bg-muted/20">
-                      <img src="/Morx/sign up 4.png" alt="Sign Up Step 4" className="w-full object-cover" />
-                    </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2">
-                      <Badge variant="outline">Step 5</Badge>
-                      <p className="text-sm font-bold">Finalizing Profile</p>
-                    </div>
-                    <p className="text-xs text-muted-foreground">Complete your profile setup and start using Morx!</p>
-                    <div className="rounded-xl overflow-hidden border bg-muted/20">
-                      <img src="/Morx/sign up 5.png" alt="Sign Up Step 5" className="w-full object-cover" />
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </AccordionContent>
-          </AccordionItem>
-
-          <AccordionItem value="signin" className="border-none mt-4">
-            <AccordionTrigger className="hover:no-underline py-4">
-              <div className="flex items-center gap-3">
-                 <div className="size-8 rounded-lg bg-blue-500/10 flex items-center justify-center text-blue-500"><LogIn className="size-4" /></div>
-                 <div className="text-left">
-                    <p className="text-sm font-bold">Sign In Process</p>
-                    <p className="text-xs text-muted-foreground font-normal">Quick access to your workspace via traditional or social login.</p>
-                 </div>
-              </div>
-            </AccordionTrigger>
-            <AccordionContent>
-              <div className="space-y-6 pt-4">
-                <div className="grid sm:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <p className="text-xs font-bold text-muted-foreground uppercase">Email Login</p>
-                    <div className="rounded-xl overflow-hidden border bg-muted/20">
-                      <img src="/Morx/login.png" alt="Login Page" className="w-full object-cover" />
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <p className="text-xs font-bold text-muted-foreground uppercase">OAuth Providers</p>
-                    <div className="rounded-xl overflow-hidden border bg-muted/20">
-                      <img src="/Morx/login 2.png" alt="Login Providers" className="w-full object-cover" />
-                    </div>
-                  </div>
-                </div>
-                <div className="grid sm:grid-cols-2 gap-4">
-                  <div className="p-4 bg-blue-500/5 rounded-xl border border-blue-500/20">
-                    <p className="text-sm font-bold flex items-center gap-2"><Shield className="size-4 text-blue-500" /> Google OAuth Integration</p>
-                    <p className="text-xs text-muted-foreground mt-1">Sign in quickly and securely using your Google account. Your profile image and basic info will be synced automatically.</p>
-                  </div>
-                  <div className="p-4 bg-slate-500/5 rounded-xl border border-slate-500/20">
-                    <p className="text-sm font-bold flex items-center gap-2"><Github className="size-4 text-slate-500" /> GitHub Auth</p>
-                    <p className="text-xs text-muted-foreground mt-1">Developer-grade authentication. Perfect for syncing your identity and future repository integrations.</p>
-                  </div>
-                </div>
-              </div>
-            </AccordionContent>
-          </AccordionItem>
-
-          <AccordionItem value="forgot" className="border-none mt-4">
-            <AccordionTrigger className="hover:no-underline py-4">
-              <div className="flex items-center gap-3">
-                 <div className="size-8 rounded-lg bg-red-500/10 flex items-center justify-center text-red-500"><Lock className="size-4" /></div>
-                 <div className="text-left">
-                    <p className="text-sm font-bold">Password Recovery</p>
-                    <p className="text-xs text-muted-foreground font-normal">Forgot your password? Reset it securely.</p>
-                 </div>
-              </div>
-            </AccordionTrigger>
-            <AccordionContent>
-              <div className="space-y-4 pt-4">
-                <p className="text-sm text-muted-foreground">If you've forgotten your password, you can reset it by verifying your identity through Google OAuth, then setting a new password.</p>
-                <div className="grid sm:grid-cols-2 gap-4">
-                  <div className="p-4 border rounded-xl">
-                    <p className="text-xs font-bold mb-2">Step 1: Verify Identity</p>
-                    <p className="text-xs text-muted-foreground">Sign in with Google to confirm your account ownership.</p>
-                  </div>
-                  <div className="p-4 border rounded-xl">
-                    <p className="text-xs font-bold mb-2">Step 2: Set New Password</p>
-                    <p className="text-xs text-muted-foreground">Create a new secure password with confirmation.</p>
-                  </div>
-                </div>
-              </div>
-            </AccordionContent>
-          </AccordionItem>
-        </Accordion>
-      </div>
-    )
+res = requests.get(
+    "https://morx-team.vercel.app/api/v1/weather/current",
+    headers={"Authorization": "Bearer YOUR_MORX_API_KEY"},
+    params={"city": "Alexandria"}
+)
+weather = res.json()["data"]["current"]
+print(f"Temperature: {weather['temperature']} C")`,
+    dartSnippet: `final res = await http.get(
+  Uri.parse('https://morx-team.vercel.app/api/v1/weather/current?city=Alexandria'),
+  headers: {'Authorization': 'Bearer YOUR_MORX_API_KEY'},
+);
+final weather = jsonDecode(res.body)['data']['current'];
+print('Temperature: \${weather['temperature']}°C');`
   },
-  { 
-    id: "profile", 
-    title: "User Profile", 
-    icon: <Users className="size-4" />,
-    content: (
-      <div className="space-y-6">
-        <h2 className="text-3xl font-black italic">👤 Your Identity</h2>
-        <p className="text-muted-foreground">Your profile is your professional hub in Morx. Manage your skills, track your participations, and showcase your contributions.</p>
-        
-        <div className="rounded-2xl overflow-hidden border bg-muted/20">
-          <img src="/Morx/Profile.png" alt="User Profile" className="w-full object-cover" />
-        </div>
 
-        <div className="space-y-4">
-           <h3 className="text-xl font-bold italic">Profile Features:</h3>
-           <ul className="grid gap-3">
-              <li className="flex items-start gap-3">
-                 <div className="size-5 rounded-full bg-green-500/10 flex items-center justify-center text-green-500 mt-0.5"><CheckSquare className="size-3" /></div>
-                  <div>
-                    <p className="text-sm font-bold">Profile Sync</p>
-                    <p className="text-xs text-muted-foreground">Automatic synchronization with your <strong>Google</strong> or <strong>GitHub</strong> account for a seamless experience.</p>
-                  </div>
-              </li>
-              <li className="flex items-start gap-3">
-                 <div className="size-5 rounded-full bg-green-500/10 flex items-center justify-center text-green-500 mt-0.5"><CheckSquare className="size-3" /></div>
-                 <div>
-                    <p className="text-sm font-bold">Activity Tracking</p>
-                    <p className="text-xs text-muted-foreground">Keep an eye on your assigned tasks and progress across all teams.</p>
-                 </div>
-              </li>
-              <li className="flex items-start gap-3">
-                 <div className="size-5 rounded-full bg-green-500/10 flex items-center justify-center text-green-500 mt-0.5"><CheckSquare className="size-3" /></div>
-                 <div>
-                    <p className="text-sm font-bold">Skills Management</p>
-                    <p className="text-xs text-muted-foreground">Add and manage your skills to be discoverable in the Talent Marketplace.</p>
-                 </div>
-              </li>
-              <li className="flex items-start gap-3">
-                 <div className="size-5 rounded-full bg-green-500/10 flex items-center justify-center text-green-500 mt-0.5"><CheckSquare className="size-3" /></div>
-                 <div>
-                    <p className="text-sm font-bold">Social Links</p>
-                    <p className="text-xs text-muted-foreground">Connect your GitHub, LinkedIn, Facebook, and WhatsApp profiles.</p>
-                 </div>
-              </li>
-              <li className="flex items-start gap-3">
-                 <div className="size-5 rounded-full bg-green-500/10 flex items-center justify-center text-green-500 mt-0.5"><CheckSquare className="size-3" /></div>
-                 <div>
-                    <p className="text-sm font-bold">Availability Status</p>
-                    <p className="text-xs text-muted-foreground">Toggle your availability to appear or hide from the Talent Marketplace.</p>
-                 </div>
-              </li>
-           </ul>
-        </div>
-
-        <div className="p-4 bg-primary/5 rounded-xl border border-primary/20">
-          <p className="text-sm font-bold flex items-center gap-2"><GraduationCap className="size-4 text-primary" /> Academic Information</p>
-          <p className="text-xs text-muted-foreground mt-1">Your profile includes your faculty, study level, department, and bio - helping others find the right collaborators.</p>
-        </div>
-      </div>
-    )
+  // ---------------------------------------------------------------------------
+  // 3. WEATHER SERVICE: FORECAST
+  // ---------------------------------------------------------------------------
+  {
+    id: "weather-forecast",
+    path: "/api/v1/weather/forecast",
+    method: "GET",
+    title: "5-Day / 7-Day Weather Forecast",
+    category: "weather",
+    serviceName: "Weather Intelligence",
+    providers: ["OpenWeather API", "Open-Meteo"],
+    cacheTtl: "30m Cache",
+    rateLimit: "120 req/min",
+    summary: "Retrieves extended multi-day weather predictions with daily temperature ranges and conditions.",
+    detailsText: "Provides day-by-day and 3-hour interval forecast models for itinerary trip planning. Perfect for the VoyageMind itinerary engine to advise travelers on packing, optimal touring days, and indoor vs. outdoor scheduling.",
+    params: [
+      { name: "city", type: "string", required: false, desc: "Target city name (e.g. 'Cairo', 'Luxor').", example: "Cairo" },
+      { name: "lat", type: "number", required: false, desc: "Latitude coordinate.", example: "30.0444" },
+      { name: "lon", type: "number", required: false, desc: "Longitude coordinate.", example: "31.2357" },
+      { name: "days", type: "number", required: false, defaultVal: "5", desc: "Forecast length in days (1 to 7).", example: "5" },
+    ],
+    responseExplanation: "Returns `data.daily` array containing forecasted days with `date`, `temp_min`, `temp_max`, `condition`, and `precipitation_probability`.",
+    responseSample: {
+      success: true,
+      service: "weather",
+      data: {
+        location: { city: "Cairo", country: "EG" },
+        daily: [
+          { date: "2026-11-20", temp_min: 16.2, temp_max: 27.5, condition: "Sunny", pop: 0 },
+          { date: "2026-11-21", temp_min: 17.0, temp_max: 28.1, condition: "Partly Cloudy", pop: 10 }
+        ]
+      },
+      meta: { provider: "openweather", cached: true, latency_ms: 12, timestamp: "2026-11-19T12:00:00Z" },
+      errors: []
+    },
+    curlSnippet: `curl -X GET "https://morx-team.vercel.app/api/v1/weather/forecast?city=Cairo&days=5" \\
+  -H "Authorization: Bearer YOUR_MORX_API_KEY"`,
+    jsSnippet: `const res = await fetch("https://morx-team.vercel.app/api/v1/weather/forecast?city=Cairo&days=5", {
+  headers: { "Authorization": "Bearer YOUR_MORX_API_KEY" }
+});
+const { data } = await res.json();
+console.log(data.daily);`,
+    pythonSnippet: `res = requests.get(
+    "https://morx-team.vercel.app/api/v1/weather/forecast",
+    headers={"Authorization": "Bearer YOUR_MORX_API_KEY"},
+    params={"city": "Cairo", "days": 5}
+)
+print(res.json()["data"]["daily"])`,
+    dartSnippet: `final res = await http.get(
+  Uri.parse('https://morx-team.vercel.app/api/v1/weather/forecast?city=Cairo&days=5'),
+  headers: {'Authorization': 'Bearer YOUR_MORX_API_KEY'},
+);
+print(jsonDecode(res.body)['data']['daily']);`
   },
-  { 
-    id: "teams", 
-    title: "Teams & Workforce", 
-    icon: <Users className="size-4" />,
-    content: (
-      <div className="space-y-6">
-        <h2 className="text-3xl font-black italic">👥 Team Power</h2>
-        <p className="text-muted-foreground">Collaborate effectively by grouping members into functional teams and departments.</p>
-        
-        <div className="grid grid-cols-2 gap-4">
-          <div className="rounded-xl overflow-hidden border bg-muted/20">
-            <img src="/Morx/Team.png" alt="Team Overview" className="w-full h-full object-cover" />
-          </div>
-          <div className="rounded-xl overflow-hidden border bg-muted/20">
-            <img src="/Morx/team 2.png" alt="Team Dashboard" className="w-full h-full object-cover" />
-          </div>
-        </div>
 
-        <Accordion type="single" collapsible className="w-full">
-          <AccordionItem value="create" className="border rounded-xl px-4 mb-3">
-            <AccordionTrigger className="hover:no-underline py-4">
-              <div className="flex items-center gap-3">
-                 <div className="size-8 rounded-lg bg-green-500/10 flex items-center justify-center text-green-500"><UserPlus className="size-4" /></div>
-                 <div className="text-left">
-                    <p className="text-sm font-bold">Creating a Team</p>
-                    <p className="text-xs text-muted-foreground font-normal">Set up your own team in minutes.</p>
-                 </div>
-              </div>
-            </AccordionTrigger>
-            <AccordionContent>
-              <div className="space-y-4 pt-2 pb-4">
-                <p className="text-sm text-muted-foreground">When creating a team, you'll provide:</p>
-                <ul className="space-y-2 text-sm">
-                  <li className="flex items-center gap-2"><div className="size-1.5 rounded-full bg-primary" /> <strong>Team Name</strong> - A unique identifier (auto-generates URL)</li>
-                  <li className="flex items-center gap-2"><div className="size-1.5 rounded-full bg-primary" /> <strong>Description</strong> - What your team is about</li>
-                  <li className="flex items-center gap-2"><div className="size-1.5 rounded-full bg-primary" /> <strong>Visibility</strong> - Public (discoverable) or Private (invite-only)</li>
-                  <li className="flex items-center gap-2"><div className="size-1.5 rounded-full bg-primary" /> <strong>Team Type</strong> - Basic or Determinated (with purpose & subject)</li>
-                  <li className="flex items-center gap-2"><div className="size-1.5 rounded-full bg-primary" /> <strong>Purpose</strong> - Gaming, Business, Development, or FCDS</li>
-                  <li className="flex items-center gap-2"><div className="size-1.5 rounded-full bg-primary" /> <strong>Required Skills</strong> - For AI-powered talent matching</li>
-                </ul>
-                <div className="p-3 bg-primary/5 rounded-lg text-xs">
-                  <strong>Note:</strong> The creator automatically becomes the team Owner.
-                </div>
-              </div>
-            </AccordionContent>
-          </AccordionItem>
-
-          <AccordionItem value="visibility" className="border rounded-xl px-4 mb-3">
-            <AccordionTrigger className="hover:no-underline py-4">
-              <div className="flex items-center gap-3">
-                 <div className="size-8 rounded-lg bg-blue-500/10 flex items-center justify-center text-blue-500"><Globe className="size-4" /></div>
-                 <div className="text-left">
-                    <p className="text-sm font-bold">Public vs Private Teams</p>
-                    <p className="text-xs text-muted-foreground font-normal">Control who can discover and join your team.</p>
-                 </div>
-              </div>
-            </AccordionTrigger>
-            <AccordionContent>
-              <div className="space-y-4 pt-2 pb-4">
-                <div className="grid sm:grid-cols-2 gap-4">
-                  <div className="p-4 border rounded-xl bg-green-500/5 border-green-500/20">
-                    <p className="text-sm font-bold text-green-600 mb-2">🌐 Public Teams</p>
-                    <ul className="space-y-1 text-xs text-muted-foreground">
-                      <li>• Visible in Browse Teams page</li>
-                      <li>• Anyone can request to join</li>
-                      <li>• Searchable by name, tags, subject</li>
-                      <li>• Great for open communities</li>
-                    </ul>
-                  </div>
-                  <div className="p-4 border rounded-xl bg-orange-500/5 border-orange-500/20">
-                    <p className="text-sm font-bold text-orange-600 mb-2">🔒 Private Teams</p>
-                    <ul className="space-y-1 text-xs text-muted-foreground">
-                      <li>• Hidden from public browse</li>
-                      <li>• Invitation-only access</li>
-                      <li>• Perfect for closed projects</li>
-                      <li>• Maximum privacy control</li>
-                    </ul>
-                  </div>
-                </div>
-                <div className="rounded-2xl overflow-hidden border bg-muted/20 border-primary/20">
-                  <img src="/Morx/public teams.png" alt="Public Teams Explorer" className="w-full object-cover" />
-                </div>
-              </div>
-            </AccordionContent>
-          </AccordionItem>
-
-          <AccordionItem value="roles" className="border rounded-xl px-4 mb-3">
-            <AccordionTrigger className="hover:no-underline py-4">
-              <div className="flex items-center gap-3">
-                 <div className="size-8 rounded-lg bg-purple-500/10 flex items-center justify-center text-purple-500"><Crown className="size-4" /></div>
-                 <div className="text-left">
-                    <p className="text-sm font-bold">Team Roles & Permissions</p>
-                    <p className="text-xs text-muted-foreground font-normal">Understand what each role can do.</p>
-                 </div>
-              </div>
-            </AccordionTrigger>
-            <AccordionContent>
-              <div className="space-y-4 pt-2 pb-4">
-                <div className="overflow-x-auto">
-                  <table className="w-full text-xs">
-                    <thead>
-                      <tr className="border-b">
-                        <th className="text-left py-2 px-3">Permission</th>
-                        <th className="text-center py-2 px-3">👑 Owner</th>
-                        <th className="text-center py-2 px-3">🛡️ Admin</th>
-                        <th className="text-center py-2 px-3">👤 Member</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y">
-                      <tr><td className="py-2 px-3">Delete Team</td><td className="text-center">✅</td><td className="text-center">❌</td><td className="text-center">❌</td></tr>
-                      <tr><td className="py-2 px-3">Update Team Settings</td><td className="text-center">✅</td><td className="text-center">✅</td><td className="text-center">❌</td></tr>
-                      <tr><td className="py-2 px-3">Change Visibility</td><td className="text-center">✅</td><td className="text-center">✅</td><td className="text-center">❌</td></tr>
-                      <tr><td className="py-2 px-3">Add/Remove Members</td><td className="text-center">✅</td><td className="text-center">✅</td><td className="text-center">❌</td></tr>
-                      <tr><td className="py-2 px-3">Change Member Roles</td><td className="text-center">✅</td><td className="text-center">✅</td><td className="text-center">❌</td></tr>
-                      <tr><td className="py-2 px-3">Approve Join Requests</td><td className="text-center">✅</td><td className="text-center">✅</td><td className="text-center">❌</td></tr>
-                      <tr><td className="py-2 px-3">Create Projects</td><td className="text-center">✅</td><td className="text-center">✅</td><td className="text-center">❌</td></tr>
-                      <tr><td className="py-2 px-3">Create Tasks</td><td className="text-center">✅</td><td className="text-center">✅</td><td className="text-center">❌</td></tr>
-                      <tr><td className="py-2 px-3">Assign Tasks</td><td className="text-center">✅</td><td className="text-center">✅</td><td className="text-center">❌</td></tr>
-                      <tr><td className="py-2 px-3">Edit Task Status</td><td className="text-center">✅</td><td className="text-center">✅</td><td className="text-center">✅</td></tr>
-                      <tr><td className="py-2 px-3">Add Comments</td><td className="text-center">✅</td><td className="text-center">✅</td><td className="text-center">✅</td></tr>
-                      <tr><td className="py-2 px-3">View Team Stats</td><td className="text-center">✅</td><td className="text-center">✅</td><td className="text-center">✅</td></tr>
-                    </tbody>
-                  </table>
-                </div>
-                <div className="rounded-xl overflow-hidden border border-primary/20 bg-background">
-                  <img src="/Morx/admin vs owner.png" alt="Admin vs Owner comparison" className="w-full" />
-                </div>
-              </div>
-            </AccordionContent>
-          </AccordionItem>
-
-          <AccordionItem value="members" className="border rounded-xl px-4 mb-3">
-            <AccordionTrigger className="hover:no-underline py-4">
-              <div className="flex items-center gap-3">
-                 <div className="size-8 rounded-lg bg-cyan-500/10 flex items-center justify-center text-cyan-500"><Users className="size-4" /></div>
-                 <div className="text-left">
-                    <p className="text-sm font-bold">Member Management</p>
-                    <p className="text-xs text-muted-foreground font-normal">Add, remove, and manage team members.</p>
-                 </div>
-              </div>
-            </AccordionTrigger>
-            <AccordionContent>
-              <div className="space-y-4 pt-2 pb-4">
-                <p className="text-sm text-muted-foreground">Owners and admins can manage team members:</p>
-                <ul className="space-y-2 text-sm">
-                  <li className="flex items-center gap-2"><div className="size-1.5 rounded-full bg-green-500" /> <strong>Add by Email</strong> - Invite users directly by their email address</li>
-                  <li className="flex items-center gap-2"><div className="size-1.5 rounded-full bg-blue-500" /> <strong>From Marketplace</strong> - Invite talent from the Talent Marketplace</li>
-                  <li className="flex items-center gap-2"><div className="size-1.5 rounded-full bg-purple-500" /> <strong>Change Roles</strong> - Promote members to admin or demote</li>
-                  <li className="flex items-center gap-2"><div className="size-1.5 rounded-full bg-red-500" /> <strong>Remove Members</strong> - Remove users from the team</li>
-                </ul>
-                <div className="p-3 bg-yellow-500/10 rounded-lg border border-yellow-500/20 text-xs">
-                  <strong>⚠️ Member Limits:</strong> The number of members you can add depends on the team owner's subscription plan (Free: 15, Starter: 50, Professional: 80, Enterprise: Unlimited).
-                </div>
-              </div>
-            </AccordionContent>
-          </AccordionItem>
-        </Accordion>
-
-        <div className="grid sm:grid-cols-2 gap-4 mt-8">
-          <div className="p-5 bg-destructive/5 border border-destructive/10 rounded-2xl space-y-3">
-             <div className="flex items-center gap-2 text-destructive">
-                <Trash2 className="size-4" />
-                <p className="text-sm font-bold">Team Dissolution</p>
-             </div>
-             <p className="text-xs text-muted-foreground">Only owners can completely delete a team. This action is irreversible and removes all projects, tasks, and data.</p>
-             <div className="rounded-xl overflow-hidden border border-destructive/20">
-                <img src="/Morx/delete team.png" alt="Delete Team" className="w-full" />
-             </div>
-          </div>
-          <div className="p-5 bg-orange-500/5 border border-orange-500/10 rounded-2xl space-y-3">
-             <div className="flex items-center gap-2 text-orange-500">
-                <LogOut className="size-4" />
-                <p className="text-sm font-bold">Leaving a Team</p>
-             </div>
-             <p className="text-xs text-muted-foreground">Members can leave teams at any time, but will lose access to team resources. Owners cannot leave without transferring ownership.</p>
-             <div className="rounded-xl overflow-hidden border border-orange-500/20">
-                <img src="/Morx/leave team.png" alt="Leave Team" className="w-full" />
-             </div>
-          </div>
-        </div>
-      </div>
-    )
+  // ---------------------------------------------------------------------------
+  // 4. MAPS: GEOCODING
+  // ---------------------------------------------------------------------------
+  {
+    id: "maps-geocode",
+    path: "/api/v1/maps/geocode",
+    method: "GET",
+    title: "Address & Landmark Geocoding",
+    category: "maps",
+    serviceName: "Maps & Geolocation",
+    providers: ["Google Maps Platform", "Mapbox (Failover)"],
+    cacheTtl: "24h Cache",
+    rateLimit: "120 req/min",
+    summary: "Converts text addresses and landmark names into high-precision GPS coordinates.",
+    detailsText: "Translates human-readable names (e.g. 'Citadel of Qaitbay', 'Bibliotheca Alexandrina', 'Eiffel Tower') into latitude and longitude coordinates with formatted addresses and bounding boxes. Caches lookups for 24 hours.",
+    params: [
+      { name: "address", type: "string", required: true, desc: "Landmark, address, or tourist attraction name.", example: "Bibliotheca Alexandrina" }
+    ],
+    responseExplanation: "Returns normalized location metadata: `formatted_address`, `latitude`, `longitude`, `place_id`, and `types`.",
+    responseSample: {
+      success: true,
+      service: "maps",
+      data: {
+        formatted_address: "Al Azaritah WA Ash Shatebi, Bab Sharqi, Alexandria Governorate, Egypt",
+        latitude: 31.2089,
+        longitude: 29.9092,
+        place_id: "ChIJ7T1s338S9RQRv4o2d8Z37wU",
+        types: ["library", "point_of_interest", "establishment"]
+      },
+      meta: { provider: "google_maps", cached: true, latency_ms: 8, timestamp: "2026-11-19T12:00:00Z" },
+      errors: []
+    },
+    curlSnippet: `curl -X GET "https://morx-team.vercel.app/api/v1/maps/geocode?address=Bibliotheca+Alexandrina" \\
+  -H "Authorization: Bearer YOUR_MORX_API_KEY"`,
+    jsSnippet: `const res = await fetch("https://morx-team.vercel.app/api/v1/maps/geocode?address=Bibliotheca+Alexandrina", {
+  headers: { "Authorization": "Bearer YOUR_MORX_API_KEY" }
+});
+const { data } = await res.json();
+console.log(\`Lat: \${data.latitude}, Lon: \${data.longitude}\`);`,
+    pythonSnippet: `res = requests.get(
+    "https://morx-team.vercel.app/api/v1/maps/geocode",
+    headers={"Authorization": "Bearer YOUR_MORX_API_KEY"},
+    params={"address": "Bibliotheca Alexandrina"}
+)
+print(res.json()["data"])`,
+    dartSnippet: `final res = await http.get(
+  Uri.parse('https://morx-team.vercel.app/api/v1/maps/geocode?address=Bibliotheca+Alexandrina'),
+  headers: {'Authorization': 'Bearer YOUR_MORX_API_KEY'},
+);
+print(jsonDecode(res.body)['data']);`
   },
-  { 
-    id: "projects", 
-    title: "Projects", 
-    icon: <FolderLock className="size-4" />,
-    content: (
-      <div className="space-y-6">
-        <h2 className="text-3xl font-black italic">📁 Projects</h2>
-        <p className="text-muted-foreground">Projects are containers for your tasks within a team. Organize work by project to keep things structured.</p>
-        
-        <div className="p-4 bg-amber-500/5 rounded-xl border-l-4 border-amber-500">
-          <p className="font-bold flex items-center gap-2"><Shield className="size-4 text-amber-500" /> Permission Required</p>
-          <p className="text-sm mt-1">Only team <strong>Owners</strong> and <strong>Admins</strong> can create projects within a team.</p>
-        </div>
 
-        <div className="space-y-4">
-          <h3 className="text-xl font-bold italic">Project Features:</h3>
-          <div className="grid sm:grid-cols-2 gap-4">
-            <div className="p-4 border rounded-xl">
-              <div className="size-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary mb-3">
-                <FolderLock className="size-5" />
-              </div>
-              <p className="text-sm font-bold">Create Project</p>
-              <p className="text-xs text-muted-foreground mt-1">Set a project name and description. The URL is auto-generated.</p>
-            </div>
-            <div className="p-4 border rounded-xl">
-              <div className="size-10 rounded-lg bg-blue-500/10 flex items-center justify-center text-blue-500 mb-3">
-                <Settings className="size-5" />
-              </div>
-              <p className="text-sm font-bold">Edit Project</p>
-              <p className="text-xs text-muted-foreground mt-1">Update project name and description at any time.</p>
-            </div>
-            <div className="p-4 border rounded-xl">
-              <div className="size-10 rounded-lg bg-green-500/10 flex items-center justify-center text-green-500 mb-3">
-                <BarChart4 className="size-5" />
-              </div>
-              <p className="text-sm font-bold">Progress Tracking</p>
-              <p className="text-xs text-muted-foreground mt-1">Visual progress bar showing task completion percentage.</p>
-            </div>
-            <div className="p-4 border rounded-xl">
-              <div className="size-10 rounded-lg bg-purple-500/10 flex items-center justify-center text-purple-500 mb-3">
-                <Users className="size-5" />
-              </div>
-              <p className="text-sm font-bold">Team Access</p>
-              <p className="text-xs text-muted-foreground mt-1">All team members automatically have access to team projects.</p>
-            </div>
-          </div>
-        </div>
-
-        <div className="p-5 bg-destructive/5 border border-destructive/10 rounded-2xl mt-6 space-y-3">
-           <div className="flex items-center gap-2 text-destructive">
-              <Trash2 className="size-4" />
-              <p className="text-sm font-bold">Project Deletion</p>
-           </div>
-           <div className="flex flex-col md:flex-row gap-6">
-              <div className="flex-1">
-                 <p className="text-xs text-muted-foreground mb-4">Deleting a project will permanently remove all associated tasks, comments, files, and documentation. Ensure you have backed up any necessary data before proceeding.</p>
-                 <div className="p-3 bg-background rounded-lg border border-destructive/20 text-[10px] italic">
-                    Note: Only the team owner or admin can delete projects. Deletion requires confirmation by typing the project name.
-                 </div>
-              </div>
-              <div className="shrink-0 w-full md:w-64 rounded-xl overflow-hidden border border-destructive/20 bg-background">
-                 <img src="/Morx/delete project.png" alt="Delete Project" className="w-full" />
-              </div>
-           </div>
-        </div>
-      </div>
-    )
+  // ---------------------------------------------------------------------------
+  // 5. MAPS: PLACES SEARCH
+  // ---------------------------------------------------------------------------
+  {
+    id: "maps-places",
+    path: "/api/v1/maps/places",
+    method: "GET",
+    title: "Nearby Places & POI Search",
+    category: "maps",
+    serviceName: "Maps & Geolocation",
+    providers: ["Google Places API", "Mapbox Places"],
+    cacheTtl: "6h Cache",
+    rateLimit: "120 req/min",
+    summary: "Searches points of interest (cafes, restaurants, museums, hotels) around specific coordinates.",
+    detailsText: "Essential for location-based discovery in VoyageMind. Given a center coordinate and query, returns sorted nearby attractions with ratings, pricing levels, addresses, and distances.",
+    params: [
+      { name: "query", type: "string", required: true, desc: "Search keyword (e.g. 'Seafood Restaurant', 'Cafe', 'Museum').", example: "Cafe" },
+      { name: "lat", type: "number", required: true, desc: "Center point latitude.", example: "31.2001" },
+      { name: "lon", type: "number", required: true, desc: "Center point longitude.", example: "29.9187" },
+      { name: "radius", type: "number", required: false, defaultVal: "5000", desc: "Search radius in meters (max: 50000).", example: "3000" },
+    ],
+    responseExplanation: "Returns array of place items with `id`, `name`, `address`, `location: { lat, lon }`, `rating`, `user_ratings_total`, and `open_now`.",
+    responseSample: {
+      success: true,
+      service: "maps",
+      data: [
+        {
+          id: "place_9812",
+          name: "Greek Club Restaurant & Cafe",
+          address: "Qaitbay St, Al Anfoushi, Alexandria",
+          location: { lat: 31.2132, lon: 29.8851 },
+          rating: 4.6,
+          user_ratings_total: 3120,
+          open_now: true
+        }
+      ],
+      meta: { provider: "google_maps", cached: false, latency_ms: 145, timestamp: "2026-11-19T12:00:00Z" },
+      errors: []
+    },
+    curlSnippet: `curl -X GET "https://morx-team.vercel.app/api/v1/maps/places?query=Cafe&lat=31.2001&lon=29.9187&radius=3000" \\
+  -H "Authorization: Bearer YOUR_MORX_API_KEY"`,
+    jsSnippet: `const res = await fetch("https://morx-team.vercel.app/api/v1/maps/places?query=Cafe&lat=31.2001&lon=29.9187", {
+  headers: { "Authorization": "Bearer YOUR_MORX_API_KEY" }
+});
+const { data } = await res.json();
+console.log(data);`,
+    pythonSnippet: `res = requests.get(
+    "https://morx-team.vercel.app/api/v1/maps/places",
+    headers={"Authorization": "Bearer YOUR_MORX_API_KEY"},
+    params={"query": "Cafe", "lat": 31.2001, "lon": 29.9187}
+)
+print(res.json()["data"])`,
+    dartSnippet: `final res = await http.get(
+  Uri.parse('https://morx-team.vercel.app/api/v1/maps/places?query=Cafe&lat=31.2001&lon=29.9187'),
+  headers: {'Authorization': 'Bearer YOUR_MORX_API_KEY'},
+);
+print(jsonDecode(res.body)['data']);`
   },
-  { 
-    id: "tasks", 
-    title: "Task Management", 
-    icon: <CheckSquare className="size-4" />,
-    content: (
-      <div className="space-y-6">
-        <h2 className="text-3xl font-black italic">✅ Task Management</h2>
-        <p className="text-muted-foreground">Our powerful task management system helps you track work from start to finish with multiple views and AI assistance.</p>
-        
-        <div className="p-4 bg-amber-500/5 rounded-xl border-l-4 border-amber-500">
-          <p className="font-bold flex items-center gap-2"><Shield className="size-4 text-amber-500" /> Task Creation Permission</p>
-          <p className="text-sm mt-1">Only team <strong>Owners</strong> and <strong>Admins</strong> can create new tasks. All members can update task status, priority, and due dates.</p>
-        </div>
-        
-        <div className="rounded-2xl overflow-hidden border bg-muted/20">
-          <img src="/Morx/tasks.png" alt="Tasks Board" className="w-full object-cover" />
-        </div>
 
-        <Accordion type="single" collapsible className="w-full">
-          <AccordionItem value="create" className="border rounded-xl px-4 mb-3">
-            <AccordionTrigger className="hover:no-underline py-4">
-              <div className="flex items-center gap-3">
-                 <div className="size-8 rounded-lg bg-green-500/10 flex items-center justify-center text-green-500"><CheckSquare className="size-4" /></div>
-                 <div className="text-left">
-                    <p className="text-sm font-bold">Creating Tasks</p>
-                    <p className="text-xs text-muted-foreground font-normal">Add new tasks with details and assignments.</p>
-                 </div>
-              </div>
-            </AccordionTrigger>
-            <AccordionContent>
-              <div className="space-y-4 pt-2 pb-4">
-                <p className="text-sm text-muted-foreground">When creating a task, you can set:</p>
-                <ul className="space-y-2 text-sm">
-                  <li className="flex items-center gap-2"><div className="size-1.5 rounded-full bg-primary" /> <strong>Title</strong> - Task name (required)</li>
-                  <li className="flex items-center gap-2"><div className="size-1.5 rounded-full bg-primary" /> <strong>Description</strong> - Detailed information</li>
-                  <li className="flex items-center gap-2"><div className="size-1.5 rounded-full bg-primary" /> <strong>Priority</strong> - Low, Medium, or High</li>
-                  <li className="flex items-center gap-2"><div className="size-1.5 rounded-full bg-primary" /> <strong>Due Date</strong> - Deadline for completion</li>
-                  <li className="flex items-center gap-2"><div className="size-1.5 rounded-full bg-primary" /> <strong>Assignees</strong> - Team members to work on the task</li>
-                </ul>
-                <div className="p-3 bg-primary/5 rounded-lg text-xs">
-                  <strong>💡 Tip:</strong> Assigned members receive a notification about the new task.
-                </div>
-              </div>
-            </AccordionContent>
-          </AccordionItem>
-
-          <AccordionItem value="views" className="border rounded-xl px-4 mb-3">
-            <AccordionTrigger className="hover:no-underline py-4">
-              <div className="flex items-center gap-3">
-                 <div className="size-8 rounded-lg bg-blue-500/10 flex items-center justify-center text-blue-500"><LayoutGrid className="size-4" /></div>
-                 <div className="text-left">
-                    <p className="text-sm font-bold">Task Views</p>
-                    <p className="text-xs text-muted-foreground font-normal">Multiple ways to visualize your tasks.</p>
-                 </div>
-              </div>
-            </AccordionTrigger>
-            <AccordionContent>
-              <div className="space-y-4 pt-2 pb-4">
-                <div className="grid sm:grid-cols-2 gap-4">
-                  <div className="p-4 border rounded-xl">
-                    <div className="flex items-center gap-2 mb-2">
-                      <LayoutGrid className="size-4 text-primary" />
-                      <p className="text-sm font-bold">Kanban Board</p>
-                    </div>
-                    <p className="text-xs text-muted-foreground">Drag-and-drop tasks between columns: Todo, In Progress, and Done.</p>
-                  </div>
-                  <div className="p-4 border rounded-xl">
-                    <div className="flex items-center gap-2 mb-2">
-                      <Calendar className="size-4 text-primary" />
-                      <p className="text-sm font-bold">Calendar View</p>
-                    </div>
-                    <p className="text-xs text-muted-foreground">View tasks on a calendar organized by due date.</p>
-                  </div>
-                </div>
-              </div>
-            </AccordionContent>
-          </AccordionItem>
-
-          <AccordionItem value="ai" className="border rounded-xl px-4 mb-3">
-            <AccordionTrigger className="hover:no-underline py-4">
-              <div className="flex items-center gap-3">
-                 <div className="size-8 rounded-lg bg-purple-500/10 flex items-center justify-center text-purple-500"><Sparkles className="size-4" /></div>
-                 <div className="text-left">
-                    <p className="text-sm font-bold">AI Task Suggestions</p>
-                    <p className="text-xs text-muted-foreground font-normal">Let AI help you plan your tasks.</p>
-                 </div>
-              </div>
-            </AccordionTrigger>
-            <AccordionContent>
-              <div className="space-y-4 pt-2 pb-4">
-                <p className="text-sm text-muted-foreground">Use the <strong>"AI Suggest"</strong> button to get intelligent task suggestions based on your project context.</p>
-                <div className="grid gap-3">
-                  <div className="p-3 bg-purple-500/5 rounded-lg border border-purple-500/20">
-                    <p className="text-xs"><strong>How it works:</strong></p>
-                    <ol className="list-decimal list-inside text-xs text-muted-foreground mt-1 space-y-1">
-                      <li>Click the "AI Suggest" button on the project page</li>
-                      <li>AI analyzes your project and existing tasks</li>
-                      <li>Receive 5 smart task suggestions</li>
-                      <li>Click any suggestion to auto-fill the task form</li>
-                    </ol>
-                  </div>
-                  <div className="p-3 bg-yellow-500/10 rounded-lg border border-yellow-500/20 text-xs">
-                    <strong>⚠️ AI Limits:</strong> Daily AI usage depends on your plan (Free: 5, Starter: 10, Professional: 20, Enterprise: Unlimited).
-                  </div>
-                </div>
-              </div>
-            </AccordionContent>
-          </AccordionItem>
-
-          <AccordionItem value="features" className="border rounded-xl px-4 mb-3">
-            <AccordionTrigger className="hover:no-underline py-4">
-              <div className="flex items-center gap-3">
-                 <div className="size-8 rounded-lg bg-cyan-500/10 flex items-center justify-center text-cyan-500"><FileText className="size-4" /></div>
-                 <div className="text-left">
-                    <p className="text-sm font-bold">Task Features</p>
-                    <p className="text-xs text-muted-foreground font-normal">Documentation, comments, files, and more.</p>
-                 </div>
-              </div>
-            </AccordionTrigger>
-            <AccordionContent>
-              <div className="space-y-4 pt-2 pb-4">
-                <div className="grid sm:grid-cols-2 gap-4">
-                  <div className="p-3 border rounded-lg">
-                    <div className="flex items-center gap-2 mb-1">
-                      <FileText className="size-4 text-blue-500" />
-                      <p className="text-sm font-bold">Documentation</p>
-                    </div>
-                    <p className="text-xs text-muted-foreground">Rich text documentation with Markdown support for each task.</p>
-                  </div>
-                  <div className="p-3 border rounded-lg">
-                    <div className="flex items-center gap-2 mb-1">
-                      <MessageSquare className="size-4 text-green-500" />
-                      <p className="text-sm font-bold">Comments</p>
-                    </div>
-                    <p className="text-xs text-muted-foreground">Discuss tasks with team members through comments.</p>
-                  </div>
-                  <div className="p-3 border rounded-lg">
-                    <div className="flex items-center gap-2 mb-1">
-                      <Upload className="size-4 text-orange-500" />
-                      <p className="text-sm font-bold">File Attachments</p>
-                    </div>
-                    <p className="text-xs text-muted-foreground">Upload and share files related to tasks.</p>
-                  </div>
-                  <div className="p-3 border rounded-lg">
-                    <div className="flex items-center gap-2 mb-1">
-                      <Users className="size-4 text-purple-500" />
-                      <p className="text-sm font-bold">Assignments</p>
-                    </div>
-                    <p className="text-xs text-muted-foreground">Assign multiple team members to work on tasks.</p>
-                  </div>
-                </div>
-              </div>
-            </AccordionContent>
-          </AccordionItem>
-        </Accordion>
-
-        <div className="grid sm:grid-cols-3 gap-4">
-           <div className="rounded-xl overflow-hidden border bg-muted/10 p-2">
-              <p className="text-[10px] font-bold text-center mb-1 uppercase">Assign Users</p>
-              <img src="/Morx/assign users.png" alt="Assigning Users" className="w-full rounded" />
-           </div>
-           <div className="rounded-xl overflow-hidden border bg-muted/10 p-2">
-              <p className="text-[10px] font-bold text-center mb-1 uppercase">Move & Organize</p>
-              <img src="/Morx/move task.png" alt="Moving Tasks" className="w-full rounded" />
-           </div>
-           <div className="rounded-xl overflow-hidden border bg-muted/10 p-2">
-              <p className="text-[10px] font-bold text-center mb-1 uppercase">Advanced Edit</p>
-              <img src="/Morx/edit task.png" alt="Editing Tasks" className="w-full rounded" />
-           </div>
-        </div>
-
-        <div className="rounded-2xl overflow-hidden border bg-muted/20">
-          <p className="p-3 text-xs font-bold bg-muted/30">Strategic Planning View</p>
-          <img src="/Morx/plan.png" alt="Strategic Plan" className="w-full object-cover" />
-        </div>
-      </div>
-    )
+  // ---------------------------------------------------------------------------
+  // 6. MAPS: ISOCHRONE (REACHABILITY)
+  // ---------------------------------------------------------------------------
+  {
+    id: "maps-isochrone",
+    path: "/api/v1/maps/isochrone",
+    method: "GET",
+    title: "Isochrone Reachability Contours",
+    category: "maps",
+    serviceName: "Maps & Geolocation",
+    providers: ["Mapbox Isochrone API"],
+    cacheTtl: "24h Cache",
+    rateLimit: "60 req/min",
+    summary: "Calculates geographical reachability polygon areas reachable within specified travel times (e.g. 15, 30 mins).",
+    detailsText: "Enables VoyageMind to visualize how far a traveler can walk or drive from their hotel in 15 or 30 minutes. Returns GeoJSON polygon contours that can be rendered directly on Mapbox, Leaflet, or Google Maps overlays.",
+    params: [
+      { name: "lat", type: "number", required: true, desc: "Origin latitude coordinate.", example: "31.2001" },
+      { name: "lon", type: "number", required: true, desc: "Origin longitude coordinate.", example: "29.9187" },
+      { name: "time", type: "number", required: false, defaultVal: "15", desc: "Travel time in minutes (e.g. 15, 30, 45, 60).", example: "15" },
+      { name: "profile", type: "string", required: false, defaultVal: "walking", desc: "Routing profile: 'walking' | 'driving' | 'cycling'.", example: "walking" },
+    ],
+    responseExplanation: "Returns GeoJSON `FeatureCollection` polygon with coordinates boundary array.",
+    responseSample: {
+      success: true,
+      service: "maps",
+      data: {
+        type: "FeatureCollection",
+        features: [
+          {
+            type: "Feature",
+            properties: { contour: 15, metric: "time" },
+            geometry: {
+              type: "Polygon",
+              coordinates: [[[29.91, 31.20], [29.92, 31.21], [29.90, 31.20]]]
+            }
+          }
+        ]
+      },
+      meta: { provider: "mapbox", cached: true, latency_ms: 22, timestamp: "2026-11-19T12:00:00Z" },
+      errors: []
+    },
+    curlSnippet: `curl -X GET "https://morx-team.vercel.app/api/v1/maps/isochrone?lat=31.2001&lon=29.9187&time=15&profile=walking" \\
+  -H "Authorization: Bearer YOUR_MORX_API_KEY"`,
+    jsSnippet: `const res = await fetch("https://morx-team.vercel.app/api/v1/maps/isochrone?lat=31.2001&lon=29.9187&time=15", {
+  headers: { "Authorization": "Bearer YOUR_MORX_API_KEY" }
+});
+const { data } = await res.json();
+console.log(data.features[0].geometry);`,
+    pythonSnippet: `res = requests.get(
+    "https://morx-team.vercel.app/api/v1/maps/isochrone",
+    headers={"Authorization": "Bearer YOUR_MORX_API_KEY"},
+    params={"lat": 31.2001, "lon": 29.9187, "time": 15}
+)
+print(res.json()["data"])`,
+    dartSnippet: `final res = await http.get(
+  Uri.parse('https://morx-team.vercel.app/api/v1/maps/isochrone?lat=31.2001&lon=29.9187&time=15'),
+  headers: {'Authorization': 'Bearer YOUR_MORX_API_KEY'},
+);
+print(jsonDecode(res.body)['data']);`
   },
-  { 
-    id: "marketplace", 
-    title: "Talent Marketplace", 
-    icon: <Briefcase className="size-4" />,
-    content: (
-      <div className="space-y-6">
-        <h2 className="text-3xl font-black italic">🏆 Talent Marketplace</h2>
-        <p className="text-muted-foreground">Need developers, designers, or writers? Find the best talent directly within our internal ecosystem.</p>
-        
-        <div className="rounded-2xl overflow-hidden border bg-muted/20">
-          <img src="/Morx/Talent.png" alt="Talent Marketplace" className="w-full object-cover" />
-        </div>
 
-        <Accordion type="single" collapsible className="w-full">
-          <AccordionItem value="browse" className="border rounded-xl px-4 mb-3">
-            <AccordionTrigger className="hover:no-underline py-4">
-              <div className="flex items-center gap-3">
-                 <div className="size-8 rounded-lg bg-blue-500/10 flex items-center justify-center text-blue-500"><Search className="size-4" /></div>
-                 <div className="text-left">
-                    <p className="text-sm font-bold">Browse Talent</p>
-                    <p className="text-xs text-muted-foreground font-normal">Search and filter available professionals.</p>
-                 </div>
-              </div>
-            </AccordionTrigger>
-            <AccordionContent>
-              <div className="space-y-4 pt-2 pb-4">
-                <p className="text-sm text-muted-foreground">Discover talented individuals who have set themselves as "available" in their profile settings.</p>
-                <ul className="space-y-2 text-sm">
-                  <li className="flex items-center gap-2"><div className="size-1.5 rounded-full bg-primary" /> <strong>Search by Skills</strong> - Find users with specific expertise</li>
-                  <li className="flex items-center gap-2"><div className="size-1.5 rounded-full bg-primary" /> <strong>Filter by Department</strong> - Browse by academic department</li>
-                  <li className="flex items-center gap-2"><div className="size-1.5 rounded-full bg-primary" /> <strong>View Profiles</strong> - See skills, bio, and social links</li>
-                </ul>
-              </div>
-            </AccordionContent>
-          </AccordionItem>
-
-          <AccordionItem value="invite" className="border rounded-xl px-4 mb-3">
-            <AccordionTrigger className="hover:no-underline py-4">
-              <div className="flex items-center gap-3">
-                 <div className="size-8 rounded-lg bg-green-500/10 flex items-center justify-center text-green-500"><UserPlus className="size-4" /></div>
-                 <div className="text-left">
-                    <p className="text-sm font-bold">Send Invitations</p>
-                    <p className="text-xs text-muted-foreground font-normal">Invite talent to join your team.</p>
-                 </div>
-              </div>
-            </AccordionTrigger>
-            <AccordionContent>
-              <div className="space-y-4 pt-2 pb-4">
-                <p className="text-sm text-muted-foreground">As a team owner or admin, you can invite users to join your team:</p>
-                <ol className="list-decimal list-inside text-sm space-y-2 text-muted-foreground">
-                  <li>Browse the talent marketplace and find a suitable candidate</li>
-                  <li>Click "Invite to Team" on their profile</li>
-                  <li>Select which team to invite them to</li>
-                  <li>Add an optional message</li>
-                  <li>The user receives a notification and can accept or decline</li>
-                </ol>
-              </div>
-            </AccordionContent>
-          </AccordionItem>
-
-          <AccordionItem value="ai-match" className="border rounded-xl px-4 mb-3">
-            <AccordionTrigger className="hover:no-underline py-4">
-              <div className="flex items-center gap-3">
-                 <div className="size-8 rounded-lg bg-purple-500/10 flex items-center justify-center text-purple-500"><Bot className="size-4" /></div>
-                 <div className="text-left">
-                    <p className="text-sm font-bold">AI Talent Matching</p>
-                    <p className="text-xs text-muted-foreground font-normal">Let AI find the best candidates for your team.</p>
-                 </div>
-              </div>
-            </AccordionTrigger>
-            <AccordionContent>
-              <div className="space-y-4 pt-2 pb-4">
-                <p className="text-sm text-muted-foreground">If your team has defined required skills, AI can automatically match candidates:</p>
-                <div className="p-3 bg-purple-500/5 rounded-lg border border-purple-500/20">
-                  <p className="text-xs"><strong>How it works:</strong></p>
-                  <ol className="list-decimal list-inside text-xs text-muted-foreground mt-1 space-y-1">
-                    <li>Set required skills in your team settings</li>
-                    <li>AI analyzes candidate skills and experience</li>
-                    <li>Receive ranked matches with explanations</li>
-                    <li>Invite top matches with one click</li>
-                  </ol>
-                </div>
-              </div>
-            </AccordionContent>
-          </AccordionItem>
-        </Accordion>
-
-        <div className="p-6 bg-secondary/5 rounded-2xl border border-secondary/20">
-           <h4 className="font-bold flex items-center gap-2 mb-2"><HelpCircle className="size-4" /> Smart Recruitment Process</h4>
-           <ol className="list-decimal list-inside text-sm space-y-2 text-muted-foreground">
-              <li>Search for talent based on their department or skills.</li>
-              <li>View their profile, previous contributions, and social links.</li>
-              <li>Send a formal invitation to join your specific team.</li>
-              <li>Track pending invitations in your Invitations page.</li>
-           </ol>
-        </div>
-      </div>
-    )
+  // ---------------------------------------------------------------------------
+  // 7. ROUTING: DIRECTIONS (OSRM & GOOGLE)
+  // ---------------------------------------------------------------------------
+  {
+    id: "routes-directions",
+    path: "/api/v1/routes/directions",
+    method: "GET",
+    title: "Turn-by-Turn Route Navigation & Geometry",
+    category: "routing",
+    serviceName: "Route Optimizer",
+    providers: ["OSRM Route Engine", "Google Maps Platform"],
+    cacheTtl: "1h Cache",
+    rateLimit: "120 req/min",
+    summary: "Computes driving or walking turn-by-turn directions, distances, durations, and decoded polyline coordinates.",
+    detailsText: "Primary routing API for navigating between origin and destination. Supports OSRM engine (`osrmroute`) and Google Maps. Coordinates are returned as resolved float pairs `[lat, lon]` and complete GeoJSON `geometry.coordinates` array for map drawing.",
+    params: [
+      { name: "origin", type: "string", required: true, desc: "Starting point: 'lat,lon' coordinates or landmark name.", example: "31.2001,29.9187" },
+      { name: "destination", type: "string", required: true, desc: "End point: 'lat,lon' coordinates or landmark name.", example: "31.2139,29.8856" },
+      { name: "mode", type: "string", required: false, defaultVal: "driving", desc: "Travel mode: 'driving' | 'walking'.", example: "driving" },
+      { name: "provider", type: "string", required: false, defaultVal: "osrmroute", desc: "Preferred routing engine: 'osrmroute' | 'google_maps'.", example: "osrmroute" },
+    ],
+    responseExplanation: "Returns `distance_meters`, formatted `distance`, `duration_seconds`, formatted `duration`, step-by-step navigation instructions, and full `geometry.coordinates` coordinate array.",
+    responseSample: {
+      success: true,
+      service: "routing",
+      data: {
+        summary: "Corniche Road",
+        origin: { latitude: 31.2001, longitude: 29.9187, name: "Bibliotheca Alexandrina" },
+        destination: { latitude: 31.2139, longitude: 29.8856, name: "Citadel of Qaitbay" },
+        distance_meters: 4501,
+        distance_formatted: "4.5 km",
+        duration_seconds: 299,
+        duration_formatted: "5 mins",
+        geometry: {
+          type: "LineString",
+          coordinates: [[29.9183, 31.1999], [29.9184, 31.1998], [29.8856, 31.2139]]
+        }
+      },
+      meta: { provider: "osrmroute", cached: false, latency_ms: 82, timestamp: "2026-11-19T12:00:00Z" },
+      errors: []
+    },
+    curlSnippet: `curl -X GET "https://morx-team.vercel.app/api/v1/routes/directions?origin=31.2001,29.9187&destination=31.2139,29.8856&mode=driving" \\
+  -H "Authorization: Bearer YOUR_MORX_API_KEY"`,
+    jsSnippet: `const res = await fetch("https://morx-team.vercel.app/api/v1/routes/directions?origin=31.2001,29.9187&destination=31.2139,29.8856", {
+  headers: { "Authorization": "Bearer YOUR_MORX_API_KEY" }
+});
+const { data } = await res.json();
+console.log(\`Distance: \${data.distance_formatted}, Duration: \${data.duration_formatted}\`);`,
+    pythonSnippet: `res = requests.get(
+    "https://morx-team.vercel.app/api/v1/routes/directions",
+    headers={"Authorization": "Bearer YOUR_MORX_API_KEY"},
+    params={"origin": "31.2001,29.9187", "destination": "31.2139,29.8856"}
+)
+print(res.json()["data"])`,
+    dartSnippet: `final res = await http.get(
+  Uri.parse('https://morx-team.vercel.app/api/v1/routes/directions?origin=31.2001,29.9187&destination=31.2139,29.8856'),
+  headers: {'Authorization': 'Bearer YOUR_MORX_API_KEY'},
+);
+print(jsonDecode(res.body)['data']);`
   },
-  { 
-    id: "invites", 
-    title: "Invites & Requests", 
-    icon: <Bell className="size-4" />,
-    content: (
-      <div className="space-y-6">
-        <h2 className="text-3xl font-black italic">📨 Managing Invitations</h2>
-        <p className="text-muted-foreground">Track all incoming requests and outgoing invitations in one centralized place.</p>
-        
-        <div className="grid gap-4">
-          <div className="rounded-2xl overflow-hidden border bg-muted/20">
-            <img src="/Morx/invite 1.png" alt="Invitation View" className="w-full object-cover" />
-          </div>
-          <div className="grid grid-cols-2 gap-4">
-             <div className="rounded-xl overflow-hidden border bg-muted/20">
-               <img src="/Morx/request.png" alt="Team Requests" className="w-full h-full object-cover" />
-             </div>
-             <div className="rounded-xl overflow-hidden border bg-muted/20">
-               <img src="/Morx/request to pub team.png" alt="Public Team Requests" className="w-full h-full object-cover" />
-             </div>
-          </div>
-        </div>
 
-        <div className="grid sm:grid-cols-2 gap-4">
-          <div className="p-4 border rounded-xl">
-            <p className="text-sm font-bold mb-2">📥 Incoming</p>
-            <ul className="space-y-1 text-xs text-muted-foreground">
-              <li>• Team invitations from other users</li>
-              <li>• Accept or decline invitations</li>
-              <li>• View invitation details and messages</li>
-            </ul>
-          </div>
-          <div className="p-4 border rounded-xl">
-            <p className="text-sm font-bold mb-2">📤 Outgoing</p>
-            <ul className="space-y-1 text-xs text-muted-foreground">
-              <li>• Join requests you've sent to teams</li>
-              <li>• Track request status (pending/approved/rejected)</li>
-              <li>• Invitations you've sent to users</li>
-            </ul>
-          </div>
-        </div>
-
-        <div className="p-4 bg-blue-500/5 rounded-xl border border-blue-500/20">
-          <p className="text-sm font-bold mb-2">Join Request Flow</p>
-          <ol className="list-decimal list-inside text-xs text-muted-foreground space-y-1">
-            <li>User finds a public team and clicks "Request to Join"</li>
-            <li>Team owners and admins receive a notification</li>
-            <li>Owner/admin approves or rejects the request</li>
-            <li>User receives notification of the decision</li>
-          </ol>
-        </div>
-      </div>
-    )
+  // ---------------------------------------------------------------------------
+  // 8. ROUTING: 2-OPT TSP TOUR OPTIMIZER
+  // ---------------------------------------------------------------------------
+  {
+    id: "routes-optimize",
+    path: "/api/v1/routes/optimize",
+    method: "POST",
+    title: "Multi-Stop Itinerary Tour Optimizer (TSP)",
+    category: "routing",
+    serviceName: "Route Optimizer",
+    providers: ["Internal 2-Opt TSP Solver", "Google Routes Optimizer"],
+    cacheTtl: "30m Cache",
+    rateLimit: "60 req/min",
+    summary: "Re-orders arbitrary lists of multi-stop attractions into the shortest, optimal touring path.",
+    detailsText: "The cornerstone of VoyageMind's AI trip planning. Uses the 2-Opt Traveling Salesperson Problem (TSP) algorithm to eliminate route crossing and backtracking. Give it a start location, an arbitrary list of tourist stops, and destination; it returns the mathematically optimal visit order, saving 30%+ of travel time.",
+    params: [],
+    bodySchema: `{
+  "origin": { "lat": 31.2001, "lon": 29.9187, "name": "Hotel / Starting Point" },
+  "stops": [
+    { "id": "stop_1", "lat": 31.2139, "lon": 29.8856, "name": "Citadel of Qaitbay" },
+    { "id": "stop_2", "lat": 31.2843, "lon": 30.0163, "name": "Montaza Palace" },
+    { "id": "stop_3", "lat": 31.1871, "lon": 29.8965, "name": "Pompey's Pillar" }
+  ],
+  "destination": { "lat": 31.2001, "lon": 29.9187, "name": "Return Hotel" }
+}`,
+    responseExplanation: "Returns `ordered_stops` in the optimized visit sequence, total `trip_distance_meters`, total `trip_duration_seconds`, and percentage of `distance_saved` compared to raw order.",
+    responseSample: {
+      success: true,
+      service: "routing",
+      data: {
+        optimized_order: ["stop_3", "stop_1", "stop_2"],
+        ordered_stops: [
+          { id: "stop_3", name: "Pompey's Pillar", sequence_index: 1 },
+          { id: "stop_1", name: "Citadel of Qaitbay", sequence_index: 2 },
+          { id: "stop_2", name: "Montaza Palace", sequence_index: 3 }
+        ],
+        total_distance_km: 36.4,
+        total_duration_minutes: 68,
+        distance_saved_percent: 24.5
+      },
+      meta: { provider: "internal_tsp", cached: false, latency_ms: 110, timestamp: "2026-11-19T12:00:00Z" },
+      errors: []
+    },
+    curlSnippet: `curl -X POST "https://morx-team.vercel.app/api/v1/routes/optimize" \\
+  -H "Authorization: Bearer YOUR_MORX_API_KEY" \\
+  -H "Content-Type: application/json" \\
+  -d '{
+    "origin": { "lat": 31.2001, "lon": 29.9187 },
+    "stops": [
+      { "id": "stop_1", "lat": 31.2139, "lon": 29.8856 },
+      { "id": "stop_2", "lat": 31.2843, "lon": 30.0163 }
+    ],
+    "destination": { "lat": 31.2001, "lon": 29.9187 }
+  }'`,
+    jsSnippet: `const res = await fetch("https://morx-team.vercel.app/api/v1/routes/optimize", {
+  method: "POST",
+  headers: {
+    "Authorization": "Bearer YOUR_MORX_API_KEY",
+    "Content-Type": "application/json"
   },
-  { 
-    id: "templates", 
-    title: "Templates", 
-    icon: <LayoutTemplate className="size-4" />,
-    content: (
-      <div className="space-y-6">
-        <h2 className="text-3xl font-black italic">📋 Smart Templates</h2>
-        <p className="text-muted-foreground">Don't start from scratch. Use templates to replicate proven workflows in seconds.</p>
-        
-        <div className="rounded-2xl overflow-hidden border bg-muted/20">
-          <img src="/Morx/templates.png" alt="Template Library" className="w-full object-cover" />
-        </div>
-
-        <div className="grid sm:grid-cols-2 gap-4">
-          <div className="p-4 border rounded-xl">
-            <div className="flex items-center gap-2 mb-2">
-              <LayoutTemplate className="size-4 text-primary" />
-              <p className="text-sm font-bold">Browse Templates</p>
-            </div>
-            <ul className="space-y-1 text-xs text-muted-foreground">
-              <li>• Search by name or category</li>
-              <li>• Filter by: Development, Marketing, Design, Product, Business</li>
-              <li>• View ratings and usage counts</li>
-            </ul>
-          </div>
-          <div className="p-4 border rounded-xl">
-            <div className="flex items-center gap-2 mb-2">
-              <Star className="size-4 text-yellow-500" />
-              <p className="text-sm font-bold">Template Details</p>
-            </div>
-            <ul className="space-y-1 text-xs text-muted-foreground">
-              <li>• View all tasks in the template</li>
-              <li>• See suggested priorities</li>
-              <li>• Rate templates (1-5 stars)</li>
-            </ul>
-          </div>
-        </div>
-
-        <div className="p-5 bg-primary/5 rounded-2xl border border-primary/20">
-          <h4 className="font-bold mb-3">How to Use Templates</h4>
-          <ol className="list-decimal list-inside text-sm space-y-2 text-muted-foreground">
-            <li>Browse the template library and select a template</li>
-            <li>Review the tasks included in the template</li>
-            <li>Click "Apply to Project" and select your target project</li>
-            <li>All template tasks are automatically created in your project</li>
-          </ol>
-        </div>
-
-        <div className="grid sm:grid-cols-5 gap-3">
-          {['Development', 'Marketing', 'Design', 'Product', 'Business'].map((category) => (
-            <div key={category} className="p-3 border rounded-xl text-center">
-              <p className="text-xs font-bold">{category}</p>
-            </div>
-          ))}
-        </div>
-
-        <p className="text-sm text-muted-foreground">Our template library includes pre-built structures for Software Development, UI/UX Research, Marketing Campaigns, Product Launches, and academic projects. You can also create your own custom templates!</p>
-      </div>
-    )
+  body: JSON.stringify({
+    origin: { lat: 31.2001, lon: 29.9187 },
+    stops: [
+      { id: "stop_1", lat: 31.2139, lon: 29.8856 },
+      { id: "stop_2", lat: 31.2843, lon: 30.0163 }
+    ],
+    destination: { lat: 31.2001, lon: 29.9187 }
+  })
+});
+const { data } = await res.json();
+console.log(data.ordered_stops);`,
+    pythonSnippet: `res = requests.post(
+    "https://morx-team.vercel.app/api/v1/routes/optimize",
+    headers={"Authorization": "Bearer YOUR_MORX_API_KEY"},
+    json={
+        "origin": {"lat": 31.2001, "lon": 29.9187},
+        "stops": [{"id": "s1", "lat": 31.2139, "lon": 29.8856}],
+        "destination": {"lat": 31.2001, "lon": 29.9187}
+    }
+)
+print(res.json()["data"])`,
+    dartSnippet: `final res = await http.post(
+  Uri.parse('https://morx-team.vercel.app/api/v1/routes/optimize'),
+  headers: {
+    'Authorization': 'Bearer YOUR_MORX_API_KEY',
+    'Content-Type': 'application/json',
   },
-  { 
-    id: "analytics", 
-    title: "Analytics", 
-    icon: <BarChart4 className="size-4" />,
-    content: (
-      <div className="space-y-6">
-        <h2 className="text-3xl font-black italic">📊 Powerful Analytics</h2>
-        <p className="text-muted-foreground">Visualize your success. Our reporting engine turns task data into beautiful, actionable charts.</p>
-        
-        <div className="rounded-2xl overflow-hidden border bg-muted/20">
-          <img src="/Morx/reports.png" alt="Reporting Dashboard" className="w-full object-cover" />
-        </div>
-
-        <div className="grid sm:grid-cols-2 gap-4">
-          <div className="p-4 border rounded-xl">
-            <p className="text-sm font-bold mb-2">📈 Team Statistics</p>
-            <ul className="space-y-1 text-xs text-muted-foreground">
-              <li>• Task completion rates</li>
-              <li>• Tasks by status (Todo, In Progress, Done)</li>
-              <li>• Tasks by priority distribution</li>
-              <li>• Member workload analysis</li>
-            </ul>
-          </div>
-          <div className="p-4 border rounded-xl">
-            <p className="text-sm font-bold mb-2">📊 Project Insights</p>
-            <ul className="space-y-1 text-xs text-muted-foreground">
-              <li>• Progress tracking per project</li>
-              <li>• Completion percentage</li>
-              <li>• Overdue task tracking</li>
-              <li>• Activity timeline</li>
-            </ul>
-          </div>
-        </div>
-
-        <div className="p-4 bg-muted/40 rounded-xl">
-           <p className="text-xs italic text-muted-foreground">"Data matures your team. Morx matures your data."</p>
-        </div>
-      </div>
-    )
+  body: jsonEncode({
+    'origin': {'lat': 31.2001, 'lon': 29.9187},
+    'stops': [{'id': 's1', 'lat': 31.2139, 'lon': 29.8856}],
+    'destination': {'lat': 31.2001, 'lon': 29.9187}
+  }),
+);
+print(jsonDecode(res.body)['data']);`
   },
-  { 
-    id: "notifications", 
-    title: "Notifications", 
-    icon: <Bell className="size-4" />,
-    content: (
-      <div className="space-y-6">
-        <h2 className="text-3xl font-black italic">🔔 Real-time Alerts</h2>
-        <p className="text-muted-foreground">Never miss a deadline or a team update with our real-time notification system powered by Supabase Realtime.</p>
-        
-        <div className="space-y-4">
-           <div className="rounded-xl border p-4 flex items-center justify-center bg-muted/5 max-w-sm mx-auto">
-              <img src="/Morx/Notification 1.png" alt="Notification Menu" className="max-w-full shadow-sm rounded-lg" />
-           </div>
-           <div className="rounded-2xl border overflow-hidden bg-muted/5">
-              <img src="/Morx/Notification 2.png" alt="Notifications Panel" className="w-full object-cover" />
-           </div>
-        </div>
 
-        <div className="space-y-4">
-          <h3 className="text-lg font-bold">Notification Types</h3>
-          <div className="grid sm:grid-cols-2 gap-3">
-            <div className="p-3 border rounded-lg flex items-start gap-3">
-              <span className="text-lg">📝</span>
-              <div>
-                <p className="text-sm font-bold">Task Assigned</p>
-                <p className="text-xs text-muted-foreground">When you're assigned to a new task</p>
-              </div>
-            </div>
-            <div className="p-3 border rounded-lg flex items-start gap-3">
-              <span className="text-lg">⏰</span>
-              <div>
-                <p className="text-sm font-bold">Due Soon</p>
-                <p className="text-xs text-muted-foreground">Task due within 24 hours</p>
-              </div>
-            </div>
-            <div className="p-3 border rounded-lg flex items-start gap-3">
-              <span className="text-lg">✅</span>
-              <div>
-                <p className="text-sm font-bold">Task Completed</p>
-                <p className="text-xs text-muted-foreground">When a task is marked as done</p>
-              </div>
-            </div>
-            <div className="p-3 border rounded-lg flex items-start gap-3">
-              <span className="text-lg">📅</span>
-              <div>
-                <p className="text-sm font-bold">Date Changed</p>
-                <p className="text-xs text-muted-foreground">Due date has been modified</p>
-              </div>
-            </div>
-            <div className="p-3 border rounded-lg flex items-start gap-3">
-              <span className="text-lg">👥</span>
-              <div>
-                <p className="text-sm font-bold">Added to Team</p>
-                <p className="text-xs text-muted-foreground">When you're added to a team</p>
-              </div>
-            </div>
-            <div className="p-3 border rounded-lg flex items-start gap-3">
-              <span className="text-lg">🤝</span>
-              <div>
-                <p className="text-sm font-bold">Join Request</p>
-                <p className="text-xs text-muted-foreground">Someone wants to join your team</p>
-              </div>
-            </div>
-            <div className="p-3 border rounded-lg flex items-start gap-3">
-              <span className="text-lg">📩</span>
-              <div>
-                <p className="text-sm font-bold">Team Invitation</p>
-                <p className="text-xs text-muted-foreground">You've been invited to a team</p>
-              </div>
-            </div>
-            <div className="p-3 border rounded-lg flex items-start gap-3">
-              <span className="text-lg">⚡</span>
-              <div>
-                <p className="text-sm font-bold">Priority Changed</p>
-                <p className="text-xs text-muted-foreground">Task priority has been updated</p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="p-4 bg-primary/5 rounded-xl border border-primary/20">
-          <p className="text-sm font-bold mb-1">Mark as Read</p>
-          <p className="text-xs text-muted-foreground">Click any notification to mark it as read, or use "Mark all as read" to clear all unread notifications at once.</p>
-        </div>
-      </div>
-    )
+  // ---------------------------------------------------------------------------
+  // 9. FINANCE: CURRENCY EXCHANGE
+  // ---------------------------------------------------------------------------
+  {
+    id: "finance-exchange",
+    path: "/api/v1/finance/exchange",
+    method: "GET",
+    title: "Real-Time Currency Exchange & Rates",
+    category: "finance",
+    serviceName: "Financial Rates",
+    providers: ["European Central Bank (Frankfurter)"],
+    cacheTtl: "1h Cache",
+    rateLimit: "120 req/min",
+    summary: "Converts real-time currency exchange rates published by the European Central Bank (ECB).",
+    detailsText: "Essential for international travelers in VoyageMind to convert trip costs, hotel bookings, food expenses, and admission tickets between their home currency (USD, EUR, GBP, SAR, etc.) and destination currency (EGP, etc.). Automatically checks ECB reference data.",
+    params: [
+      { name: "from", type: "string", required: false, defaultVal: "USD", desc: "Base source currency 3-letter ISO code.", example: "USD" },
+      { name: "to", type: "string", required: false, defaultVal: "EUR", desc: "Target currency 3-letter ISO code.", example: "EUR" },
+      { name: "amount", type: "number", required: false, defaultVal: "1", desc: "Monetary amount to convert.", example: "100" },
+    ],
+    responseExplanation: "Returns `base`, `amount`, `converted_amount`, `rate`, and `date` of reference rate.",
+    responseSample: {
+      success: true,
+      service: "finance",
+      data: {
+        base: "USD",
+        target: "EUR",
+        amount: 100,
+        rate: 0.925,
+        converted_amount: 92.5,
+        date: "2026-11-19",
+        source: "European Central Bank (Frankfurter)"
+      },
+      meta: { provider: "frankfurter", cached: true, latency_ms: 15, timestamp: "2026-11-19T12:00:00Z" },
+      errors: []
+    },
+    curlSnippet: `curl -X GET "https://morx-team.vercel.app/api/v1/finance/exchange?from=USD&to=EUR&amount=100" \\
+  -H "Authorization: Bearer YOUR_MORX_API_KEY"`,
+    jsSnippet: `const res = await fetch("https://morx-team.vercel.app/api/v1/finance/exchange?from=USD&to=EUR&amount=100", {
+  headers: { "Authorization": "Bearer YOUR_MORX_API_KEY" }
+});
+const { data } = await res.json();
+console.log(\`100 USD = \${data.converted_amount} EUR\`);`,
+    pythonSnippet: `res = requests.get(
+    "https://morx-team.vercel.app/api/v1/finance/exchange",
+    headers={"Authorization": "Bearer YOUR_MORX_API_KEY"},
+    params={"from": "USD", "to": "EUR", "amount": 100}
+)
+print(res.json()["data"])`,
+    dartSnippet: `final res = await http.get(
+  Uri.parse('https://morx-team.vercel.app/api/v1/finance/exchange?from=USD&to=EUR&amount=100'),
+  headers: {'Authorization': 'Bearer YOUR_MORX_API_KEY'},
+);
+print(jsonDecode(res.body)['data']);`
   },
-  { 
-    id: "settings", 
-    title: "Settings", 
-    icon: <Settings className="size-4" />,
-    content: (
-      <div className="space-y-6">
-        <h2 className="text-3xl font-black italic">⚙️ Settings & Customization</h2>
-        <p className="text-muted-foreground">Personalize your Morx experience with extensive customization options.</p>
-        
-        <Accordion type="single" collapsible className="w-full">
-          <AccordionItem value="profile" className="border rounded-xl px-4 mb-3">
-            <AccordionTrigger className="hover:no-underline py-4">
-              <div className="flex items-center gap-3">
-                 <div className="size-8 rounded-lg bg-blue-500/10 flex items-center justify-center text-blue-500"><Users className="size-4" /></div>
-                 <div className="text-left">
-                    <p className="text-sm font-bold">Profile Settings</p>
-                    <p className="text-xs text-muted-foreground font-normal">Personal information and account details.</p>
-                 </div>
-              </div>
-            </AccordionTrigger>
-            <AccordionContent>
-              <div className="space-y-3 pt-2 pb-4">
-                <p className="text-sm text-muted-foreground">Update your personal information:</p>
-                <ul className="space-y-1 text-sm">
-                  <li>• First name and last name</li>
-                  <li>• Password (securely hashed)</li>
-                  <li>• Study level and department</li>
-                  <li>• Faculty information</li>
-                  <li>• Personal bio</li>
-                </ul>
-              </div>
-            </AccordionContent>
-          </AccordionItem>
 
-          <AccordionItem value="theme" className="border rounded-xl px-4 mb-3">
-            <AccordionTrigger className="hover:no-underline py-4">
-              <div className="flex items-center gap-3">
-                 <div className="size-8 rounded-lg bg-purple-500/10 flex items-center justify-center text-purple-500"><Palette className="size-4" /></div>
-                 <div className="text-left">
-                    <p className="text-sm font-bold">Appearance</p>
-                    <p className="text-xs text-muted-foreground font-normal">Theme and color customization.</p>
-                 </div>
-              </div>
-            </AccordionTrigger>
-            <AccordionContent>
-              <div className="space-y-4 pt-2 pb-4">
-                <div>
-                  <p className="text-sm font-bold mb-2">Light/Dark Mode</p>
-                  <div className="flex gap-2">
-                    <div className="px-3 py-1.5 border rounded-lg text-xs">System</div>
-                    <div className="px-3 py-1.5 border rounded-lg text-xs">Light</div>
-                    <div className="px-3 py-1.5 border rounded-lg text-xs">Dark</div>
-                  </div>
-                </div>
-                <div>
-                  <p className="text-sm font-bold mb-2">Color Themes (15 options)</p>
-                  <div className="flex flex-wrap gap-2">
-                    {['Mint', 'Indigo', 'Ocean', 'Amber', 'Rose', 'Lavender', 'Forest', 'Sunset', 'Coral'].map(color => (
-                      <div key={color} className="px-3 py-1 border rounded-lg text-[10px]">
-                        {color}
-                      </div>
-                    ))}
-                    <div className="px-3 py-1 border rounded-lg text-[10px] text-muted-foreground">+6 more</div>
-                  </div>
-                </div>
-              </div>
-            </AccordionContent>
-          </AccordionItem>
-
-          <AccordionItem value="clock" className="border rounded-xl px-4 mb-3">
-            <AccordionTrigger className="hover:no-underline py-4">
-              <div className="flex items-center gap-3">
-                 <div className="size-8 rounded-lg bg-cyan-500/10 flex items-center justify-center text-cyan-500"><Clock className="size-4" /></div>
-                 <div className="text-left">
-                    <p className="text-sm font-bold">Clock Settings</p>
-                    <p className="text-xs text-muted-foreground font-normal">Time format and timezone.</p>
-                 </div>
-              </div>
-            </AccordionTrigger>
-            <AccordionContent>
-              <div className="space-y-3 pt-2 pb-4">
-                <ul className="space-y-1 text-sm text-muted-foreground">
-                  <li>• 12-hour or 24-hour format toggle</li>
-                  <li>• 15+ timezone options</li>
-                  <li>• Live preview of your settings</li>
-                </ul>
-              </div>
-            </AccordionContent>
-          </AccordionItem>
-
-          <AccordionItem value="professional" className="border rounded-xl px-4 mb-3">
-            <AccordionTrigger className="hover:no-underline py-4">
-              <div className="flex items-center gap-3">
-                 <div className="size-8 rounded-lg bg-green-500/10 flex items-center justify-center text-green-500"><Briefcase className="size-4" /></div>
-                 <div className="text-left">
-                    <p className="text-sm font-bold">Professional Profile</p>
-                    <p className="text-xs text-muted-foreground font-normal">Talent marketplace visibility.</p>
-                 </div>
-              </div>
-            </AccordionTrigger>
-            <AccordionContent>
-              <div className="space-y-3 pt-2 pb-4">
-                <ul className="space-y-1 text-sm text-muted-foreground">
-                  <li>• Toggle availability for Talent Marketplace</li>
-                  <li>• Manage your skills list</li>
-                  <li>• Configure social links (GitHub, LinkedIn, etc.)</li>
-                </ul>
-              </div>
-            </AccordionContent>
-          </AccordionItem>
-
-          <AccordionItem value="plan" className="border rounded-xl px-4 mb-3">
-            <AccordionTrigger className="hover:no-underline py-4">
-              <div className="flex items-center gap-3">
-                 <div className="size-8 rounded-lg bg-yellow-500/10 flex items-center justify-center text-yellow-500"><Crown className="size-4" /></div>
-                 <div className="text-left">
-                    <p className="text-sm font-bold">Subscription Plan</p>
-                    <p className="text-xs text-muted-foreground font-normal">View your plan and limits.</p>
-                 </div>
-              </div>
-            </AccordionTrigger>
-            <AccordionContent>
-              <div className="space-y-3 pt-2 pb-4">
-                <p className="text-sm text-muted-foreground">View your current plan details:</p>
-                <div className="overflow-x-auto">
-                  <table className="w-full text-xs">
-                    <thead>
-                      <tr className="border-b">
-                        <th className="text-left py-2 px-2">Feature</th>
-                        <th className="text-center py-2 px-2">Free</th>
-                        <th className="text-center py-2 px-2">Starter</th>
-                        <th className="text-center py-2 px-2">Pro</th>
-                        <th className="text-center py-2 px-2">Enterprise</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y">
-                      <tr><td className="py-2 px-2">Team Members</td><td className="text-center">15</td><td className="text-center">50</td><td className="text-center">80</td><td className="text-center">∞</td></tr>
-                      <tr><td className="py-2 px-2">AI Requests/Day</td><td className="text-center">5</td><td className="text-center">10</td><td className="text-center">20</td><td className="text-center">∞</td></tr>
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            </AccordionContent>
-          </AccordionItem>
-        </Accordion>
-
-        <div className="rounded-2xl overflow-hidden border bg-muted/20">
-          <img src="/Morx/themes.png" alt="Theme Selector" className="w-full object-cover" />
-        </div>
-      </div>
-    )
+  // ---------------------------------------------------------------------------
+  // 10. NEWS: MEDIA SEARCH
+  // ---------------------------------------------------------------------------
+  {
+    id: "news-search",
+    path: "/api/v1/news/search",
+    method: "GET",
+    title: "Global & Destination News Headlines",
+    category: "news",
+    serviceName: "News & Media",
+    providers: ["GNews API"],
+    cacheTtl: "30m Cache",
+    rateLimit: "60 req/min",
+    summary: "Searches verified world and regional news publications, travel alerts, and headlines.",
+    detailsText: "Supplies VoyageMind travelers with live destination advisories, local event news, cultural festivals, and airport transit updates. Enriched with publisher names, article URLs, and teaser imagery.",
+    params: [
+      { name: "q", type: "string", required: true, desc: "Search topic or destination keyword.", example: "Egypt Tourism" },
+      { name: "lang", type: "string", required: false, defaultVal: "en", desc: "Language code: 'en' | 'ar' | 'fr' | 'de' | 'es'.", example: "en" },
+      { name: "limit", type: "number", required: false, defaultVal: "10", desc: "Articles to return (max: 20).", example: "5" },
+    ],
+    responseExplanation: "Returns `data` array with `title`, `description`, `content`, `url`, `image`, `publishedAt`, and `source: { name, url }`.",
+    responseSample: {
+      success: true,
+      service: "news",
+      data: [
+        {
+          title: "Alexandria Celebrates Mediterranean Cultural Festival",
+          description: "International travelers flock to Alexandria for coastal heritage week.",
+          url: "https://news.example.com/alexandria-festival",
+          image: "https://images.example.com/alexandria.jpg",
+          publishedAt: "2026-11-19T08:00:00Z",
+          source: { name: "Egypt Independent", url: "https://egyptindependent.com" }
+        }
+      ],
+      meta: { provider: "gnews", cached: false, latency_ms: 140, timestamp: "2026-11-19T12:00:00Z" },
+      errors: []
+    },
+    curlSnippet: `curl -X GET "https://morx-team.vercel.app/api/v1/news/search?q=Egypt+Tourism&lang=en&limit=5" \\
+  -H "Authorization: Bearer YOUR_MORX_API_KEY"`,
+    jsSnippet: `const res = await fetch("https://morx-team.vercel.app/api/v1/news/search?q=Egypt+Tourism", {
+  headers: { "Authorization": "Bearer YOUR_MORX_API_KEY" }
+});
+const { data } = await res.json();
+console.log(data);`,
+    pythonSnippet: `res = requests.get(
+    "https://morx-team.vercel.app/api/v1/news/search",
+    headers={"Authorization": "Bearer YOUR_MORX_API_KEY"},
+    params={"q": "Egypt Tourism"}
+)
+print(res.json()["data"])`,
+    dartSnippet: `final res = await http.get(
+  Uri.parse('https://morx-team.vercel.app/api/v1/news/search?q=Egypt+Tourism'),
+  headers: {'Authorization': 'Bearer YOUR_MORX_API_KEY'},
+);
+print(jsonDecode(res.body)['data']);`
   },
-  { 
-    id: "ai-team-os", 
-    title: "AI Team OS & Formulas", 
-    icon: <Sparkles className="size-4" />,
-    content: (
-      <div className="space-y-6">
-        <h2 className="text-3xl font-black italic flex items-center gap-2">🤖 Marlin AI Team OS</h2>
-        <p className="text-muted-foreground">Morx transforms project spaces using a modular AI engine that calculates behavioral metrics, matches skills, runs health diagnostics, and utilizes semantic memory.</p>
 
-        <div className="p-4 bg-primary/5 rounded-xl border-l-4 border-primary">
-          <p className="font-bold">LaTeX Math & Calculations</p>
-          <p className="text-sm mt-1">Below are the concise mathematical models used to power Marlin's analysis and indicators.</p>
-        </div>
-
-        <Accordion type="single" collapsible className="w-full space-y-3">
-          <AccordionItem value="dna" className="border rounded-xl px-4">
-            <AccordionTrigger className="hover:no-underline font-bold">🧬 AI Team DNA Profile</AccordionTrigger>
-            <AccordionContent className="space-y-4 pt-2">
-              <p className="text-sm text-muted-foreground">Evolves continuously based on user commits, task status, comments, and project timelines.</p>
-              <div className="p-4 bg-muted/40 rounded-xl space-y-4">
-                <div>
-                  <p className="text-xs font-bold uppercase text-primary">1. Preferred Working Hours</p>
-                  <p className="text-xs text-muted-foreground mb-2">Calculates the statistical mode of activity timestamps:</p>
-                  <div className="bg-background p-3 rounded-lg border flex justify-center text-sm font-semibold">
-                    {"$$\\text{Peak Hour} = \\text{mode}\\left(\\{ \\text{Hour}(c.\\text{created\\_at}) \\mid c \\in \\text{Comments} \\} \\cup \\{ \\text{Hour}(t.\\text{created\\_at}) \\mid t \\in \\text{Tasks} \\}\\right)$$"}
-                  </div>
-                </div>
-                <div>
-                  <p className="text-xs font-bold uppercase text-primary">2. Deadline Reliability</p>
-                  <p className="text-xs text-muted-foreground mb-2">The percentage of assigned tasks completed before or on the due date:</p>
-                  <div className="bg-background p-3 rounded-lg border flex justify-center text-sm font-semibold">
-                    {"$$\\text{Reliability} = \\frac{\\text{Tasks Completed On Time}}{\\text{Total Assigned Tasks}} \\times 100\\%$$"}
-                  </div>
-                </div>
-                <div>
-                  <p className="text-xs font-bold uppercase text-primary">3. Collaboration Score</p>
-                  <p className="text-xs text-muted-foreground mb-2">Quantifies messaging behavior and team integration:</p>
-                  <div className="bg-background p-3 rounded-lg border flex justify-center text-sm font-semibold">
-                    {"$$\\text{Collaboration} = \\min\\left(100, \\text{Comments Count} \\times 5 + \\text{Teams Joined} \\times 10\\right)$$"}
-                  </div>
-                </div>
-                <div>
-                  <p className="text-xs font-bold uppercase text-primary">4. Task Consistency</p>
-                  <p className="text-xs text-muted-foreground mb-2">Measures completion variance via standard deviation $\sigma$:</p>
-                  <div className="bg-background p-3 rounded-lg border flex justify-center text-sm font-semibold">
-                    {"$$\\text{Consistency} = \\max\\left(0, 100 - \\sigma\\right)$$\n\n$$\\text{where } \\sigma = \\sqrt{\\frac{1}{N}\\sum_{i=1}^{N}(X_i - \\mu)^2}$$"}
-                  </div>
-                </div>
-              </div>
-            </AccordionContent>
-          </AccordionItem>
-
-          <AccordionItem value="matching" className="border rounded-xl px-4">
-            <AccordionTrigger className="hover:no-underline font-bold">🤝 Smart Team Matching</AccordionTrigger>
-            <AccordionContent className="space-y-4 pt-2">
-              <p className="text-sm text-muted-foreground">Finds the best-suited student candidates for projects based on skills and reliability DNA.</p>
-              <div className="p-4 bg-muted/40 rounded-xl space-y-2">
-                <p className="text-xs font-bold uppercase text-primary">Compatibility Score Formula</p>
-                <div className="bg-background p-3 rounded-lg border flex justify-center text-sm font-semibold">
-                  {"$$\\text{Compatibility} = 0.4 \\times \\text{Skills Match} + 0.3 \\times \\text{Reliability} + 0.3 \\times \\text{Collaboration}$$"}
-                </div>
-                <p className="text-xs text-muted-foreground">Where the Skills Match ratio is computed as:</p>
-                <div className="bg-background p-3 rounded-lg border flex justify-center text-sm font-semibold">
-                  {"$$\\text{Skills Match} = \\frac{\\text{Candidate Skills} \\cap \\text{Project Required Skills}}{\\text{Project Required Skills}} \\times 100\\%$$"}
-                </div>
-              </div>
-            </AccordionContent>
-          </AccordionItem>
-
-          <AccordionItem value="health" className="border rounded-xl px-4">
-            <AccordionTrigger className="hover:no-underline font-bold">🏥 Team Health Engine</AccordionTrigger>
-            <AccordionContent className="space-y-4 pt-2">
-              <p className="text-sm text-muted-foreground">Monitors workload distribution imbalances and burnout indexes across active student groups.</p>
-              <div className="p-4 bg-muted/40 rounded-xl space-y-4">
-                <div>
-                  <p className="text-xs font-bold uppercase text-primary">1. Workload Imbalance</p>
-                  <p className="text-xs text-muted-foreground mb-2">Calculated using the standard deviation of tasks assigned among active members:</p>
-                  <div className="bg-background p-3 rounded-lg border flex justify-center text-sm font-semibold">
-                    {"$$\\text{Imbalance} = \\sqrt{\\frac{1}{M}\\sum_{j=1}^{M}(T_j - \\bar{T})^2}$$"}
-                  </div>
-                </div>
-                <div>
-                  <p className="text-xs font-bold uppercase text-primary">2. Burnout Risk Index</p>
-                  <p className="text-xs text-muted-foreground mb-2">Aggregates overdue backlogs against completion speed:</p>
-                  <div className="bg-background p-3 rounded-lg border flex justify-center text-sm font-semibold">
-                    {"$$\\text{Burnout Risk} = \\min\\left(100, \\frac{\\text{Overdue Tasks} \\times 1.5 + \\text{Active Tasks}}{\\text{Historical Velocity}} \\times 100\\right)$$"}
-                  </div>
-                </div>
-              </div>
-            </AccordionContent>
-          </AccordionItem>
-
-          <AccordionItem value="skills" className="border rounded-xl px-4">
-            <AccordionTrigger className="hover:no-underline font-bold">🌳 Skill Trees & Gamification</AccordionTrigger>
-            <AccordionContent className="space-y-4 pt-2">
-              <p className="text-sm text-muted-foreground">Progresses academic capabilities automatically upon task completion and keyword analysis.</p>
-              <div className="p-4 bg-muted/40 rounded-xl space-y-4">
-                <div>
-                  <p className="text-xs font-bold uppercase text-primary">1. Skill Level Progression</p>
-                  <p className="text-xs text-muted-foreground mb-2">Calculates the current tier based on accumulated Experience Points (XP):</p>
-                  <div className="bg-background p-3 rounded-lg border flex justify-center text-sm font-semibold">
-                    {"$$\\text{Level} = \\left\\lfloor \\frac{\\text{Total XP}}{300} \\right\\rfloor + 1$$"}
-                  </div>
-                </div>
-                <div>
-                  <p className="text-xs font-bold uppercase text-primary">2. Confidence Score</p>
-                  <p className="text-xs text-muted-foreground mb-2">Formulates a credibility ranking by scaling reliability with level weights:</p>
-                  <div className="bg-background p-3 rounded-lg border flex justify-center text-sm font-semibold">
-                    {"$$\\text{Confidence} = \\max\\left(30, \\min\\left(100, 45 + 0.5 \\times (\\text{Reliability} - 50) + \\text{Level} \\times 5\\right)\\right)$$"}
-                  </div>
-                </div>
-              </div>
-            </AccordionContent>
-          </AccordionItem>
-
-          <AccordionItem value="reputation" className="border rounded-xl px-4">
-            <AccordionTrigger className="hover:no-underline font-bold">🌟 Team Reputation</AccordionTrigger>
-            <AccordionContent className="space-y-4 pt-2">
-              <p className="text-sm text-muted-foreground">Merges anonymous teammate reviews into DNA scores using a Weighted Moving Average:</p>
-              <div className="p-4 bg-muted/40 rounded-xl">
-                <div className="bg-background p-3 rounded-lg border flex justify-center text-sm font-semibold">
-                  {"$$\\text{New DNA Score} = 0.7 \\times \\text{Existing Score} + 0.3 \\times (\\text{Peer Rating} \\times 20)$$" }
-                </div>
-              </div>
-            </AccordionContent>
-          </AccordionItem>
-
-          <AccordionItem value="memory" className="border rounded-xl px-4">
-            <AccordionTrigger className="hover:no-underline font-bold">🎙️ Voice Assistant & Semantic Memory</AccordionTrigger>
-            <AccordionContent className="space-y-4 pt-2">
-              <p className="text-sm text-muted-foreground">Retrieves long-term chat contexts using vector cosine similarity:</p>
-              <div className="p-4 bg-muted/40 rounded-xl">
-                <div className="bg-background p-3 rounded-lg border flex justify-center text-sm font-semibold">
-                  {"$$\\text{Cosine Distance} = 1 - \\frac{\\mathbf{A} \\cdot \\mathbf{B}}{\\|\\mathbf{A}\\| \\|\\mathbf{B}\\|} = 1 - \\frac{\\sum_{i=1}^{n} A_i B_i}{\\sqrt{\\sum_{i=1}^{n} A_i^2} \\sqrt{\\sum_{i=1}^{n} B_i^2}}$$" }
-                </div>
-              </div>
-            </AccordionContent>
-          </AccordionItem>
-        </Accordion>
-      </div>
-    )
+  // ---------------------------------------------------------------------------
+  // 11. UTILS: IP GEOLOCATION
+  // ---------------------------------------------------------------------------
+  {
+    id: "utils-ip-lookup",
+    path: "/api/v1/utils/ip-lookup",
+    method: "GET",
+    title: "IP Geolocation & Network Resolver",
+    category: "utils",
+    serviceName: "Network Utils",
+    providers: ["IP-API Geolocation"],
+    cacheTtl: "24h Cache",
+    rateLimit: "120 req/min",
+    summary: "Resolves client IP addresses into approximate cities, country codes, timezones, and coordinates.",
+    detailsText: "Enables VoyageMind to detect a new traveler's country and city automatically upon opening the app without immediately requiring GPS permissions. When `ip` parameter is omitted, it automatically inspects the incoming client request IP.",
+    params: [
+      { name: "ip", type: "string", required: false, desc: "IPv4 or IPv6 address. Defaults to caller's IP.", example: "8.8.8.8" }
+    ],
+    responseExplanation: "Returns `ip`, `city`, `region`, `country`, `country_code`, `lat`, `lon`, `timezone`, and `isp`.",
+    responseSample: {
+      success: true,
+      service: "utils",
+      data: {
+        ip: "8.8.8.8",
+        city: "Mountain View",
+        region: "California",
+        country: "United States",
+        country_code: "US",
+        lat: 37.4223,
+        lon: -122.0848,
+        timezone: "America/Los_Angeles",
+        isp: "Google LLC"
+      },
+      meta: { provider: "ip_geolocation", cached: true, latency_ms: 10, timestamp: "2026-11-19T12:00:00Z" },
+      errors: []
+    },
+    curlSnippet: `curl -X GET "https://morx-team.vercel.app/api/v1/utils/ip-lookup?ip=8.8.8.8" \\
+  -H "Authorization: Bearer YOUR_MORX_API_KEY"`,
+    jsSnippet: `const res = await fetch("https://morx-team.vercel.app/api/v1/utils/ip-lookup", {
+  headers: { "Authorization": "Bearer YOUR_MORX_API_KEY" }
+});
+const { data } = await res.json();
+console.log(\`Visitor City: \${data.city}, \${data.country}\`);`,
+    pythonSnippet: `res = requests.get(
+    "https://morx-team.vercel.app/api/v1/utils/ip-lookup",
+    headers={"Authorization": "Bearer YOUR_MORX_API_KEY"}
+)
+print(res.json()["data"])`,
+    dartSnippet: `final res = await http.get(
+  Uri.parse('https://morx-team.vercel.app/api/v1/utils/ip-lookup'),
+  headers: {'Authorization': 'Bearer YOUR_MORX_API_KEY'},
+);
+print(jsonDecode(res.body)['data']);`
   },
-]
+
+  // ---------------------------------------------------------------------------
+  // 12. SOCIAL: TIKTOK
+  // ---------------------------------------------------------------------------
+  {
+    id: "social-tiktok",
+    path: "/api/v1/tiktok/videos",
+    method: "GET",
+    title: "TikTok Creator Videos & Engagement",
+    category: "social",
+    serviceName: "Social Feeds",
+    providers: ["TikTok Display API"],
+    cacheTtl: "15m Cache",
+    rateLimit: "60 req/min",
+    summary: "Retrieves public video reels, captions, and engagement metrics for authorized creator accounts.",
+    detailsText: "Allows travel creators to show live video portfolios and reels inside VoyageMind itineraries.",
+    params: [
+      { name: "max_count", type: "number", required: false, defaultVal: "20", desc: "Max items to return (1-50).", example: "10" },
+      { name: "cursor", type: "string", required: false, desc: "Pagination cursor for batch navigation.", example: "172819200" }
+    ],
+    responseExplanation: "Returns video array with `id`, `title`, `cover_image_url`, `like_count`, `comment_count`, and `share_count`.",
+    responseSample: {
+      success: true,
+      service: "social",
+      data: [
+        {
+          id: "712839210",
+          title: "Hidden Gems in Egypt You Must Visit!",
+          cover_image_url: "https://p16.tiktokcdn.com/cover.jpg",
+          like_count: 89400,
+          comment_count: 1420
+        }
+      ],
+      meta: { provider: "tiktok", cached: false, latency_ms: 120, timestamp: "2026-11-19T12:00:00Z" },
+      errors: []
+    },
+    curlSnippet: `curl -X GET "https://morx-team.vercel.app/api/v1/tiktok/videos?max_count=10" \\
+  -H "Authorization: Bearer YOUR_MORX_API_KEY"`,
+    jsSnippet: `const res = await fetch("https://morx-team.vercel.app/api/v1/tiktok/videos?max_count=10", {
+  headers: { "Authorization": "Bearer YOUR_MORX_API_KEY" }
+});
+console.log(await res.json());`,
+    pythonSnippet: `res = requests.get(
+    "https://morx-team.vercel.app/api/v1/tiktok/videos",
+    headers={"Authorization": "Bearer YOUR_MORX_API_KEY"}
+)
+print(res.json()["data"])`,
+    dartSnippet: `final res = await http.get(
+  Uri.parse('https://morx-team.vercel.app/api/v1/tiktok/videos'),
+  headers: {'Authorization': 'Bearer YOUR_MORX_API_KEY'},
+);
+print(jsonDecode(res.body)['data']);`
+  },
+
+  // ---------------------------------------------------------------------------
+  // 13. SYSTEM: HEALTH
+  // ---------------------------------------------------------------------------
+  {
+    id: "system-health",
+    path: "/api/v1/gateway/health",
+    method: "GET",
+    title: "Live Provider Health & Circuit Breaker Status",
+    category: "system",
+    serviceName: "Gateway System",
+    providers: ["Morx Health Checker"],
+    cacheTtl: "Realtime",
+    rateLimit: "300 req/min",
+    summary: "Monitors upstream provider latencies, availability, and circuit breaker trip states.",
+    detailsText: "Returns live diagnostic health metrics for all 13 third-party providers. Can be polled by monitoring daemons or status widgets.",
+    params: [],
+    responseExplanation: "Returns dictionary of registered providers with `status` ('healthy', 'degraded', 'unhealthy') and `latency_ms`.",
+    responseSample: {
+      success: true,
+      service: "gateway",
+      data: {
+        status: "healthy",
+        healthy_providers: 13,
+        total_providers: 13,
+        providers: {
+          youtube: { status: "healthy", latency_ms: 85 },
+          open_meteo: { status: "healthy", latency_ms: 62 },
+          osrmroute: { status: "healthy", latency_ms: 78 },
+          frankfurter: { status: "healthy", latency_ms: 24 }
+        }
+      },
+      meta: { provider: "morx_core", cached: false, latency_ms: 5, timestamp: "2026-11-19T12:00:00Z" },
+      errors: []
+    },
+    curlSnippet: `curl -X GET "https://morx-team.vercel.app/api/v1/gateway/health" \\
+  -H "Authorization: Bearer YOUR_MORX_API_KEY"`,
+    jsSnippet: `const res = await fetch("https://morx-team.vercel.app/api/v1/gateway/health", {
+  headers: { "Authorization": "Bearer YOUR_MORX_API_KEY" }
+});
+console.log(await res.json());`,
+    pythonSnippet: `res = requests.get(
+    "https://morx-team.vercel.app/api/v1/gateway/health",
+    headers={"Authorization": "Bearer YOUR_MORX_API_KEY"}
+)
+print(res.json()["data"])`,
+    dartSnippet: `final res = await http.get(
+  Uri.parse('https://morx-team.vercel.app/api/v1/gateway/health'),
+  headers: {'Authorization': 'Bearer YOUR_MORX_API_KEY'},
+);
+print(jsonDecode(res.body)['data']);`
+  }
+];
+
+const CATEGORIES = [
+  { id: "all", label: "All Endpoints", icon: Layers },
+  { id: "videos", label: "Videos", logo: YouTubeLogo },
+  { id: "weather", label: "Weather", logo: OpenWeatherLogo },
+  { id: "maps", label: "Maps & Places", logo: GoogleMapsLogo },
+  { id: "routing", label: "Routes (OSRM/TSP)", logo: OSRMRouteLogo },
+  { id: "finance", label: "Rates & Exchange", logo: FrankfurterLogo },
+  { id: "news", label: "News & Media", logo: GNewsLogo },
+  { id: "utils", label: "Network & IP", logo: IpGeolocationLogo },
+  { id: "social", label: "Social Feeds", logo: TikTokLogo },
+  { id: "system", label: "Gateway Health", icon: Activity },
+];
 
 export default function DocsPage() {
-  const [activeSection, setActiveSection] = useState("getting-started")
+  const [activeTab, setActiveTab] = useState<"api" | "platform">("api")
+  const [searchQuery, setSearchQuery] = useState("")
+  const [selectedCategory, setSelectedCategory] = useState("all")
+  const [copiedId, setCopiedId] = useState<string | null>(null)
+  const [activeCodeLang, setActiveCodeLang] = useState<Record<string, "curl" | "js" | "python" | "dart">>({})
+  const [customApiKey, setCustomApiKey] = useState("")
 
-  useEffect(() => {
-    // Inject KaTeX CSS
-    if (!document.getElementById("katex-css")) {
-      const link = document.createElement("link");
-      link.id = "katex-css";
-      link.rel = "stylesheet";
-      link.href = "https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css";
-      document.head.appendChild(link);
-    }
+  const handleCopy = (text: string, id: string) => {
+    navigator.clipboard.writeText(text)
+    setCopiedId(id)
+    setTimeout(() => setCopiedId(null), 2000)
+  }
 
-    let observer: MutationObserver | null = null;
-
-    // Trigger rendering on content
-    const triggerRender = () => {
-      const el = document.getElementById("docs-content");
-      if (el && (window as any).renderMathInElement) {
-        try {
-          if (observer) observer.disconnect();
-          (window as any).renderMathInElement(el, {
-            delimiters: [
-              { left: "$$", right: "$$", display: true },
-              { left: "$", right: "$", display: false }
-            ],
-            throwOnError: false
-          });
-          if (observer) observer.observe(el, { childList: true, subtree: true });
-        } catch (e) {
-          console.error("Error rendering KaTeX math:", e);
-        }
-      }
-    };
-
-    // Inject Auto-render JS
-    const loadAutoRender = () => {
-      if (!(window as any).renderMathInElement) {
-        const script = document.createElement("script");
-        script.src = "https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js";
-        script.async = true;
-        script.onload = () => {
-          triggerRender();
-          startObserver();
-        };
-        document.body.appendChild(script);
-      } else {
-        triggerRender();
-        startObserver();
-      }
-    };
-
-    // Inject KaTeX JS
-    const loadKatex = () => {
-      if (!(window as any).katex) {
-        const script = document.createElement("script");
-        script.src = "https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js";
-        script.async = true;
-        script.onload = () => loadAutoRender();
-        document.body.appendChild(script);
-      } else {
-        loadAutoRender();
-      }
-    };
-
-    const startObserver = () => {
-      const el = document.getElementById("docs-content");
-      if (el && !observer) {
-        observer = new MutationObserver(() => {
-          triggerRender();
-        });
-        observer.observe(el, { childList: true, subtree: true });
-      }
-    };
-
-    loadKatex();
-
-    return () => {
-      if (observer) {
-        observer.disconnect();
-      }
-    };
-  }, [activeSection]);
+  // Filtered endpoints based on search and category
+  const filteredEndpoints = useMemo(() => {
+    return ENDPOINTS_DOCUMENTATION.filter((ep) => {
+      const matchesCategory = selectedCategory === "all" || ep.category === selectedCategory
+      const q = searchQuery.toLowerCase().trim()
+      const matchesQuery = 
+        !q ||
+        ep.title.toLowerCase().includes(q) ||
+        ep.path.toLowerCase().includes(q) ||
+        ep.summary.toLowerCase().includes(q) ||
+        ep.serviceName.toLowerCase().includes(q) ||
+        ep.providers.some(p => p.toLowerCase().includes(q)) ||
+        ep.params.some(p => p.name.toLowerCase().includes(q))
+      return matchesCategory && matchesQuery
+    })
+  }, [searchQuery, selectedCategory])
 
   return (
-    <div className="flex min-h-screen flex-col">
+    <div className="min-h-screen bg-background text-foreground flex flex-col">
       <Header />
-      <main className="flex-1 border-t relative">
-        <div className="container px-4 md:px-6 py-12 flex flex-col md:flex-row gap-12">
-          {/* Sidebar */}
-          <aside className="w-full md:w-64 shrink-0 space-y-8">
-             <div className="space-y-1">
-                <h4 className="px-4 text-xs font-black uppercase tracking-widest text-muted-foreground/60 mb-4">Documentation</h4>
-                <nav className="space-y-1">
-                   {sections.map((section) => (
-                     <button
-                        key={section.id}
-                        data-section-id={section.id}
-                        onClick={() => setActiveSection(section.id)}
-                        className={`w-full flex items-center gap-3 px-4 py-2 text-sm font-medium rounded-lg transition-colors ${activeSection === section.id ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:bg-muted'}`}
-                     >
-                        {section.icon}
-                        {section.title}
-                     </button>
-                   ))}
-                </nav>
-             </div>
 
-             <div className="p-4 rounded-2xl bg-muted/40 border space-y-4">
-                <div className="size-10 rounded-xl bg-background flex items-center justify-center border shadow-sm"><Code className="size-5 text-primary" /></div>
-                <div className="space-y-1">
-                   <p className="text-sm font-bold">API Access</p>
-                   <p className="text-xs text-muted-foreground">Want to build on top of Morx? Explore our API reference guide.</p>
-                </div>
-                <Link href="/api" className="text-xs font-bold text-primary flex items-center gap-1 hover:underline">
-                   View API Specs <ChevronRight className="size-3" />
-                </Link>
-             </div>
+      <main className="flex-1 container max-w-7xl mx-auto px-4 py-8">
+        
+        {/* ===================================================================== */}
+        {/* TOP HERO & MODE SWITCHER */}
+        {/* ===================================================================== */}
+        <div className="space-y-6 mb-8 text-center md:text-left">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-border/70 pb-6">
+            <div>
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary border border-primary/20 text-xs font-semibold mb-3">
+                <Sparkles className="size-3.5" /> Complete Developer Documentation & Connection Specs
+              </div>
+              <h1 className="text-3xl md:text-5xl font-black tracking-tight text-foreground">
+                VoyageMind API Documentation
+              </h1>
+              <p className="text-sm md:text-base text-muted-foreground mt-2 max-w-3xl leading-relaxed">
+                Full text explanations, parameters, returned structures, and live code snippets for every endpoint in the Unified Morx API Gateway.
+              </p>
+            </div>
 
-             <div className="p-4 rounded-2xl bg-gradient-to-br from-purple-500/10 to-primary/10 border border-purple-500/20 space-y-4">
-                <div className="size-10 rounded-xl bg-background flex items-center justify-center border shadow-sm"><Sparkles className="size-5 text-purple-500" /></div>
-                <div className="space-y-1">
-                   <p className="text-sm font-bold">AI Features</p>
-                   <p className="text-xs text-muted-foreground">Morx uses AI for task suggestions, talent matching, and description generation.</p>
-                </div>
-             </div>
-          </aside>
-
-          {/* Content Area */}
-          <div id="docs-content" className="flex-1 max-w-4xl min-h-[600px] border-l md:pl-12">
-             <motion.div
-                key={activeSection}
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.3 }}
-             >
-                {sections.find(s => s.id === activeSection)?.content}
-             </motion.div>
+            {/* Mode Switcher */}
+            <div className="flex items-center gap-2 self-start md:self-auto bg-muted/60 p-1.5 rounded-2xl border border-border/70">
+              <button
+                onClick={() => setActiveTab("api")}
+                className={`px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 transition-all ${
+                  activeTab === "api"
+                    ? "bg-foreground text-background shadow-xs"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                <Code2 className="size-3.5" />
+                <span>API Gateway Reference</span>
+              </button>
+              <button
+                onClick={() => setActiveTab("platform")}
+                className={`px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 transition-all ${
+                  activeTab === "platform"
+                    ? "bg-foreground text-background shadow-xs"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                <BookOpen className="size-3.5" />
+                <span>Workspace Guide</span>
+              </button>
+            </div>
           </div>
         </div>
+
+        {/* ===================================================================== */}
+        {/* TAB 1: API GATEWAY COMPREHENSIVE DOCUMENTATION */}
+        {/* ===================================================================== */}
+        {activeTab === "api" && (
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+            
+            {/* ----------------------------------------------------------------- */}
+            {/* LEFT SIDEBAR: QUICK NAVIGATION & SEARCH */}
+            {/* ----------------------------------------------------------------- */}
+            <aside className="lg:col-span-3 sticky top-20 space-y-4 max-h-[calc(100vh-6rem)] overflow-y-auto pr-1">
+              
+              {/* Search Box */}
+              <div className="relative">
+                <Search className="size-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                <input
+                  type="text"
+                  placeholder="Filter endpoints & params..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full pl-8 pr-3 py-2 text-xs rounded-xl border border-border/70 bg-card text-foreground focus:ring-1 focus:ring-primary outline-none"
+                />
+              </div>
+
+              {/* Quick Connection Card */}
+              <div className="p-3.5 rounded-2xl border border-emerald-500/20 bg-emerald-500/5 space-y-2 text-xs">
+                <div className="flex items-center gap-1.5 font-bold text-emerald-500 text-[11px] uppercase tracking-wider">
+                  <ShieldCheck className="size-3.5" /> Quick Connection
+                </div>
+                <p className="text-[11px] text-muted-foreground leading-normal">
+                  All calls require your secret Morx API Key sent in the HTTP Authorization header:
+                </p>
+                <div className="p-2 rounded-lg bg-background border border-border/60 font-mono text-[10px] break-all flex items-center justify-between">
+                  <span className="text-foreground">Authorization: Bearer <span className="text-primary font-bold">KEY</span></span>
+                  <button 
+                    onClick={() => handleCopy("Authorization: Bearer YOUR_MORX_API_KEY", "auth-hdr")}
+                    className="p-1 hover:text-primary transition-colors text-muted-foreground"
+                    title="Copy Header"
+                  >
+                    {copiedId === "auth-hdr" ? <Check className="size-3 text-emerald-400" /> : <Copy className="size-3" />}
+                  </button>
+                </div>
+                <Link
+                  href="/gateway"
+                  className="inline-flex items-center gap-1 text-[11px] text-primary hover:underline font-semibold pt-1"
+                >
+                  <span>Issue your API Key in Gateway</span>
+                  <ArrowRight className="size-3" />
+                </Link>
+              </div>
+
+              {/* Endpoints Table of Contents */}
+              <div className="space-y-1">
+                <span className="text-[10px] uppercase font-bold text-muted-foreground tracking-wider px-2 block mb-1">
+                  Endpoints List ({filteredEndpoints.length})
+                </span>
+                <nav className="space-y-1">
+                  {filteredEndpoints.map((ep) => (
+                    <a
+                      key={ep.id}
+                      href={`#${ep.id}`}
+                      className="flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs hover:bg-muted/50 text-muted-foreground hover:text-foreground transition-colors group"
+                    >
+                      <span className="truncate max-w-[170px] font-medium group-hover:translate-x-0.5 transition-transform">
+                        {ep.title}
+                      </span>
+                      <span className={`text-[9px] font-mono px-1.5 py-0.2 rounded font-bold ${
+                        ep.method === "POST" ? "bg-amber-500/20 text-amber-500" : "bg-primary/20 text-primary"
+                      }`}>
+                        {ep.method}
+                      </span>
+                    </a>
+                  ))}
+                </nav>
+              </div>
+
+            </aside>
+
+            {/* ----------------------------------------------------------------- */}
+            {/* RIGHT MAIN CONTENT: DETAILED ENDPOINT SPECS */}
+            {/* ----------------------------------------------------------------- */}
+            <div className="lg:col-span-9 space-y-10">
+
+              {/* SECTION: CONNECTION & AUTHENTICATION MASTER GUIDE */}
+              <div className="p-6 md:p-8 rounded-3xl bg-card border border-border/80 space-y-6 shadow-xs">
+                <div>
+                  <div className="flex items-center gap-2 text-xs font-bold text-primary uppercase tracking-wider mb-1">
+                    <Server className="size-4" /> Global Connection Specs
+                  </div>
+                  <h2 className="text-2xl font-bold text-foreground">
+                    Connecting to the Morx Unified Gateway
+                  </h2>
+                  <p className="text-xs md:text-sm text-muted-foreground mt-1">
+                    Every endpoint in the Morx Gateway communicates over HTTPS using standardized JSON envelopes. Follow this simple handshake to connect from any frontend, mobile app, or backend service.
+                  </p>
+                </div>
+
+                {/* Connection Matrix Grid */}
+                <div className="grid sm:grid-cols-3 gap-3 text-xs">
+                  <div className="p-3.5 rounded-2xl bg-muted/30 border border-border/60 space-y-1">
+                    <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-mono font-bold">1. Base URL</span>
+                    <p className="font-mono text-foreground font-bold text-xs truncate">https://morx-team.vercel.app</p>
+                    <p className="text-[10px] text-muted-foreground">Always use HTTPS production host</p>
+                  </div>
+                  <div className="p-3.5 rounded-2xl bg-muted/30 border border-border/60 space-y-1">
+                    <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-mono font-bold">2. Auth Header</span>
+                    <p className="font-mono text-foreground font-bold text-xs truncate">Authorization: Bearer &lt;KEY&gt;</p>
+                    <p className="text-[10px] text-muted-foreground">Generated via /gateway dashboard</p>
+                  </div>
+                  <div className="p-3.5 rounded-2xl bg-muted/30 border border-border/60 space-y-1">
+                    <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-mono font-bold">3. Normalized Envelope</span>
+                    <p className="font-mono text-emerald-500 font-bold text-xs">success, service, data, meta</p>
+                    <p className="text-[10px] text-muted-foreground">Guaranteed schema across all APIs</p>
+                  </div>
+                </div>
+
+                {/* Response Envelope Explanation */}
+                <div className="p-4 rounded-2xl bg-muted/20 border border-border/60 space-y-2 text-xs">
+                  <span className="font-bold text-foreground flex items-center gap-1.5">
+                    <FileJson className="size-3.5 text-primary" /> The Standardized JSON Envelope Format
+                  </span>
+                  <p className="text-muted-foreground text-[11px] leading-relaxed">
+                    Unlike raw third-party APIs that return inconsistent, deeply-nested responses, Morx wraps every successful call or error into a unified structure:
+                  </p>
+                  <pre className="p-3 rounded-xl bg-background border border-border/70 font-mono text-[11px] text-muted-foreground overflow-x-auto leading-relaxed">
+{`{
+  "success": true,               // Boolean: overall operation success
+  "service": "weather",          // Target namespace (weather, maps, routing, videos, finance, news, utils)
+  "data": { ... },               // Standardized payload regardless of upstream provider
+  "meta": {                      // Telemetry: provider used, cache flag, latency in ms
+    "provider": "open_meteo",
+    "cached": false,
+    "latency_ms": 65,
+    "timestamp": "2026-11-19T12:00:00Z"
+  },
+  "errors": []                   // Array of errors if success is false
+}`}
+                  </pre>
+                </div>
+              </div>
+
+              {/* CATEGORY FILTER PILLS */}
+              <div className="flex flex-wrap items-center gap-1.5 border-b border-border/60 pb-3">
+                {CATEGORIES.map((cat) => {
+                  const isSelected = selectedCategory === cat.id
+                  return (
+                    <button
+                      key={cat.id}
+                      onClick={() => setSelectedCategory(cat.id)}
+                      className={`px-3 py-1.5 rounded-xl text-xs font-medium flex items-center gap-1.5 transition-all ${
+                        isSelected
+                          ? "bg-foreground text-background font-bold shadow-xs"
+                          : "bg-muted/40 hover:bg-muted text-muted-foreground hover:text-foreground"
+                      }`}
+                    >
+                      {cat.logo ? (
+                        <cat.logo className="size-3.5 shrink-0" />
+                      ) : cat.icon ? (
+                        <cat.icon className="size-3.5 shrink-0" />
+                      ) : null}
+                      <span>{cat.label}</span>
+                    </button>
+                  )
+                })}
+              </div>
+
+              {/* --------------------------------------------------------------- */}
+              {/* ENDPOINT CARDS */}
+              {/* --------------------------------------------------------------- */}
+              <div className="space-y-12">
+                {filteredEndpoints.length === 0 ? (
+                  <div className="p-12 text-center text-muted-foreground space-y-2 border border-dashed rounded-3xl">
+                    <Search className="size-8 mx-auto text-muted-foreground/40" />
+                    <p className="font-bold text-foreground">No matching endpoints found</p>
+                    <p className="text-xs">Try searching for other keywords or clear the category filter.</p>
+                  </div>
+                ) : (
+                  filteredEndpoints.map((ep, idx) => {
+                    const currentLang = activeCodeLang[ep.id] || "curl"
+                    const currentSnippet = 
+                      currentLang === "curl" ? ep.curlSnippet :
+                      currentLang === "js" ? ep.jsSnippet :
+                      currentLang === "python" ? ep.pythonSnippet : ep.dartSnippet
+
+                    return (
+                      <article
+                        key={ep.id}
+                        id={ep.id}
+                        className="p-6 md:p-8 rounded-3xl bg-card border border-border/80 space-y-6 shadow-xs scroll-mt-24 transition-all hover:border-primary/40"
+                      >
+                        {/* Header: Title, Method, Path, Badges */}
+                        <div className="space-y-2 border-b border-border/50 pb-5">
+                          <div className="flex flex-wrap items-center justify-between gap-2">
+                            <div className="flex items-center gap-2">
+                              <ProviderBrandLogo name={ep.category} className="size-5 shrink-0 shadow-xs" />
+                              <h3 className="text-xl md:text-2xl font-extrabold text-foreground tracking-tight">
+                                {ep.title}
+                              </h3>
+                            </div>
+                            
+                            <div className="flex items-center gap-2 font-mono text-[10px]">
+                              <span className="px-2 py-0.5 rounded-full bg-muted border text-muted-foreground">
+                                {ep.cacheTtl}
+                              </span>
+                              <span className="px-2 py-0.5 rounded-full bg-muted border text-muted-foreground">
+                                {ep.rateLimit}
+                              </span>
+                            </div>
+                          </div>
+
+                          {/* HTTP Path pill */}
+                          <div className="flex flex-wrap items-center gap-2 pt-1 font-mono text-xs">
+                            <span className={`px-2.5 py-1 rounded-lg font-bold text-[11px] ${
+                              ep.method === "POST" 
+                                ? "bg-amber-500/15 text-amber-500 border border-amber-500/30" 
+                                : "bg-primary/15 text-primary border border-primary/30"
+                            }`}>
+                              {ep.method}
+                            </span>
+                            <code className="px-3 py-1 rounded-lg bg-muted/60 border border-border/70 text-foreground font-bold">
+                              {ep.path}
+                            </code>
+                            <div className="flex items-center gap-1.5 ml-auto text-muted-foreground text-[11px]">
+                              <span>Upstream:</span>
+                              <span className="text-foreground font-medium">{ep.providers.join(", ")}</span>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Text Explanation & Use Cases */}
+                        <div className="space-y-2">
+                          <span className="text-xs uppercase font-bold tracking-wider text-muted-foreground block font-mono">
+                            Endpoint Overview & Details
+                          </span>
+                          <p className="text-xs md:text-sm text-foreground/90 leading-relaxed">
+                            {ep.detailsText}
+                          </p>
+                        </div>
+
+                        {/* Parameters Table */}
+                        {ep.params.length > 0 && (
+                          <div className="space-y-2">
+                            <span className="text-xs uppercase font-bold tracking-wider text-muted-foreground block font-mono">
+                              Request Query Parameters
+                            </span>
+                            <div className="border border-border/70 rounded-2xl overflow-hidden bg-background">
+                              <table className="w-full text-left text-xs">
+                                <thead className="bg-muted/40 border-b border-border/70 text-[10px] text-muted-foreground uppercase font-mono">
+                                  <tr>
+                                    <th className="p-3">Parameter</th>
+                                    <th className="p-3">Type</th>
+                                    <th className="p-3">Requirement</th>
+                                    <th className="p-3">Default</th>
+                                    <th className="p-3">Description & Example</th>
+                                  </tr>
+                                </thead>
+                                <tbody className="divide-y divide-border/50 text-xs">
+                                  {ep.params.map((param) => (
+                                    <tr key={param.name} className="hover:bg-muted/20 transition-colors">
+                                      <td className="p-3 font-mono font-bold text-foreground">{param.name}</td>
+                                      <td className="p-3 font-mono text-muted-foreground text-[11px]">{param.type}</td>
+                                      <td className="p-3">
+                                        {param.required ? (
+                                          <span className="px-2 py-0.5 rounded-full text-[9px] font-bold font-mono bg-rose-500/10 text-rose-500 border border-rose-500/20">
+                                            Required
+                                          </span>
+                                        ) : (
+                                          <span className="px-2 py-0.5 rounded-full text-[9px] font-bold font-mono bg-muted text-muted-foreground border">
+                                            Optional
+                                          </span>
+                                        )}
+                                      </td>
+                                      <td className="p-3 font-mono text-muted-foreground text-[11px]">{param.defaultVal || "—"}</td>
+                                      <td className="p-3 text-muted-foreground leading-normal">
+                                        {param.desc}
+                                        {param.example && (
+                                          <code className="ml-1.5 px-1.5 py-0.5 rounded bg-muted font-mono text-[10px] text-foreground">
+                                            eg: {param.example}
+                                          </code>
+                                        )}
+                                      </td>
+                                    </tr>
+                                  ))}
+                                </tbody>
+                              </table>
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Request Body Schema (If POST) */}
+                        {ep.bodySchema && (
+                          <div className="space-y-2">
+                            <span className="text-xs uppercase font-bold tracking-wider text-muted-foreground block font-mono">
+                              Request JSON Body Schema
+                            </span>
+                            <div className="relative">
+                              <pre className="p-4 rounded-2xl bg-muted/30 border border-border/70 font-mono text-xs text-foreground overflow-x-auto leading-relaxed">
+                                {ep.bodySchema}
+                              </pre>
+                              <button
+                                onClick={() => handleCopy(ep.bodySchema!, `${ep.id}-body`)}
+                                className="absolute right-3 top-3 p-1.5 rounded-lg bg-background border border-border/70 hover:bg-muted text-muted-foreground hover:text-foreground text-[11px] flex items-center gap-1 font-mono transition-colors"
+                              >
+                                {copiedId === `${ep.id}-body` ? <Check className="size-3 text-emerald-400" /> : <Copy className="size-3" />}
+                                <span>{copiedId === `${ep.id}-body` ? "Copied" : "Copy Body"}</span>
+                              </button>
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Response Explanation & Sample */}
+                        <div className="space-y-2">
+                          <span className="text-xs uppercase font-bold tracking-wider text-muted-foreground block font-mono">
+                            Response Format & Structure
+                          </span>
+                          <p className="text-xs text-muted-foreground leading-relaxed">
+                            {ep.responseExplanation}
+                          </p>
+
+                          {/* JSON Response Block */}
+                          <div className="relative">
+                            <pre className="p-4 rounded-2xl bg-background border border-border/70 font-mono text-xs text-muted-foreground overflow-x-auto max-h-72 leading-relaxed">
+                              {JSON.stringify(ep.responseSample, null, 2)}
+                            </pre>
+                            <button
+                              onClick={() => handleCopy(JSON.stringify(ep.responseSample, null, 2), `${ep.id}-resp`)}
+                              className="absolute right-3 top-3 p-1.5 rounded-lg bg-card border border-border/70 hover:bg-muted text-muted-foreground hover:text-foreground text-[11px] flex items-center gap-1 font-mono transition-colors"
+                            >
+                              {copiedId === `${ep.id}-resp` ? <Check className="size-3 text-emerald-400" /> : <Copy className="size-3" />}
+                              <span>{copiedId === `${ep.id}-resp` ? "Copied" : "Copy JSON"}</span>
+                            </button>
+                          </div>
+                        </div>
+
+                        {/* Ready-to-use Code Integration Tabs */}
+                        <div className="space-y-2 pt-2 border-t border-border/50">
+                          <div className="flex items-center justify-between">
+                            <span className="text-xs uppercase font-bold tracking-wider text-muted-foreground block font-mono flex items-center gap-1.5">
+                              <Code2 className="size-3.5 text-primary" /> Connection Snippet
+                            </span>
+
+                            {/* Language Pills */}
+                            <div className="flex items-center gap-1 bg-muted/60 p-1 rounded-xl font-mono text-[10px]">
+                              {(["curl", "js", "python", "dart"] as const).map((lang) => (
+                                <button
+                                  key={lang}
+                                  onClick={() => setActiveCodeLang((prev) => ({ ...prev, [ep.id]: lang }))}
+                                  className={`px-2.5 py-1 rounded-lg uppercase font-bold transition-all ${
+                                    currentLang === lang
+                                      ? "bg-foreground text-background shadow-xs"
+                                      : "text-muted-foreground hover:text-foreground"
+                                  }`}
+                                >
+                                  {lang}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+
+                          <div className="relative">
+                            <pre className="p-4 rounded-2xl bg-muted/30 border border-border/70 font-mono text-xs text-foreground overflow-x-auto leading-relaxed">
+                              {currentSnippet}
+                            </pre>
+                            <button
+                              onClick={() => handleCopy(currentSnippet, `${ep.id}-code`)}
+                              className="absolute right-3 top-3 p-1.5 rounded-lg bg-background border border-border/70 hover:bg-muted text-muted-foreground hover:text-foreground text-[11px] flex items-center gap-1 font-mono transition-colors"
+                            >
+                              {copiedId === `${ep.id}-code` ? <Check className="size-3 text-emerald-400" /> : <Copy className="size-3" />}
+                              <span>{copiedId === `${ep.id}-code` ? "Copied" : "Copy Code"}</span>
+                            </button>
+                          </div>
+                        </div>
+
+                      </article>
+                    )
+                  })
+                )}
+              </div>
+
+            </div>
+          </div>
+        )}
+
+        {/* ===================================================================== */}
+        {/* TAB 2: MORX WORKSPACE GUIDE (TASK & TEAM MANAGEMENT) */}
+        {/* ===================================================================== */}
+        {activeTab === "platform" && (
+          <div className="p-8 rounded-3xl bg-card border border-border/80 space-y-6 shadow-xs max-w-4xl mx-auto">
+            <h2 className="text-2xl font-bold">Morx Workspace & Collaboration Guide</h2>
+            <p className="text-muted-foreground text-sm leading-relaxed">
+              Morx provides teams with rich tools for project tracking, automated workflows, and task collaboration.
+            </p>
+            <div className="grid sm:grid-cols-2 gap-4 text-xs">
+              <div className="p-4 rounded-2xl bg-muted/30 border space-y-2">
+                <span className="font-bold text-foreground text-sm">Teams & Workspaces</span>
+                <p className="text-muted-foreground">Create public and private teams, invite collaborators, and manage role-based permissions.</p>
+              </div>
+              <div className="p-4 rounded-2xl bg-muted/30 border space-y-2">
+                <span className="font-bold text-foreground text-sm">Kanban & Task Management</span>
+                <p className="text-muted-foreground">Assign tasks, move items through custom sprint columns, and attach documents.</p>
+              </div>
+            </div>
+          </div>
+        )}
+
       </main>
+
       <Footer />
     </div>
   )
-}
-
-function Badge({ children, variant = "default", className = "" }: any) {
-   const styles = variant === "outline" ? "border text-foreground" : "bg-primary text-primary-foreground";
-   return <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${styles} ${className}`}>{children}</span>
 }
