@@ -28,7 +28,10 @@ import {
   X,
   Lock,
   Layers,
-  Sparkles
+  Sparkles,
+  DollarSign,
+  Newspaper,
+  Globe
 } from "lucide-react";
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
@@ -37,9 +40,12 @@ import { useAuth } from "@/contexts/auth-context";
 
 const GATEWAY_SERVICES = [
   { id: "videos", label: "Video Discovery", provider: "YouTube Data API v3", icon: Video, color: "text-red-400" },
-  { id: "weather", label: "Weather Intelligence", provider: "OpenWeather", icon: CloudSun, color: "text-amber-400" },
-  { id: "maps", label: "Maps & Geolocation", provider: "Google Maps & Mapbox", icon: Compass, color: "text-blue-400" },
-  { id: "routing", label: "Route Optimizer", provider: "2-Opt TSP Solver", icon: Navigation, color: "text-emerald-400" },
+  { id: "weather", label: "Weather Intelligence", provider: "OpenWeather & Open-Meteo", icon: CloudSun, color: "text-amber-400" },
+  { id: "maps", label: "Maps & Geolocation", provider: "Google Maps, Mapbox & Isochrone", icon: Compass, color: "text-blue-400" },
+  { id: "routing", label: "Route Optimizer", provider: "OSRM, Google Routes & 2-Opt", icon: Navigation, color: "text-emerald-400" },
+  { id: "finance", label: "Exchange & Rates", provider: "European Central Bank (Frankfurter)", icon: DollarSign, color: "text-emerald-400" },
+  { id: "news", label: "News & Media", provider: "GNews Intelligence", icon: Newspaper, color: "text-cyan-400" },
+  { id: "utils", label: "Network & IP Lookup", provider: "IP Geolocation", icon: Globe, color: "text-indigo-400" },
   { id: "tiktok", label: "TikTok Feeds", provider: "TikTok API", icon: Share2, color: "text-pink-400" },
   { id: "instagram", label: "Instagram Graph", provider: "Meta Graph API", icon: Share2, color: "text-purple-400" },
 ];
@@ -50,6 +56,41 @@ const QUICK_ENDPOINTS = [
     service: "weather",
     method: "GET",
     path: "/api/v1/weather/current?city=Alexandria",
+    body: null,
+  },
+  {
+    name: "OSRM Route Directions",
+    service: "routing",
+    method: "GET",
+    path: "/api/v1/routes/directions?origin=31.2001,29.9187&destination=31.2139,29.8856&mode=driving",
+    body: null,
+  },
+  {
+    name: "Currency Exchange (USD to EGP)",
+    service: "finance",
+    method: "GET",
+    path: "/api/v1/finance/exchange?from=USD&to=EGP&amount=100",
+    body: null,
+  },
+  {
+    name: "News Headlines (Egypt)",
+    service: "news",
+    method: "GET",
+    path: "/api/v1/news/search?q=Egypt&lang=en&limit=3",
+    body: null,
+  },
+  {
+    name: "IP Geolocation (8.8.8.8)",
+    service: "utils",
+    method: "GET",
+    path: "/api/v1/utils/ip-lookup?ip=8.8.8.8",
+    body: null,
+  },
+  {
+    name: "Maps Isochrone (15 Mins Reach)",
+    service: "maps",
+    method: "GET",
+    path: "/api/v1/maps/isochrone?lat=31.2001&lon=29.9187&time=15",
     body: null,
   },
   {
@@ -108,7 +149,7 @@ export default function GatewayAdminPage() {
   // New Client Form State
   const [newClientName, setNewClientName] = useState("");
   const [newClientDesc, setNewClientDesc] = useState("");
-  const [newClientServices, setNewClientServices] = useState<string[]>(["videos", "weather", "maps", "routing", "tiktok", "instagram"]);
+  const [newClientServices, setNewClientServices] = useState<string[]>(GATEWAY_SERVICES.map(s => s.id));
   const [newClientRateLimit, setNewClientRateLimit] = useState<number>(120);
   const [generatedKey, setGeneratedKey] = useState<string | null>(null);
   const [copiedKey, setCopiedKey] = useState(false);
@@ -192,7 +233,7 @@ export default function GatewayAdminPage() {
         setSelectedApiKey(data.data.apiKey);
         setNewClientName("");
         setNewClientDesc("");
-        setNewClientServices(["videos", "weather", "maps", "routing", "tiktok", "instagram"]);
+        setNewClientServices(GATEWAY_SERVICES.map(s => s.id));
         fetchData();
       } else {
         alert(data.errors?.[0]?.message || "Failed to generate API Key");

@@ -15,6 +15,8 @@ export const MORX_ALLOWABLE_PROVIDERS = [
   'ip_geolocation',
   'frankfurter',
   'gnews',
+  'tiktok',
+  'instagram',
 ] as const;
 
 export type MorxAllowableProvider = (typeof MORX_ALLOWABLE_PROVIDERS)[number];
@@ -39,6 +41,10 @@ export const MORX_ALLOWABLE_ENDPOINTS = [
   '/api/v1/utils/ip-lookup',
   '/api/v1/finance/exchange',
   '/api/v1/news/search',
+  '/api/v1/tiktok/videos',
+  '/api/v1/tiktok/user',
+  '/api/v1/instagram/media',
+  '/api/v1/instagram/user',
   '/api/v1/gateway/clients',
   '/api/v1/gateway/metrics',
   '/api/v1/gateway/health',

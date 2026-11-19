@@ -84,6 +84,65 @@ function saveStoreToDisk() {
 // Load on initialization
 loadStoreFromDisk();
 
+// Helper to resolve providers and endpoints from service categories
+export function resolveProvidersAndEndpointsFromServices(services: (ServiceCategory | '*')[]) {
+  if (services.includes('*')) {
+    return {
+      providers: ['*'],
+      endpoints: ['*'],
+    };
+  }
+
+  const providers: string[] = [];
+  const endpoints: string[] = [];
+
+  for (const s of services) {
+    switch (s) {
+      case 'videos':
+        providers.push('youtube');
+        endpoints.push('/api/v1/videos/search');
+        break;
+      case 'weather':
+        providers.push('openweather', 'open_meteo');
+        endpoints.push('/api/v1/weather/current', '/api/v1/weather/forecast', '/api/v1/weather/air-quality');
+        break;
+      case 'maps':
+        providers.push('google_maps', 'mapbox');
+        endpoints.push('/api/v1/maps/geocode', '/api/v1/maps/reverse-geocode', '/api/v1/maps/places', '/api/v1/maps/directions', '/api/v1/maps/isochrone', '/api/v1/maps/distance-matrix');
+        break;
+      case 'routing':
+        providers.push('google_routes', 'internal_tsp', 'osrmroute');
+        endpoints.push('/api/v1/routes/directions', '/api/v1/routes/optimize', '/api/v1/routes/matrix');
+        break;
+      case 'finance':
+        providers.push('frankfurter');
+        endpoints.push('/api/v1/finance/exchange');
+        break;
+      case 'news':
+        providers.push('gnews');
+        endpoints.push('/api/v1/news/search');
+        break;
+      case 'utils':
+        providers.push('ip_geolocation');
+        endpoints.push('/api/v1/utils/ip-lookup');
+        break;
+      case 'tiktok':
+        providers.push('tiktok');
+        endpoints.push('/api/v1/tiktok/videos', '/api/v1/tiktok/user');
+        break;
+      case 'instagram':
+        providers.push('instagram');
+        endpoints.push('/api/v1/instagram/media', '/api/v1/instagram/user');
+        break;
+    }
+  }
+
+  return {
+    providers: Array.from(new Set(providers)),
+    endpoints: Array.from(new Set(endpoints)),
+  };
+}
+
 export class GatewayDatabase {
   /**
    * Lookup client and key by SHA-256 hash
@@ -187,8 +246,9 @@ export class GatewayDatabase {
     const createdAt = new Date().toISOString();
 
     const allowedServices: (ServiceCategory | '*')[] = params.allowedServices && params.allowedServices.length > 0 ? params.allowedServices : ['*'];
-    const allowedProviders = params.allowedProviders && params.allowedProviders.length > 0 ? params.allowedProviders : ['*'];
-    const allowedEndpoints = params.allowedEndpoints && params.allowedEndpoints.length > 0 ? params.allowedEndpoints : ['*'];
+    const resolved = resolveProvidersAndEndpointsFromServices(allowedServices);
+    const allowedProviders = params.allowedProviders && params.allowedProviders.length > 0 ? params.allowedProviders : resolved.providers;
+    const allowedEndpoints = params.allowedEndpoints && params.allowedEndpoints.length > 0 ? params.allowedEndpoints : resolved.endpoints;
 
     const newClient: ApiClientRecord = {
       id: clientId,
@@ -279,14 +339,53 @@ export class GatewayDatabase {
   ): Promise<ApiClientRecord | null> {
     loadStoreFromDisk();
 
-    const client = memoryClients.get(id);
+    let client = memoryClients.get(id);
+    if (!client) {
+      try {
+        const { data: dbClient } = await supabaseAdmin
+          .from('api_clients')
+          .select('*')
+          .eq('id', id)
+          .single();
+
+        if (dbClient) {
+          const meta = dbClient.metadata || {};
+          client = {
+            id: dbClient.id,
+            name: dbClient.name,
+            description: dbClient.description || '',
+            status: dbClient.status,
+            rateLimitPerMinute: dbClient.rate_limit_per_minute || 120,
+            rateLimitPerHour: dbClient.rate_limit_per_hour || 2000,
+            rateLimitPerDay: dbClient.rate_limit_per_day || 20000,
+            allowedServices: dbClient.allowed_services || ['*'],
+            allowedProviders: meta.allowedProviders || ['*'],
+            allowedEndpoints: meta.allowedEndpoints || ['*'],
+            createdAt: dbClient.created_at,
+            rawKey: dbClient.raw_key,
+            userId: meta.userId,
+            userEmail: meta.userEmail,
+          };
+          memoryClients.set(id, client);
+        }
+      } catch (err) {
+        console.error('Failed to load client from Supabase in updateClient:', err);
+      }
+    }
+
     if (!client) return null;
 
     if (updates.name !== undefined) client.name = updates.name;
     if (updates.description !== undefined) client.description = updates.description;
-    if (updates.allowedServices !== undefined) client.allowedServices = updates.allowedServices;
-    if (updates.allowedProviders !== undefined) client.allowedProviders = updates.allowedProviders;
-    if (updates.allowedEndpoints !== undefined) client.allowedEndpoints = updates.allowedEndpoints;
+    if (updates.allowedServices !== undefined) {
+      client.allowedServices = updates.allowedServices;
+      const resolved = resolveProvidersAndEndpointsFromServices(updates.allowedServices);
+      client.allowedProviders = updates.allowedProviders !== undefined ? updates.allowedProviders : resolved.providers;
+      client.allowedEndpoints = updates.allowedEndpoints !== undefined ? updates.allowedEndpoints : resolved.endpoints;
+    } else {
+      if (updates.allowedProviders !== undefined) client.allowedProviders = updates.allowedProviders;
+      if (updates.allowedEndpoints !== undefined) client.allowedEndpoints = updates.allowedEndpoints;
+    }
     if (updates.rateLimitPerMinute !== undefined) client.rateLimitPerMinute = updates.rateLimitPerMinute;
     if (updates.status !== undefined) {
       client.status = updates.status;
@@ -558,10 +657,15 @@ export class GatewayDatabase {
     return [
       { id: 'youtube', name: 'YouTube Data API v3', service: 'videos', priority: 100, status: 'active' },
       { id: 'openweather', name: 'OpenWeather API', service: 'weather', priority: 100, status: 'active' },
+      { id: 'open_meteo', name: 'Open-Meteo Weather API', service: 'weather', priority: 90, status: 'active' },
       { id: 'google_maps', name: 'Google Maps Platform', service: 'maps', priority: 100, status: 'active' },
-      { id: 'mapbox', name: 'Mapbox API', service: 'maps', priority: 80, status: 'active' },
-      { id: 'google_routes', name: 'Google Routes Optimizer', service: 'routing', priority: 100, status: 'active' },
+      { id: 'mapbox', name: 'Mapbox API (Geocoding & Isochrone)', service: 'maps', priority: 80, status: 'active' },
+      { id: 'osrmroute', name: 'OSRM Route Engine', service: 'routing', priority: 100, status: 'active' },
+      { id: 'google_routes', name: 'Google Routes Optimizer', service: 'routing', priority: 90, status: 'active' },
       { id: 'internal_tsp', name: 'Internal 2-opt TSP Solver', service: 'routing', priority: 50, status: 'active' },
+      { id: 'frankfurter', name: 'Frankfurter (ECB Currency Rates)', service: 'finance', priority: 100, status: 'active' },
+      { id: 'gnews', name: 'GNews World News API', service: 'news', priority: 100, status: 'active' },
+      { id: 'ip_geolocation', name: 'IP Geolocation & Network API', service: 'utils', priority: 100, status: 'active' },
       { id: 'tiktok', name: 'TikTok Display API', service: 'tiktok', priority: 100, status: 'active' },
       { id: 'instagram', name: 'Meta Instagram Graph API', service: 'instagram', priority: 100, status: 'active' },
     ];
