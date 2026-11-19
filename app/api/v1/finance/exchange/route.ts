@@ -51,9 +51,10 @@ export async function GET(request: NextRequest) {
   );
 
   if (!result.success || !result.data) {
+    const isClientError = result.error?.code === 'UNSUPPORTED_CURRENCY' || result.error?.code === 'INVALID_PARAMS';
     return Normalizer.error({
       service: 'finance',
-      statusCode: 502,
+      statusCode: isClientError ? 400 : 502,
       errors: [result.error || { code: 'EXCHANGE_FAILED', message: 'Failed to fetch currency exchange rates' }],
       provider: result.providerName,
     });

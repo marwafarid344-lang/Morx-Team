@@ -70,6 +70,60 @@ export class FrankfurterProvider implements IProvider {
         RateLimiter.recordProviderCall(this.name, 1);
 
         if (!res.ok) {
+          // Frankfurter (ECB) only tracks ~32 major currencies. For currencies like EGP, SAR, AED,
+          // or during Frankfurter upstream downtime, seamlessly fallback to the Global Open Exchange Engine (160+ currencies).
+          try {
+            const fallbackRes = await fetch(`https://open.er-api.com/v6/latest/${encodeURIComponent(base)}`, {
+              signal: AbortSignal.timeout(6000),
+            });
+            if (fallbackRes.ok) {
+              const fbData = await fallbackRes.json();
+              if (fbData.result === 'success' && fbData.rates) {
+                const allRates = fbData.rates as Record<string, number>;
+                if (target && allRates[target] === undefined) {
+                  return {
+                    success: false,
+                    data: null,
+                    providerName: this.name,
+                    latencyMs: Date.now() - start,
+                    error: {
+                      code: 'UNSUPPORTED_CURRENCY',
+                      message: `Target currency '${target}' is not recognized or supported.`,
+                      provider: this.name,
+                      retryable: false,
+                    },
+                  };
+                }
+
+                const targetRate = target ? allRates[target] : undefined;
+                const converted = targetRate !== undefined ? Number((amount * targetRate).toFixed(4)) : undefined;
+                const filteredRates = target ? { [target]: targetRate! } : allRates;
+
+                const normalized: UnifiedExchangeRate = {
+                  base,
+                  target,
+                  amount,
+                  date: fbData.time_last_update_utc ? new Date(fbData.time_last_update_utc).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
+                  converted_amount: converted,
+                  rates: filteredRates,
+                };
+
+                return {
+                  success: true,
+                  data: normalized as unknown as T,
+                  providerName: this.name,
+                  latencyMs: Date.now() - start,
+                  meta: {
+                    source: 'ExchangeRate Engine (Global Open Rates)',
+                    note: `Currency '${base}' resolved via Global Exchange Engine fallback.`,
+                  },
+                };
+              }
+            }
+          } catch {
+            // fallback error, proceed to standard error reporting
+          }
+
           return {
             success: false,
             data: null,
@@ -77,7 +131,7 @@ export class FrankfurterProvider implements IProvider {
             latencyMs,
             error: {
               code: 'PROVIDER_API_ERROR',
-              message: `Frankfurter API failed with HTTP ${res.status}`,
+              message: `Frankfurter API failed with HTTP ${res.status}. Currency '${base}' may not be tracked by the European Central Bank.`,
               provider: this.name,
               retryable: res.status >= 500,
             },
