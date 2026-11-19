@@ -37,17 +37,29 @@ import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
 import { ApiAccessGuard } from "@/components/gateway/api-access-guard";
 import { useAuth } from "@/contexts/auth-context";
+import {
+  YouTubeLogo,
+  TikTokLogo,
+  InstagramLogo,
+  GoogleMapsLogo,
+  OpenWeatherLogo,
+  OSRMRouteLogo,
+  FrankfurterLogo,
+  GNewsLogo,
+  IpGeolocationLogo,
+  ProviderBrandLogo,
+} from "@/components/gateway/provider-logos";
 
 const GATEWAY_SERVICES = [
-  { id: "videos", label: "Video Discovery", provider: "YouTube Data API v3", icon: Video, color: "text-red-400" },
-  { id: "weather", label: "Weather Intelligence", provider: "OpenWeather & Open-Meteo", icon: CloudSun, color: "text-amber-400" },
-  { id: "maps", label: "Maps & Geolocation", provider: "Google Maps, Mapbox & Isochrone", icon: Compass, color: "text-blue-400" },
-  { id: "routing", label: "Route Optimizer", provider: "OSRM, Google Routes & 2-Opt", icon: Navigation, color: "text-emerald-400" },
-  { id: "finance", label: "Exchange & Rates", provider: "European Central Bank (Frankfurter)", icon: DollarSign, color: "text-emerald-400" },
-  { id: "news", label: "News & Media", provider: "GNews Intelligence", icon: Newspaper, color: "text-cyan-400" },
-  { id: "utils", label: "Network & IP Lookup", provider: "IP Geolocation", icon: Globe, color: "text-indigo-400" },
-  { id: "tiktok", label: "TikTok Feeds", provider: "TikTok API", icon: Share2, color: "text-pink-400" },
-  { id: "instagram", label: "Instagram Graph", provider: "Meta Graph API", icon: Share2, color: "text-purple-400" },
+  { id: "videos", label: "Video Discovery", provider: "YouTube Data API v3", logo: YouTubeLogo, color: "text-red-400" },
+  { id: "weather", label: "Weather Intelligence", provider: "OpenWeather & Open-Meteo", logo: OpenWeatherLogo, color: "text-amber-400" },
+  { id: "maps", label: "Maps & Geolocation", provider: "Google Maps, Mapbox & Isochrone", logo: GoogleMapsLogo, color: "text-blue-400" },
+  { id: "routing", label: "Route Optimizer", provider: "OSRM, Google Routes & 2-Opt", logo: OSRMRouteLogo, color: "text-emerald-400" },
+  { id: "finance", label: "Exchange & Rates", provider: "European Central Bank (Frankfurter)", logo: FrankfurterLogo, color: "text-emerald-400" },
+  { id: "news", label: "News & Media", provider: "GNews Intelligence", logo: GNewsLogo, color: "text-cyan-400" },
+  { id: "utils", label: "Network & IP Lookup", provider: "IP Geolocation", logo: IpGeolocationLogo, color: "text-indigo-400" },
+  { id: "tiktok", label: "TikTok Feeds", provider: "TikTok API", logo: TikTokLogo, color: "text-pink-400" },
+  { id: "instagram", label: "Instagram Graph", provider: "Meta Graph API", logo: InstagramLogo, color: "text-purple-400" },
 ];
 
 const QUICK_ENDPOINTS = [
@@ -605,13 +617,13 @@ export default function GatewayAdminPage() {
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                   {GATEWAY_SERVICES.map((s) => {
                     const isChecked = newClientServices.includes(s.id);
-                    const Icon = s.icon;
+                    const Logo = s.logo;
                     return (
                       <label 
                         key={s.id} 
                         className={`flex items-center gap-2.5 p-2.5 rounded-xl border cursor-pointer transition-all text-xs select-none ${
                           isChecked 
-                            ? "bg-primary/10 border-primary/40 text-foreground font-medium" 
+                            ? "bg-primary/10 border-primary/40 text-foreground font-medium shadow-xs" 
                             : "bg-background/60 border-border/60 text-muted-foreground hover:border-border"
                         }`}
                       >
@@ -627,7 +639,7 @@ export default function GatewayAdminPage() {
                           }}
                           className="rounded text-primary focus:ring-0"
                         />
-                        <Icon className={`size-3.5 ${s.color} shrink-0`} />
+                        <Logo className="size-4 shrink-0 shadow-xs" />
                         <span className="truncate">{s.label}</span>
                       </label>
                     );
@@ -719,10 +731,11 @@ export default function GatewayAdminPage() {
                                   All Services (*)
                                 </span>
                               ) : (
-                                <div className="flex flex-wrap gap-1 max-w-[200px]">
+                                <div className="flex flex-wrap gap-1.5 max-w-[220px]">
                                   {allowed.map((s: string) => (
-                                    <span key={s} className="px-1.5 py-0.2 rounded text-[9px] font-mono bg-primary/10 text-primary border border-primary/20 capitalize">
-                                      {s}
+                                    <span key={s} className="flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-mono bg-muted/60 border border-border/70 capitalize" title={s}>
+                                      <ProviderBrandLogo name={s} className="size-3.5 shrink-0" />
+                                      <span>{s}</span>
                                     </span>
                                   ))}
                                 </div>
@@ -1000,14 +1013,9 @@ export default function GatewayAdminPage() {
                   <div key={p.name} className="p-4 rounded-2xl border border-border/70 bg-card flex flex-col justify-between space-y-3 shadow-xs">
                     <div>
                       <div className="flex items-center justify-between">
-                        <span className="font-bold text-sm capitalize flex items-center gap-1.5">
-                          {p.service === "weather" && <CloudSun className="size-3.5 text-amber-500" />}
-                          {p.service === "videos" && <Video className="size-3.5 text-red-500" />}
-                          {p.service === "maps" && <Compass className="size-3.5 text-blue-500" />}
-                          {p.service === "routing" && <Navigation className="size-3.5 text-emerald-500" />}
-                          {p.service === "tiktok" && <Share2 className="size-3.5 text-pink-500" />}
-                          {p.service === "instagram" && <Share2 className="size-3.5 text-purple-500" />}
-                          {p.name.replace("_", " ")}
+                        <span className="font-bold text-sm capitalize flex items-center gap-2">
+                          <ProviderBrandLogo name={p.name || p.service} className="size-4 shrink-0 shadow-xs" />
+                          <span>{p.name.replace(/_/g, " ")}</span>
                         </span>
                         <div className="flex items-center gap-1.5">
                           {/* Compliance Status Badge */}
@@ -1187,13 +1195,13 @@ export default function GatewayAdminPage() {
                 <div className="grid grid-cols-2 gap-2">
                   {GATEWAY_SERVICES.map((s) => {
                     const isChecked = editServices.includes(s.id);
-                    const Icon = s.icon;
+                    const Logo = s.logo;
                     return (
                       <label 
                         key={s.id} 
-                        className={`flex items-center gap-2 p-2 rounded-xl border cursor-pointer text-xs ${
+                        className={`flex items-center gap-2.5 p-2 rounded-xl border cursor-pointer text-xs select-none ${
                           isChecked 
-                            ? "bg-primary/10 border-primary/40 text-foreground font-medium" 
+                            ? "bg-primary/10 border-primary/40 text-foreground font-medium shadow-xs" 
                             : "bg-background/60 border-border/60 text-muted-foreground"
                         }`}
                       >
@@ -1209,7 +1217,7 @@ export default function GatewayAdminPage() {
                           }}
                           className="rounded text-primary focus:ring-0"
                         />
-                        <Icon className={`size-3.5 ${s.color} shrink-0`} />
+                        <Logo className="size-4 shrink-0 shadow-xs" />
                         <span className="truncate">{s.label}</span>
                       </label>
                     );
