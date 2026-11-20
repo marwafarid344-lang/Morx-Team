@@ -80,7 +80,7 @@ const UPGRADE_PLANS = [
       "Weather Radar & 5-Day Forecast API",
       "Maps & Places Geocoding API",
       "Route & TSP Multi-stop Optimizer",
-      "Social Feeds (TikTok & Instagram)",
+      "Social Feeds (Instagram Reels & Posts)",
       "System Database Cron & Maintenance API",
       "Unlimited Custom API Keys & Client Management",
       "High-throughput limits (up to 10,000 req/min)",

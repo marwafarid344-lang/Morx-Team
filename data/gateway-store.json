@@ -1,5 +1,73 @@
 {
-  "clients": [],
-  "keys": [],
-  "updatedAt": "2026-11-19T00:00:00.000Z"
+  "clients": [
+    {
+      "id": "client_1795085048711_09shj",
+      "name": "Morx Test",
+      "description": "testing",
+      "status": "active",
+      "rateLimitPerMinute": 120,
+      "rateLimitPerHour": 2000,
+      "rateLimitPerDay": 20000,
+      "allowedServices": [
+        "*"
+      ],
+      "allowedProviders": [
+        "*"
+      ],
+      "allowedEndpoints": [
+        "*"
+      ],
+      "createdAt": "2026-11-19T10:44:09.037682+00:00",
+      "rawKey": "morx_live_KtMoZUc_JnZ2lxzdTTGbTmUJsM2I9M_RW",
+      "expiresAt": "2027-11-19T10:44:08.711+00:00",
+      "lastUsedAt": "2026-11-19T11:06:36.159+00:00",
+      "userId": "cfae8b08-707c-4b5b-a602-f3552a2ca5f4",
+      "userEmail": "tokyo9900777@gmail.com"
+    },
+    {
+      "id": "client_1795216110699_wl34d",
+      "name": "Restricted Allowable Client",
+      "description": "",
+      "status": "active",
+      "rateLimitPerMinute": 120,
+      "rateLimitPerHour": 2000,
+      "rateLimitPerDay": 20000,
+      "allowedServices": [
+        "weather"
+      ],
+      "allowedProviders": [
+        "open_meteo"
+      ],
+      "allowedEndpoints": [
+        "/api/v1/weather/current"
+      ],
+      "createdAt": "2026-11-20T23:08:30.699Z",
+      "rawKey": "morx_live_O0rnKOn_88gBbO7WNqRhUkjAkAGbXXQZ5",
+      "expiresAt": "2027-11-20T23:08:30.699Z"
+    }
+  ],
+  "keys": [
+    {
+      "id": "key_1795085048711_ny4ft",
+      "clientId": "client_1795085048711_09shj",
+      "keyPrefix": "morx_live_KtMoZUc",
+      "keyHash": "15fbf80a941c83e0281256219d6795007298f62753255d844826ecd573b4355d",
+      "status": "active",
+      "expiresAt": "2027-11-19T10:44:08.711+00:00",
+      "createdAt": "2026-11-19T10:44:09.393183+00:00",
+      "lastUsedAt": "2026-11-19T11:06:36.159+00:00",
+      "rawKey": "morx_live_KtMoZUc_JnZ2lxzdTTGbTmUJsM2I9M_RW"
+    },
+    {
+      "id": "key_1795216110699_of34z",
+      "clientId": "client_1795216110699_wl34d",
+      "keyPrefix": "morx_live_O0rnKOn",
+      "keyHash": "d08e71e5787c25b511bddf6bf3af327156faaa299b66f80a410f15ddb85b6d43",
+      "status": "active",
+      "createdAt": "2026-11-20T23:08:30.699Z",
+      "expiresAt": "2027-11-20T23:08:30.699Z",
+      "rawKey": "morx_live_O0rnKOn_88gBbO7WNqRhUkjAkAGbXXQZ5"
+    }
+  ],
+  "updatedAt": "2026-11-20T23:08:30.699Z"
 }

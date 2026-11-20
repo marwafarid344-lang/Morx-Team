@@ -126,15 +126,13 @@ export function resolveProvidersAndEndpointsFromServices(services: (ServiceCateg
         providers.push('ip_geolocation');
         endpoints.push('/api/v1/utils/ip-lookup');
         break;
-      case 'tiktok':
-        providers.push('tiktok');
-        endpoints.push('/api/v1/tiktok/videos', '/api/v1/tiktok/user');
-        break;
       case 'instagram':
         providers.push('apify', 'rapidapi', 'instagram');
         endpoints.push(
           '/api/v1/instagram/reels/search',
-          '/api/instagram/reels/search'
+          '/api/instagram/reels/search',
+          '/api/v1/instagram/posts/search',
+          '/api/instagram/posts/search'
         );
         break;
     }
@@ -669,7 +667,6 @@ export class GatewayDatabase {
       { id: 'frankfurter', name: 'Frankfurter (ECB Currency Rates)', service: 'finance', priority: 100, status: 'active' },
       { id: 'gnews', name: 'GNews World News API', service: 'news', priority: 100, status: 'active' },
       { id: 'ip_geolocation', name: 'IP Geolocation & Network API', service: 'utils', priority: 100, status: 'active' },
-      { id: 'tiktok', name: 'TikTok Display API', service: 'tiktok', priority: 100, status: 'active' },
       { id: 'instagram', name: 'Meta Instagram Graph API', service: 'instagram', priority: 100, status: 'active' },
       { id: 'apify', name: 'Apify Instagram Hashtag Scraper', service: 'instagram', priority: 95, status: 'active' },
       { id: 'rapidapi', name: 'RapidAPI Instagram Scraper', service: 'instagram', priority: 90, status: 'active' },

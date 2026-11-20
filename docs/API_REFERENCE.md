@@ -105,15 +105,14 @@ Intelligent stop sequencing using 2-opt TSP heuristics or Google Routes.
 
 ---
 
-## 5. TikTok Display API
-* `GET /api/v1/tiktok/user?access_token=...`
-* `GET /api/v1/tiktok/videos?access_token=...&limit=20`
-* `GET /api/v1/tiktok/videos/:id?access_token=...`
+## 5. Instagram Platform
+### Reels Search (Hashtag)
+* `GET /api/v1/instagram/reels/search?tag=travel&limit=10&sort=top`
+* `GET /api/instagram/reels/search?tag=travel&limit=10&sort=top`
+Guaranteed playable video stream, duration, and engagement metrics via Apify + RapidAPI fallback.
 
----
-
-## 6. Instagram Platform
-* `GET /api/v1/instagram/profile?access_token=...`
-* `GET /api/v1/instagram/media?access_token=...&limit=20`
-* `GET /api/v1/instagram/media/:id?access_token=...`
+### Posts Search (Hashtag)
+* `GET /api/v1/instagram/posts/search?tag=travel&limit=10&sort=top`
+* `GET /api/instagram/posts/search?tag=travel&limit=10&sort=top`
+Guaranteed static photography and carousels (no video reels) via Apify + RapidAPI fallback.
 

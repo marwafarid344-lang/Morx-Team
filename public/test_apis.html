@@ -620,15 +620,17 @@
         }, null, 2)
       },
       {
-        id: "social-tiktok",
+        id: "social-instagram-posts",
         category: "Social Feeds",
-        icon: "🎵",
-        title: "TikTok Videos",
+        icon: "📸",
+        title: "Instagram Posts Search",
         method: "GET",
-        path: "/api/v1/tiktok/videos",
-        description: "Fetch authorized creator video items and engagement metrics.",
+        path: "/api/instagram/posts/search",
+        description: "Search public Instagram Posts (Photos, Carousels, Galleries ONLY) by hashtag without Meta restrictions (Apify + RapidAPI fallback).",
         defaultParams: [
-          { key: "limit", value: "6", desc: "Max videos" }
+          { key: "tag", value: "travel", desc: "Hashtag to search without #" },
+          { key: "limit", value: "6", desc: "Number of Posts (1-30)" },
+          { key: "sort", value: "top", desc: "top | recent" }
         ],
         body: null
       },
@@ -1415,7 +1417,7 @@
         { name: "Maps", path: "/api/v1/maps/geocode?address=Alexandria", method: "GET" },
         { name: "OSRMRoute", path: "/api/v1/routes/directions?coordinates=29.9187,31.2001;29.9500,31.2200&profile=driving", method: "GET" },
         { name: "Optimizer", path: "/api/v1/routes/optimize", method: "POST", body: CATALOG.find(e => e.id === 'routes-optimize').body },
-        { name: "TikTok", path: "/api/v1/tiktok/videos?limit=2", method: "GET" },
+        { name: "IG Posts", path: "/api/v1/instagram/posts/search?tag=travel&limit=2", method: "GET" },
       ];
 
       for (const t of tests) {

@@ -39,7 +39,6 @@ import { ApiAccessGuard } from "@/components/gateway/api-access-guard";
 import { useAuth } from "@/contexts/auth-context";
 import {
   YouTubeLogo,
-  TikTokLogo,
   InstagramLogo,
   GoogleMapsLogo,
   OpenWeatherLogo,
@@ -58,8 +57,7 @@ const GATEWAY_SERVICES = [
   { id: "finance", label: "Exchange & Rates", provider: "European Central Bank (Frankfurter)", logo: FrankfurterLogo, color: "text-emerald-400" },
   { id: "news", label: "News & Media", provider: "GNews Intelligence", logo: GNewsLogo, color: "text-cyan-400" },
   { id: "utils", label: "Network & IP Lookup", provider: "IP Geolocation", logo: IpGeolocationLogo, color: "text-indigo-400" },
-  { id: "tiktok", label: "TikTok Feeds", provider: "TikTok API", logo: TikTokLogo, color: "text-pink-400" },
-  { id: "instagram", label: "Instagram Graph", provider: "Meta Graph API", logo: InstagramLogo, color: "text-purple-400" },
+  { id: "instagram", label: "Instagram Platform", provider: "Reels & Posts Engine", logo: InstagramLogo, color: "text-purple-400" },
 ];
 
 const QUICK_ENDPOINTS = [
@@ -142,17 +140,17 @@ const QUICK_ENDPOINTS = [
     body: null,
   },
   {
-    name: "TikTok Creator Videos",
-    service: "tiktok",
-    method: "GET",
-    path: "/api/v1/tiktok/videos?limit=2",
-    body: null,
-  },
-  {
     name: "Instagram Reels Search (Apify/RapidAPI)",
     service: "instagram",
     method: "GET",
     path: "/api/v1/instagram/reels/search?tag=travel&limit=2",
+    body: null,
+  },
+  {
+    name: "Instagram Posts Search (Apify/RapidAPI)",
+    service: "instagram",
+    method: "GET",
+    path: "/api/v1/instagram/posts/search?tag=travel&limit=2",
     body: null,
   },
 ];
@@ -364,7 +362,7 @@ export default function GatewayAdminPage() {
       { name: "Google Maps Geocoding", service: "maps", path: "/api/v1/maps/geocode?address=Alexandria", method: "GET" },
       { name: "Google Maps Places", service: "maps", path: "/api/v1/maps/places?query=Cafe&lat=31.2&lon=29.9", method: "GET" },
       { name: "YouTube Data API v3 (Videos)", service: "videos", path: "/api/v1/videos/search?q=Alexandria&limit=2", method: "GET" },
-      { name: "TikTok Display API", service: "tiktok", path: "/api/v1/tiktok/videos?limit=2", method: "GET" },
+      { name: "Instagram Reels Engine", service: "instagram", path: "/api/v1/instagram/reels/search?tag=travel&limit=2", method: "GET" },
     ];
 
     const results = [];

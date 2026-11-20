@@ -620,15 +620,32 @@
         }, null, 2)
       },
       {
-        id: "social-tiktok",
+        id: "social-instagram-posts",
         category: "Social Feeds",
-        icon: "🎵",
-        title: "TikTok Videos",
+        icon: "📸",
+        title: "Instagram Posts Search",
         method: "GET",
-        path: "/api/v1/tiktok/videos",
-        description: "Fetch authorized creator video items and engagement metrics.",
+        path: "/api/instagram/posts/search",
+        description: "Search public Instagram Posts (Photos, Carousels, Galleries ONLY) by hashtag without Meta restrictions (Apify + RapidAPI fallback).",
         defaultParams: [
-          { key: "limit", value: "6", desc: "Max videos" }
+          { key: "tag", value: "travel", desc: "Hashtag to search without #" },
+          { key: "limit", value: "6", desc: "Number of Posts (1-30)" },
+          { key: "sort", value: "top", desc: "top | recent" }
+        ],
+        body: null
+      },
+      {
+        id: "social-instagram-posts-v1",
+        category: "Social Feeds",
+        icon: "🖼️",
+        title: "Instagram Posts (v1 Gateway)",
+        method: "GET",
+        path: "/api/v1/instagram/posts/search",
+        description: "Official Gateway v1 route for Instagram static Posts search.",
+        defaultParams: [
+          { key: "tag", value: "travel", desc: "Hashtag without #" },
+          { key: "limit", value: "6", desc: "Number of Posts (1-30)" },
+          { key: "sort", value: "top", desc: "top | recent" }
         ],
         body: null
       },
@@ -1171,40 +1188,6 @@
         return;
       }
 
-      // 9. INSTAGRAM REELS
-      if ((endpoint.id.includes('instagram-reels') || (endpoint.path && endpoint.path.includes('reels/search'))) && Array.isArray(data)) {
-        let html = '<div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">';
-        data.forEach(r => {
-          html += `
-            <div class="p-3 rounded-xl bg-morx-950 border border-morx-800 flex flex-col justify-between gap-2 hover:border-pink-500/40 transition-colors">
-              <div class="relative aspect-[9/16] max-h-56 rounded-lg overflow-hidden bg-morx-900 mx-auto w-full">
-                <img src="${r.thumbnail || ''}" class="w-full h-full object-cover" onerror="this.src='https://via.placeholder.com/200x350?text=No+Thumbnail'" />
-                <span class="absolute top-2 left-2 px-1.5 py-0.5 rounded bg-pink-600/90 font-mono text-[9px] text-white flex items-center gap-1 font-bold shadow">
-                  <span>▶</span> REEL
-                </span>
-                <span class="absolute bottom-2 right-2 px-1.5 py-0.5 rounded bg-black/80 font-mono text-[9px] text-white">
-                  ${r.duration ? Math.floor(r.duration) + 's' : 'Reel'}
-                </span>
-              </div>
-              <div class="space-y-1.5">
-                <div class="flex items-center justify-between text-[11px]">
-                  <span class="font-bold text-pink-400">@${r.owner?.username || 'instagram_user'}</span>
-                  ${r.permalink ? `<a href="${r.permalink}" target="_blank" class="text-blue-400 hover:underline text-[10px]">Open ↗</a>` : ''}
-                </div>
-                <p class="text-[11px] text-slate-300 line-clamp-2">${r.caption || 'No caption'}</p>
-                <div class="text-[10px] text-slate-400 flex items-center justify-between pt-1 border-t border-morx-800 font-mono">
-                  <span class="text-emerald-400">❤️ ${(r.like_count || 0).toLocaleString()}</span>
-                  <span class="text-blue-400">💬 ${(r.comments_count || 0).toLocaleString()}</span>
-                  ${r.views_count ? `<span class="text-purple-400">👁️ ${r.views_count.toLocaleString()}</span>` : ''}
-                </div>
-              </div>
-            </div>
-          `;
-        });
-        html += '</div>';
-        container.innerHTML = html;
-        return;
-      }
 
       // 2. WEATHER
       if (endpoint.category === 'Weather' && data.temperature !== undefined) {
@@ -1427,7 +1410,8 @@
         return;
       }
 
-      // 9. INSTAGRAM REELS
+
+      // 9. INSTAGRAM REELS (Playable Video Stream ONLY)
       if ((endpoint.id.includes('instagram-reels') || (endpoint.path && endpoint.path.includes('reels/search'))) && Array.isArray(data)) {
         let html = '<div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">';
         data.forEach(r => {
@@ -1452,6 +1436,39 @@
                   <span class="text-emerald-400">❤️ ${(r.like_count || 0).toLocaleString()}</span>
                   <span class="text-blue-400">💬 ${(r.comments_count || 0).toLocaleString()}</span>
                   ${r.views_count ? `<span class="text-purple-400">👁️ ${r.views_count.toLocaleString()}</span>` : ''}
+                </div>
+              </div>
+            </div>
+          `;
+        });
+        html += '</div>';
+        container.innerHTML = html;
+        return;
+      }
+
+      // 10. INSTAGRAM POSTS (Static Photos & Carousels ONLY)
+      if ((endpoint.id.includes('instagram-posts') || (endpoint.path && endpoint.path.includes('posts/search'))) && Array.isArray(data)) {
+        let html = '<div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">';
+        data.forEach(p => {
+          const isCarousel = p.type === 'CAROUSEL_ALBUM' || (p.images && p.images.length > 1);
+          html += `
+            <div class="p-3 rounded-xl bg-morx-950 border border-morx-800 flex flex-col justify-between gap-2 hover:border-amber-500/40 transition-colors">
+              <div class="relative aspect-square max-h-56 rounded-lg overflow-hidden bg-morx-900 mx-auto w-full">
+                <img src="${p.display_url || (p.images && p.images[0]) || ''}" class="w-full h-full object-cover" onerror="this.src='https://via.placeholder.com/300x300?text=No+Photo'" />
+                <span class="absolute top-2 left-2 px-1.5 py-0.5 rounded bg-amber-600/90 font-mono text-[9px] text-white flex items-center gap-1 font-bold shadow">
+                  <span>${isCarousel ? '📚 CAROUSEL' : '📷 PHOTO'}</span>
+                </span>
+                ${isCarousel ? `<span class="absolute bottom-2 right-2 px-1.5 py-0.5 rounded bg-black/80 font-mono text-[9px] text-white">${p.images.length} photos</span>` : ''}
+              </div>
+              <div class="space-y-1.5">
+                <div class="flex items-center justify-between text-[11px]">
+                  <span class="font-bold text-amber-400">@${p.owner?.username || 'instagram_user'}</span>
+                  ${p.permalink ? `<a href="${p.permalink}" target="_blank" class="text-blue-400 hover:underline text-[10px]">Open ↗</a>` : ''}
+                </div>
+                <p class="text-[11px] text-slate-300 line-clamp-2">${p.caption || 'No caption'}</p>
+                <div class="text-[10px] text-slate-400 flex items-center justify-between pt-1 border-t border-morx-800 font-mono">
+                  <span class="text-rose-400">❤️ ${(p.like_count || 0).toLocaleString()}</span>
+                  <span class="text-blue-400">💬 ${(p.comments_count || 0).toLocaleString()}</span>
                 </div>
               </div>
             </div>
@@ -1502,7 +1519,7 @@
         { name: "Maps", path: "/api/v1/maps/geocode?address=Alexandria", method: "GET" },
         { name: "OSRMRoute", path: "/api/v1/routes/directions?coordinates=29.9187,31.2001;29.9500,31.2200&profile=driving", method: "GET" },
         { name: "Optimizer", path: "/api/v1/routes/optimize", method: "POST", body: CATALOG.find(e => e.id === 'routes-optimize').body },
-        { name: "TikTok", path: "/api/v1/tiktok/videos?limit=2", method: "GET" },
+        { name: "IG Posts", path: "/api/v1/instagram/posts/search?tag=travel&limit=2", method: "GET" },
       ];
 
       for (const t of tests) {

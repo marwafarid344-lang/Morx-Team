@@ -14,7 +14,6 @@ export async function GET(request: NextRequest) {
     'weather',
     'maps',
     'routing',
-    'tiktok',
     'instagram',
   ];
 

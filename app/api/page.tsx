@@ -652,41 +652,44 @@ print(res.json())`,
 }`
   },
   {
-    path: "/api/v1/tiktok/videos",
+    path: "/api/instagram/reels/search",
     method: "GET",
-    title: "TikTok Creator Videos",
-    desc: "Retrieves recent public videos and engagement metadata for an authorized creator account.",
+    title: "Instagram Reels Search",
+    desc: "Searches public Instagram Reels by hashtag with extreme precision, returning only playable videos and engagement metrics.",
     category: "social",
-    providers: ["TikTok Display API"],
-    cacheTtl: "15m Cache",
+    providers: ["Apify", "RapidAPI"],
+    cacheTtl: "10m Cache",
     rateLimit: "60 req/min",
     params: [
-      { name: "max_count", type: "number", required: false, defaultVal: "20", description: "Number of videos to fetch (max: 50)." },
-      { name: "cursor", type: "string", required: false, description: "Pagination cursor for subsequent video batches." },
+      { name: "tag", type: "string", required: true, description: "Hashtag to search without '#' (e.g. travel, cairo)." },
+      { name: "limit", type: "number", required: false, defaultVal: "10", description: "Number of Reels to return (1-30)." },
+      { name: "sort", type: "string", required: false, defaultVal: "top", description: "Sort order: 'top' or 'recent'." },
     ],
     importantNotes: [
-      "Requires creator OAuth token authorization with user.info.basic and video.list scopes.",
-      "Responses are normalized into the standard Morx video envelope.",
+      "Strictly excludes static photos and text posts; only playable video Reels are returned.",
+      "Automatically falls back from Apify to RapidAPI with 10-minute caching.",
     ],
-    curlExample: `curl -X GET "https://YOUR-DOMAIN/api/v1/tiktok/videos?max_count=10" \\
+    curlExample: `curl -X GET "https://YOUR-DOMAIN/api/instagram/reels/search?tag=travel&limit=10" \\
   -H "Authorization: Bearer YOUR_MORX_API_KEY"`,
-    jsExample: `const res = await fetch("https://YOUR-DOMAIN/api/v1/tiktok/videos", {
+    jsExample: `const res = await fetch("https://YOUR-DOMAIN/api/instagram/reels/search?tag=travel&limit=10", {
   headers: { "Authorization": "Bearer YOUR_MORX_API_KEY" }
 });
-const videos = await res.json();`,
+const reels = await res.json();`,
     pythonExample: `import requests
-res = requests.get("https://YOUR-DOMAIN/api/v1/tiktok/videos", headers={"Authorization": "Bearer YOUR_MORX_API_KEY"})
+res = requests.get("https://YOUR-DOMAIN/api/instagram/reels/search", params={"tag": "travel", "limit": 10}, headers={"Authorization": "Bearer YOUR_MORX_API_KEY"})
 print(res.json()["data"])`,
     responseExample: `{
   "success": true,
-  "service": "tiktok",
+  "service": "instagram",
   "data": [
     {
-      "id": "71987654321",
-      "provider": "tiktok",
-      "title": "Alexandria Sunset",
-      "url": "https://www.tiktok.com/@creator/video/71987654321",
-      "statistics": { "views": 45000, "likes": 3200 }
+      "id": "3985123576472766346",
+      "shortcode": "DdOAMdZsYeK",
+      "caption": "Exploring Cairo! #travel #cairo",
+      "video_url": "https://scontent.cdninstagram.com/reel.mp4",
+      "permalink": "https://www.instagram.com/reel/DdOAMdZsYeK/",
+      "like_count": 24500,
+      "views_count": 142000
     }
   ]
 }`
@@ -773,10 +776,10 @@ const SERVICE_HUBS = [
   },
   {
     id: "social",
-    title: "Social Media Feeds",
-    badge: "TikTok & Instagram",
-    desc: "Fetch authorized creator reels, media posts, captions, and engagement metrics into a unified format.",
-    quickEndpoint: "/api/v1/tiktok/videos",
+    title: "Instagram Platform",
+    badge: "Reels & Posts",
+    desc: "Fetch public Instagram Reels and high-resolution photo posts by hashtag with extreme precision.",
+    quickEndpoint: "/api/instagram/reels/search",
     count: 2,
     icon: Share2,
   },

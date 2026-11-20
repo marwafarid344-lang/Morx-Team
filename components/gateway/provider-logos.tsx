@@ -12,28 +12,6 @@ export function YouTubeLogo({ className = "size-4 shrink-0" }: { className?: str
   );
 }
 
-export function TikTokLogo({ className = "size-4 shrink-0" }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" className={className} fill="none" aria-label="TikTok">
-      <rect width="24" height="24" rx="5" fill="#010101" />
-      <path
-        d="M17.8 7.2a4.4 4.4 0 0 1-2.9-2.3V4h-2.5v11.2a2.3 2.3 0 1 1-2.3-2.3c.25 0 .5.04.72.12V10.4a4.8 4.8 0 0 0-.72-.05 4.8 4.8 0 1 0 4.8 4.8V9.3a6.8 6.8 0 0 0 3.9 1.2V8a4.4 4.4 0 0 1-1-.8z"
-        fill="#25F4EE"
-        transform="translate(-0.5, -0.5)"
-      />
-      <path
-        d="M17.8 7.2a4.4 4.4 0 0 1-2.9-2.3V4h-2.5v11.2a2.3 2.3 0 1 1-2.3-2.3c.25 0 .5.04.72.12V10.4a4.8 4.8 0 0 0-.72-.05 4.8 4.8 0 1 0 4.8 4.8V9.3a6.8 6.8 0 0 0 3.9 1.2V8a4.4 4.4 0 0 1-1-.8z"
-        fill="#FE2C55"
-        transform="translate(0.5, 0.5)"
-      />
-      <path
-        d="M17.8 7.2a4.4 4.4 0 0 1-2.9-2.3V4h-2.5v11.2a2.3 2.3 0 1 1-2.3-2.3c.25 0 .5.04.72.12V10.4a4.8 4.8 0 0 0-.72-.05 4.8 4.8 0 1 0 4.8 4.8V9.3a6.8 6.8 0 0 0 3.9 1.2V8a4.4 4.4 0 0 1-1-.8z"
-        fill="#FFFFFF"
-      />
-    </svg>
-  );
-}
-
 export function InstagramLogo({ className = "size-4 shrink-0" }: { className?: string }) {
   return (
     <svg viewBox="0 0 24 24" className={className} fill="none" aria-label="Instagram">
@@ -198,7 +176,6 @@ export function ProviderBrandLogo({
   if (norm.includes("apify")) return <ApifyLogo className={className} />;
   if (norm.includes("rapidapi")) return <RapidApiLogo className={className} />;
   if (norm.includes("youtube") || norm === "videos") return <YouTubeLogo className={className} />;
-  if (norm.includes("tiktok")) return <TikTokLogo className={className} />;
   if (norm.includes("instagram")) return <InstagramLogo className={className} />;
   if (norm.includes("openmeteo")) return <OpenMeteoLogo className={className} />;
   if (norm.includes("weather") || norm.includes("openweather")) return <OpenWeatherLogo className={className} />;

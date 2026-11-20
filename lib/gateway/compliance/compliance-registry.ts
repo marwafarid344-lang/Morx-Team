@@ -228,53 +228,6 @@ export class ComplianceRegistry {
       lastReviewedDate: '2026-11-18',
     });
 
-    // 6. TikTok
-    this.register({
-      providerName: 'tiktok',
-      service: 'tiktok',
-      officialDocumentation: 'https://developers.tiktok.com/',
-      applicableAgreement: 'TikTok Developer Terms of Service & Developer Guidelines',
-      complianceStatus: 'BLOCKED_PENDING_APPROVAL',
-      approvedUseCases: [
-        'Creator-authenticated display of authorized public videos via official Login Kit',
-      ],
-      allowedOperations: ['feed', 'profile', 'creator_insights'],
-      prohibitedOperations: [
-        'unauthorized_scraping_or_crawling',
-        'headless_browser_harvesting',
-        'biometric_face_or_voice_profiling',
-        'multi_tenant_proxying_without_tech_provider_status',
-      ],
-      dataRedistributionPolicy: 'TRANSFORMED_ONLY',
-      dataRetentionPolicy: {
-        maxStorageDays: 1,
-        allowPermanentStorage: false,
-        deletionOnRevocationRequired: true,
-      },
-      cachingPolicy: {
-        allowed: true,
-        maxTtlSeconds: 86400, // 24 hours mandatory refresh
-        prohibitedDataTypes: ['video_binaries', 'audio_binaries', 'biometric_data'],
-        allowPersistentStorage: false,
-      },
-      attributionRequirements: {
-        required: true,
-        displayText: 'Content from TikTok',
-        linkUrl: 'https://www.tiktok.com',
-        placement: 'inline',
-      },
-      oauthRequirements: {
-        required: true,
-        requiredScopes: ['user.info.basic', 'video.list'],
-        appReviewRequired: true,
-      },
-      geographicRestrictions: [],
-      clientEligibility: 'all',
-      requiredApprovals: ['TikTok Tech Provider Commercial Agreement', 'App Review'],
-      restrictionReason: 'Multi-tenant third-party proxying is blocked until Morx receives official TikTok Tech Provider certification and App Review clearance.',
-      lastReviewedDate: '2026-11-18',
-    });
-
     // 6. Instagram / Meta Platform
     this.register({
       providerName: 'instagram',

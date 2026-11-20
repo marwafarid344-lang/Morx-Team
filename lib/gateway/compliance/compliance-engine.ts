@@ -47,7 +47,7 @@ export class ComplianceEngine {
       };
     }
 
-    // 3. Blocked Pending Approval (e.g. YouTube proxying, TikTok, Instagram)
+    // 3. Blocked Pending Approval (e.g. YouTube proxying, Instagram)
     if (config.complianceStatus === 'BLOCKED_PENDING_APPROVAL') {
       // Internal first-party UI can access under strictly verified internal terms if permitted
       const isInternalWhitelisted = clientContext.isFirstParty && config.approvedUseCases.length > 0;

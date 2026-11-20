@@ -11,7 +11,6 @@ import { MapboxProvider } from '../providers/maps/mapbox';
 import { GoogleRoutesProvider } from '../providers/routing/google-routes';
 import { InternalTspProvider } from '../providers/routing/internal-tsp';
 import { OSRMRouteProvider } from '../providers/routing/osrmroute';
-import { TikTokProvider } from '../providers/social/tiktok';
 import { InstagramProvider } from '../providers/social/instagram';
 import { IpGeolocationProvider } from '../providers/utils/ip-geolocation';
 import { FrankfurterProvider } from '../providers/finance/frankfurter';
@@ -31,7 +30,6 @@ export class ProviderRegistry {
     this.register(new GoogleRoutesProvider());
     this.register(new InternalTspProvider());
     this.register(new OSRMRouteProvider());
-    this.register(new TikTokProvider());
     this.register(new InstagramProvider());
     this.register(new IpGeolocationProvider());
     this.register(new FrankfurterProvider());
@@ -138,16 +136,6 @@ export class ProviderRegistry {
       paginationSupported: false,
       quotaCostPerCall: 1,
       notes: 'OSRMRoute high-performance hosted turn-by-turn routing with OpenStreetMap road networks',
-    });
-
-    this.capabilities.set('tiktok', {
-      supportedOperations: ['user', 'videos', 'video_details'],
-      supportedFilters: ['access_token', 'cursor', 'limit', 'id'],
-      authType: 'oauth2',
-      paginationSupported: true,
-      maxLimit: 50,
-      quotaCostPerCall: 1,
-      notes: 'Official TikTok Display API for authorized creators',
     });
 
     this.capabilities.set('instagram', {

@@ -38,7 +38,6 @@ import { Footer } from "@/components/footer"
 import { Badge } from "@/components/ui/badge"
 import {
   YouTubeLogo,
-  TikTokLogo,
   InstagramLogo,
   GoogleMapsLogo,
   OpenWeatherLogo,
@@ -779,53 +778,72 @@ print(jsonDecode(res.body)['data']);`
   },
 
   // ---------------------------------------------------------------------------
-  // 12. SOCIAL: TIKTOK
+  // 12. SOCIAL: INSTAGRAM POSTS (PHOTOS & CAROUSELS ONLY - EXTREME PRECISION)
   // ---------------------------------------------------------------------------
   {
-    id: "social-tiktok",
-    path: "/api/v1/tiktok/videos",
+    id: "social-instagram-posts",
+    path: "/api/instagram/posts/search",
     method: "GET",
-    title: "TikTok Creator Videos & Engagement",
+    title: "Instagram Posts Search (Images & Carousels Only)",
     category: "social",
-    serviceName: "Social Feeds",
-    providers: ["TikTok Display API"],
-    cacheTtl: "15m Cache",
+    serviceName: "Instagram Platform",
+    providers: ["Apify", "RapidAPI"],
+    cacheTtl: "10m Cache",
     rateLimit: "60 req/min",
-    summary: "Retrieves public video reels, captions, and engagement metrics for authorized creator accounts.",
-    detailsText: "Allows travel creators to show live video portfolios and reels inside VoyageMind itineraries.",
+    summary: "High-precision search for public Instagram image posts, multi-photo carousels, and photo albums, strictly excluding Reels and videos.",
+    detailsText: "Designed specifically for VoyageMind travel galleries and itinerary photo feeds. Only returns high-resolution static photography and carousels with captions, like/comment counts, creator handles, and hashtags.",
     params: [
-      { name: "max_count", type: "number", required: false, defaultVal: "20", desc: "Max items to return (1-50).", example: "10" },
-      { name: "cursor", type: "string", required: false, desc: "Pagination cursor for batch navigation.", example: "172819200" }
+      { name: "tag", type: "string", required: true, desc: "Hashtag to search without '#'. Leading hashes are stripped automatically.", example: "cairo" },
+      { name: "limit", type: "number", required: false, defaultVal: "10", desc: "Max post items to return (1-30).", example: "10" },
+      { name: "sort", type: "string", required: false, defaultVal: "top", desc: "Sorting order: 'top' (highest likes/comments) or 'recent' (chronological).", example: "top" }
     ],
-    responseExplanation: "Returns video array with `id`, `title`, `cover_image_url`, `like_count`, `comment_count`, and `share_count`.",
+    responseExplanation: "Returns an array of photo posts with `display_url`, `images` gallery list, `caption`, `like_count`, `comments_count`, and `owner` metadata.",
     responseSample: {
       success: true,
-      service: "social",
+      service: "instagram",
       data: [
         {
-          id: "712839210",
-          title: "Hidden Gems in Egypt You Must Visit!",
-          cover_image_url: "https://p16.tiktokcdn.com/cover.jpg",
-          like_count: 89400,
-          comment_count: 1420
+          id: "34891230192847",
+          shortcode: "C9xK1mNpQrS",
+          type: "IMAGE",
+          caption: "Morning light over Khan el-Khalili #cairo #egypt #travelphotography",
+          display_url: "https://scontent.cdninstagram.com/v/t51.2885-15/photo.jpg",
+          images: [
+            "https://scontent.cdninstagram.com/v/t51.2885-15/photo_1.jpg",
+            "https://scontent.cdninstagram.com/v/t51.2885-15/photo_2.jpg"
+          ],
+          permalink: "https://www.instagram.com/p/C9xK1mNpQrS/",
+          published_at: "2026-11-20T09:15:00.000Z",
+          like_count: 5420,
+          comments_count: 88,
+          owner: {
+            username: "cairo_photographer",
+            full_name: "Cairo Lens",
+            profile_pic_url: "https://scontent.cdninstagram.com/profile.jpg"
+          },
+          hashtags: ["cairo", "egypt", "travelphotography"]
         }
       ],
-      meta: { provider: "tiktok", cached: false, latency_ms: 120, timestamp: "2026-11-19T12:00:00Z" },
+      meta: { provider: "apify", providers_used: ["apify"], cached: false, latency_ms: 820, timestamp: "2026-11-20T22:00:00Z" },
       errors: []
     },
-    curlSnippet: `curl -X GET "https://morx-team.vercel.app/api/v1/tiktok/videos?max_count=10" \\
+    curlSnippet: `curl -X GET "https://morx-team.vercel.app/api/instagram/posts/search?tag=cairo&limit=10&sort=top" \\
   -H "Authorization: Bearer YOUR_MORX_API_KEY"`,
-    jsSnippet: `const res = await fetch("https://morx-team.vercel.app/api/v1/tiktok/videos?max_count=10", {
+    jsSnippet: `const res = await fetch("https://morx-team.vercel.app/api/instagram/posts/search?tag=cairo&limit=10", {
   headers: { "Authorization": "Bearer YOUR_MORX_API_KEY" }
 });
-console.log(await res.json());`,
-    pythonSnippet: `res = requests.get(
-    "https://morx-team.vercel.app/api/v1/tiktok/videos",
+const data = await res.json();
+console.log(data.data);`,
+    pythonSnippet: `import requests
+
+res = requests.get(
+    "https://morx-team.vercel.app/api/instagram/posts/search",
+    params={"tag": "cairo", "limit": 10, "sort": "top"},
     headers={"Authorization": "Bearer YOUR_MORX_API_KEY"}
 )
 print(res.json()["data"])`,
     dartSnippet: `final res = await http.get(
-  Uri.parse('https://morx-team.vercel.app/api/v1/tiktok/videos'),
+  Uri.parse('https://morx-team.vercel.app/api/instagram/posts/search?tag=cairo&limit=10'),
   headers: {'Authorization': 'Bearer YOUR_MORX_API_KEY'},
 );
 print(jsonDecode(res.body)['data']);`
@@ -972,7 +990,7 @@ const CATEGORIES = [
   { id: "finance", label: "Rates & Exchange", logo: FrankfurterLogo },
   { id: "news", label: "News & Media", logo: GNewsLogo },
   { id: "utils", label: "Network & IP", logo: IpGeolocationLogo },
-  { id: "social", label: "Social Feeds", logo: TikTokLogo },
+  { id: "social", label: "Instagram (Reels & Posts)", logo: InstagramLogo },
   { id: "system", label: "Gateway Health", icon: Activity },
 ];
 

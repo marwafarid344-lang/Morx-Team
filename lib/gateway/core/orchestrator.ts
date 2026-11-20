@@ -35,7 +35,6 @@ export class ProviderOrchestrator {
         return 600; // 10 min
       case 'routing':
         return 900; // 15 min
-      case 'tiktok':
       case 'instagram':
         return 600; // 10 min
       default:
@@ -185,7 +184,6 @@ export class ProviderOrchestrator {
             compliance.errorCode === 'PROVIDER_OPERATION_PROHIBITED' ||
             compliance.complianceStatus === 'BLOCKED_PENDING_APPROVAL' ||
             service === 'videos' ||
-            service === 'tiktok' ||
             service === 'instagram'
           ) {
             return {

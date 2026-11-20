@@ -199,34 +199,7 @@ export interface UnifiedRouteOptimization {
   }[];
 }
 
-// ─── 5. TIKTOK DISPLAY API ───────────────────────────────────────────
-export interface UnifiedTikTokUser {
-  open_id: string;
-  union_id?: string;
-  avatar_url?: string;
-  display_name: string;
-  profile_deep_link?: string;
-  is_verified?: boolean;
-}
-
-export interface UnifiedTikTokVideo {
-  id: string;
-  provider: 'tiktok';
-  title: string;
-  description: string;
-  cover_image_url: string | null;
-  share_url: string;
-  duration_seconds: number | null;
-  create_time: string | null;
-  statistics: {
-    views: number | null;
-    likes: number | null;
-    comments: number | null;
-    shares: number | null;
-  };
-}
-
-// ─── 6. INSTAGRAM PLATFORM ───────────────────────────────────────────
+// ─── 5. INSTAGRAM PLATFORM ───────────────────────────────────────────
 export interface UnifiedInstagramProfile {
   id: string;
   username: string;
@@ -270,6 +243,22 @@ export interface UnifiedInstagramReel {
   views_count?: number | null;
   play_count?: number | null;
   shares_count?: number | null;
+  owner: UnifiedInstagramReelOwner;
+  hashtags: string[];
+}
+
+export interface UnifiedInstagramPost {
+  provider: 'apify' | 'rapidapi' | 'instagram';
+  id: string;
+  shortcode: string;
+  type: 'IMAGE' | 'CAROUSEL_ALBUM';
+  caption: string | null;
+  display_url: string;
+  images: string[];
+  permalink: string;
+  published_at: string | null;
+  like_count: number | null;
+  comments_count: number | null;
   owner: UnifiedInstagramReelOwner;
   hashtags: string[];
 }

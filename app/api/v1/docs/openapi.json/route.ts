@@ -222,16 +222,16 @@ export async function GET() {
           },
         },
       },
-      '/tiktok/user': {
+      '/instagram/reels/search': {
         get: {
-          summary: 'TikTok Creator Profile',
-          responses: { '200': { description: 'TikTok creator profile' } },
+          summary: 'Search Instagram Reels (Videos Only)',
+          responses: { '200': { description: 'Playable video reels matching hashtag' } },
         },
       },
-      '/tiktok/videos': {
+      '/instagram/posts/search': {
         get: {
-          summary: 'TikTok Creator Videos',
-          responses: { '200': { description: 'Recent creator videos' } },
+          summary: 'Search Instagram Posts (Images & Carousels Only)',
+          responses: { '200': { description: 'Static photography & carousel posts matching hashtag' } },
         },
       },
       '/instagram/profile': {

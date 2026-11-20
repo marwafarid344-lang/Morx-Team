@@ -44,7 +44,6 @@ export type ServiceCategory =
   | 'weather'
   | 'maps'
   | 'routing'
-  | 'tiktok'
   | 'instagram'
   | 'finance'
   | 'news'

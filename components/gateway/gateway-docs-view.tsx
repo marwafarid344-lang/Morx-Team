@@ -264,7 +264,7 @@ export function GatewayDocsView() {
                 <div className="space-y-1">
                   <p className="font-bold text-foreground">Why this eliminates 80% of frontend integration effort:</p>
                   <p className="text-muted-foreground leading-relaxed">
-                    Instead of writing 5 distinct, fragile parsers for YouTube, Google Maps, OpenWeather, and TikTok, your frontend consumes one predictable format. Swapping an underlying vendor in the future requires zero frontend code changes.
+                    Instead of writing distinct, fragile parsers for YouTube, Google Maps, OpenWeather, and Instagram, your frontend consumes one predictable format. Swapping an underlying vendor in the future requires zero frontend code changes.
                   </p>
                 </div>
               </div>

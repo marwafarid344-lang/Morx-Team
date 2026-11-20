@@ -163,16 +163,14 @@ async function runGatewayTests() {
   const weatherProviders = ProviderRegistry.getProviders('weather');
   const mapsProviders = ProviderRegistry.getProviders('maps');
   const routingProviders = ProviderRegistry.getProviders('routing');
-  const tiktokProviders = ProviderRegistry.getProviders('tiktok');
   const instagramProviders = ProviderRegistry.getProviders('instagram');
 
   assert.strictEqual(videoProviders.length >= 1, true, 'Videos provider registered');
   assert.strictEqual(weatherProviders.length >= 1, true, 'Weather provider registered');
   assert.strictEqual(mapsProviders.length >= 2, true, 'Maps providers registered (Google + Mapbox)');
   assert.strictEqual(routingProviders.length >= 2, true, 'Routing providers registered (Google + Internal TSP)');
-  assert.strictEqual(tiktokProviders.length >= 1, true, 'TikTok provider registered');
   assert.strictEqual(instagramProviders.length >= 1, true, 'Instagram provider registered');
-  console.log('   ✓ All 8 service providers and capabilities registered successfully.');
+  console.log('   ✓ All service providers and capabilities registered successfully.');
 
   // ── TEST 8: Provider Compliance Engine & Registry ──
   console.log('\n8. Testing Provider Compliance Engine & Policy Enforcement...');
@@ -209,24 +207,18 @@ async function runGatewayTests() {
   assert.strictEqual(mapboxEval.complianceStatus, 'APPROVED');
   assert.strictEqual(mapboxEval.attribution?.displayText, '© Mapbox © OpenStreetMap');
 
-  // 8.5 TikTok / Instagram Blocked Pending Approval
-  const tiktokEval = ComplianceEngine.evaluate('tiktok', 'tiktok', 'user', {
-    clientTier: 'third_party_developer',
-  });
-  assert.strictEqual(tiktokEval.allowed, false, 'TikTok proxying must be BLOCKED_PENDING_APPROVAL');
-  assert.strictEqual(tiktokEval.errorCode, 'PROVIDER_COMPLIANCE_RESTRICTION');
-
+  // 8.5 Instagram Blocked Pending Approval
   const igEval = ComplianceEngine.evaluate('instagram', 'instagram', 'profile', {
     clientTier: 'third_party_developer',
   });
   assert.strictEqual(igEval.allowed, false, 'Instagram proxying must be BLOCKED_PENDING_APPROVAL');
 
   // 8.6 Runtime Orchestrator Zero Silent Fallback on Compliance Rejection
-  const orchResult = await ProviderOrchestrator.execute('tiktok', 'user', { limit: 5 }, {
+  const orchResult = await ProviderOrchestrator.execute('instagram', 'profile', { limit: 5 }, {
     clientTier: 'third_party_developer',
     isFirstParty: false,
   });
-  assert.strictEqual(orchResult.success, false, 'Orchestrator must not execute TikTok for unapproved client');
+  assert.strictEqual(orchResult.success, false, 'Orchestrator must not execute Instagram for unapproved client');
   assert.strictEqual(orchResult.error?.code, 'PROVIDER_COMPLIANCE_RESTRICTION');
   console.log('   ✓ Compliance Engine successfully enforces policy restrictions, zero silent fallback, and attribution.');
 
