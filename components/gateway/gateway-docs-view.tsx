@@ -23,6 +23,7 @@ import {
   Gauge,
   Workflow
 } from "lucide-react"
+import { CurlLogo, JavaScriptLogo } from "@/components/gateway/language-logos"
 
 export function GatewayDocsView() {
   const [activeTab, setActiveTab] = useState<"envelope" | "auth" | "limits" | "failover" | "errors">("envelope")
@@ -336,7 +337,9 @@ export function GatewayDocsView() {
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <span className="text-xs text-muted-foreground font-mono">cURL Terminal Command:</span>
+                <span className="text-xs text-muted-foreground font-mono flex items-center gap-1.5">
+                  <CurlLogo className="size-3.5" /> cURL Terminal Command:
+                </span>
                 <pre className="p-4 rounded-xl bg-zinc-950 text-emerald-400 font-mono text-xs border border-zinc-800 overflow-x-auto whitespace-pre-wrap">
 {`curl -X GET "https://YOUR-DOMAIN/api/v1/weather/current?city=Alexandria" \\
   -H "Authorization: Bearer morx_live_grad_project_2026_demo_key"`}
@@ -344,7 +347,9 @@ export function GatewayDocsView() {
               </div>
 
               <div className="space-y-2">
-                <span className="text-xs text-muted-foreground font-mono">JavaScript / Next.js Fetch:</span>
+                <span className="text-xs text-muted-foreground font-mono flex items-center gap-1.5">
+                  <JavaScriptLogo className="size-3.5" /> JavaScript / Next.js Fetch:
+                </span>
                 <pre className="p-4 rounded-xl bg-zinc-950 text-blue-300 font-mono text-xs border border-zinc-800 overflow-x-auto whitespace-pre-wrap">
 {`const res = await fetch("https://YOUR-DOMAIN/api/v1/weather/current?city=Alexandria", {
   headers: {

@@ -59,6 +59,7 @@ import {
   IpGeolocationLogo,
   InstagramLogo,
 } from "@/components/gateway/provider-logos"
+import { LanguageLogo } from "@/components/gateway/language-logos"
 
 interface Parameter {
   name: string
@@ -1400,27 +1401,30 @@ export default function ApiPage() {
                                     <div className="flex items-center gap-1 bg-muted/60 p-1 rounded-xl">
                                       <button
                                         onClick={() => setCodeLanguage("curl")}
-                                        className={`px-2.5 py-1 rounded-lg font-mono text-xs transition-colors cursor-pointer ${
+                                        className={`px-2.5 py-1 rounded-lg font-mono text-xs transition-colors cursor-pointer flex items-center gap-1.5 ${
                                           codeLanguage === "curl" ? "bg-card text-foreground font-bold shadow-xs" : "text-muted-foreground"
                                         }`}
                                       >
-                                        cURL
+                                        <LanguageLogo lang="curl" className="size-3.5 shrink-0" />
+                                        <span>cURL</span>
                                       </button>
                                       <button
                                         onClick={() => setCodeLanguage("js")}
-                                        className={`px-2.5 py-1 rounded-lg font-mono text-xs transition-colors cursor-pointer ${
+                                        className={`px-2.5 py-1 rounded-lg font-mono text-xs transition-colors cursor-pointer flex items-center gap-1.5 ${
                                           codeLanguage === "js" ? "bg-card text-foreground font-bold shadow-xs" : "text-muted-foreground"
                                         }`}
                                       >
-                                        JavaScript (fetch)
+                                        <LanguageLogo lang="js" className="size-3.5 shrink-0" />
+                                        <span>JavaScript</span>
                                       </button>
                                       <button
                                         onClick={() => setCodeLanguage("python")}
-                                        className={`px-2.5 py-1 rounded-lg font-mono text-xs transition-colors cursor-pointer ${
+                                        className={`px-2.5 py-1 rounded-lg font-mono text-xs transition-colors cursor-pointer flex items-center gap-1.5 ${
                                           codeLanguage === "python" ? "bg-card text-foreground font-bold shadow-xs" : "text-muted-foreground"
                                         }`}
                                       >
-                                        Python (requests)
+                                        <LanguageLogo lang="python" className="size-3.5 shrink-0" />
+                                        <span>Python</span>
                                       </button>
                                     </div>
 

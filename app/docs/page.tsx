@@ -47,6 +47,7 @@ import {
   IpGeolocationLogo,
   ProviderBrandLogo,
 } from "@/components/gateway/provider-logos"
+import { LanguageLogo } from "@/components/gateway/language-logos"
 
 // =============================================================================
 // API ENDPOINTS DOCUMENTATION DATA MODEL
@@ -1424,13 +1425,14 @@ export default function DocsPage() {
                                 <button
                                   key={lang}
                                   onClick={() => setActiveCodeLang((prev) => ({ ...prev, [ep.id]: lang }))}
-                                  className={`px-2.5 py-1 rounded-lg uppercase font-bold transition-all ${
+                                  className={`px-2.5 py-1 rounded-lg uppercase font-bold transition-all flex items-center gap-1.5 ${
                                     currentLang === lang
                                       ? "bg-foreground text-background shadow-xs"
                                       : "text-muted-foreground hover:text-foreground"
                                   }`}
                                 >
-                                  {lang}
+                                  <LanguageLogo lang={lang} className="size-3.5 shrink-0" />
+                                  <span>{lang}</span>
                                 </button>
                               ))}
                             </div>
