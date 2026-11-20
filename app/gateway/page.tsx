@@ -148,6 +148,13 @@ const QUICK_ENDPOINTS = [
     path: "/api/v1/tiktok/videos?limit=2",
     body: null,
   },
+  {
+    name: "Instagram Reels Search (Apify/RapidAPI)",
+    service: "instagram",
+    method: "GET",
+    path: "/api/v1/instagram/reels/search?tag=travel&limit=2",
+    body: null,
+  },
 ];
 
 export default function GatewayAdminPage() {

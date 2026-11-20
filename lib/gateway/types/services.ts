@@ -248,6 +248,32 @@ export interface UnifiedInstagramMedia {
   comments_count?: number | null;
 }
 
+export interface UnifiedInstagramReelOwner {
+  id?: string;
+  username: string;
+  full_name?: string;
+  profile_pic_url?: string;
+}
+
+export interface UnifiedInstagramReel {
+  provider: 'apify' | 'rapidapi' | 'instagram';
+  id: string;
+  shortcode: string;
+  caption: string | null;
+  video_url: string | null;
+  permalink: string;
+  thumbnail: string | null;
+  published_at: string | null;
+  duration?: number | null;
+  like_count: number | null;
+  comments_count: number | null;
+  views_count?: number | null;
+  play_count?: number | null;
+  shares_count?: number | null;
+  owner: UnifiedInstagramReelOwner;
+  hashtags: string[];
+}
+
 // ─── 7. GEOSPATIAL ISOCHRONE ──────────────────────────────────────────
 export interface UnifiedIsochrone {
   center: Coordinates;

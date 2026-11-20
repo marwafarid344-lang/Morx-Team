@@ -147,6 +147,33 @@ export function IpGeolocationLogo({ className = "size-4 shrink-0" }: { className
   );
 }
 
+export function ApifyLogo({ className = "size-4 shrink-0" }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} fill="none" aria-label="Apify">
+      <rect width="24" height="24" rx="5" fill="#00A65A" />
+      <path
+        d="M12 4L4.5 18h3.3l1.7-3.4h5l1.7 3.4h3.3L12 4zm0 5.2l1.6 3.4h-3.2L12 9.2z"
+        fill="#FFFFFF"
+      />
+    </svg>
+  );
+}
+
+export function RapidApiLogo({ className = "size-4 shrink-0" }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} fill="none" aria-label="RapidAPI">
+      <rect width="24" height="24" rx="5" fill="#0055FF" />
+      <path
+        d="M7 6h10a1 1 0 0 1 1 1v4a1 1 0 0 1-1 1h-2v3l-3-3H7a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1z"
+        fill="#FFFFFF"
+      />
+      <circle cx="9.5" cy="9" r="1" fill="#0055FF" />
+      <circle cx="12" cy="9" r="1" fill="#0055FF" />
+      <circle cx="14.5" cy="9" r="1" fill="#0055FF" />
+    </svg>
+  );
+}
+
 export function MapboxLogo({ className = "size-4 shrink-0" }: { className?: string }) {
   return (
     <svg viewBox="0 0 24 24" className={className} fill="none" aria-label="Mapbox">
@@ -168,6 +195,8 @@ export function ProviderBrandLogo({
 }) {
   const norm = name.toLowerCase().replace(/[-_\s]/g, "");
 
+  if (norm.includes("apify")) return <ApifyLogo className={className} />;
+  if (norm.includes("rapidapi")) return <RapidApiLogo className={className} />;
   if (norm.includes("youtube") || norm === "videos") return <YouTubeLogo className={className} />;
   if (norm.includes("tiktok")) return <TikTokLogo className={className} />;
   if (norm.includes("instagram")) return <InstagramLogo className={className} />;

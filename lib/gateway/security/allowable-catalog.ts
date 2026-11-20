@@ -17,6 +17,8 @@ export const MORX_ALLOWABLE_PROVIDERS = [
   'gnews',
   'tiktok',
   'instagram',
+  'apify',
+  'rapidapi',
 ] as const;
 
 export type MorxAllowableProvider = (typeof MORX_ALLOWABLE_PROVIDERS)[number];
@@ -45,6 +47,8 @@ export const MORX_ALLOWABLE_ENDPOINTS = [
   '/api/v1/tiktok/user',
   '/api/v1/instagram/media',
   '/api/v1/instagram/user',
+  '/api/v1/instagram/reels/search',
+  '/api/instagram/reels/search',
   '/api/v1/gateway/clients',
   '/api/v1/gateway/metrics',
   '/api/v1/gateway/health',

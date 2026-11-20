@@ -633,6 +633,36 @@
         body: null
       },
       {
+        id: "social-instagram-reels",
+        category: "Social Feeds",
+        icon: "🎬",
+        title: "Instagram Reels Hashtag Search",
+        method: "GET",
+        path: "/api/instagram/reels/search",
+        description: "Search public Instagram Reels by hashtag without Meta Graph API restrictions (Apify + RapidAPI fallback).",
+        defaultParams: [
+          { key: "tag", value: "travel", desc: "Hashtag to search without #" },
+          { key: "limit", value: "6", desc: "Number of Reels (1-30)" },
+          { key: "sort", value: "top", desc: "top | recent" }
+        ],
+        body: null
+      },
+      {
+        id: "social-instagram-reels-v1",
+        category: "Social Feeds",
+        icon: "✨",
+        title: "Instagram Reels (v1 Gateway)",
+        method: "GET",
+        path: "/api/v1/instagram/reels/search",
+        description: "Official Gateway v1 route for Instagram Reels search.",
+        defaultParams: [
+          { key: "tag", value: "travel", desc: "Hashtag without #" },
+          { key: "limit", value: "6", desc: "Number of Reels (1-30)" },
+          { key: "sort", value: "top", desc: "top | recent" }
+        ],
+        body: null
+      },
+      {
         id: "social-instagram",
         category: "Social Feeds",
         icon: "📸",
@@ -1154,6 +1184,41 @@
         return;
       }
 
+      // 9. INSTAGRAM REELS
+      if ((endpoint.id.includes('instagram-reels') || (endpoint.path && endpoint.path.includes('reels/search'))) && Array.isArray(data)) {
+        let html = '<div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">';
+        data.forEach(r => {
+          html += `
+            <div class="p-3 rounded-xl bg-morx-950 border border-morx-800 flex flex-col justify-between gap-2 hover:border-pink-500/40 transition-colors">
+              <div class="relative aspect-[9/16] max-h-56 rounded-lg overflow-hidden bg-morx-900 mx-auto w-full">
+                <img src="${r.thumbnail || ''}" class="w-full h-full object-cover" onerror="this.src='https://via.placeholder.com/200x350?text=No+Thumbnail'" />
+                <span class="absolute top-2 left-2 px-1.5 py-0.5 rounded bg-pink-600/90 font-mono text-[9px] text-white flex items-center gap-1 font-bold shadow">
+                  <span>▶</span> REEL
+                </span>
+                <span class="absolute bottom-2 right-2 px-1.5 py-0.5 rounded bg-black/80 font-mono text-[9px] text-white">
+                  ${r.duration ? Math.floor(r.duration) + 's' : 'Reel'}
+                </span>
+              </div>
+              <div class="space-y-1.5">
+                <div class="flex items-center justify-between text-[11px]">
+                  <span class="font-bold text-pink-400">@${r.owner?.username || 'instagram_user'}</span>
+                  ${r.permalink ? `<a href="${r.permalink}" target="_blank" class="text-blue-400 hover:underline text-[10px]">Open ↗</a>` : ''}
+                </div>
+                <p class="text-[11px] text-slate-300 line-clamp-2">${r.caption || 'No caption'}</p>
+                <div class="text-[10px] text-slate-400 flex items-center justify-between pt-1 border-t border-morx-800 font-mono">
+                  <span class="text-emerald-400">❤️ ${(r.like_count || 0).toLocaleString()}</span>
+                  <span class="text-blue-400">💬 ${(r.comments_count || 0).toLocaleString()}</span>
+                  ${r.views_count ? `<span class="text-purple-400">👁️ ${r.views_count.toLocaleString()}</span>` : ''}
+                </div>
+              </div>
+            </div>
+          `;
+        });
+        html += '</div>';
+        container.innerHTML = html;
+        return;
+      }
+
       // 2. WEATHER
       if (endpoint.category === 'Weather' && data.temperature !== undefined) {
         const providerName = data.source || res.meta?.provider || 'weather';
@@ -1366,6 +1431,41 @@
                 </div>
                 <h4 class="font-bold text-xs text-white line-clamp-1">${a.title}</h4>
                 <p class="text-[11px] text-slate-400 line-clamp-2">${a.description}</p>
+              </div>
+            </div>
+          `;
+        });
+        html += '</div>';
+        container.innerHTML = html;
+        return;
+      }
+
+      // 9. INSTAGRAM REELS
+      if ((endpoint.id.includes('instagram-reels') || (endpoint.path && endpoint.path.includes('reels/search'))) && Array.isArray(data)) {
+        let html = '<div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">';
+        data.forEach(r => {
+          html += `
+            <div class="p-3 rounded-xl bg-morx-950 border border-morx-800 flex flex-col justify-between gap-2 hover:border-pink-500/40 transition-colors">
+              <div class="relative aspect-[9/16] max-h-56 rounded-lg overflow-hidden bg-morx-900 mx-auto w-full">
+                <img src="${r.thumbnail || ''}" class="w-full h-full object-cover" onerror="this.src='https://via.placeholder.com/200x350?text=No+Thumbnail'" />
+                <span class="absolute top-2 left-2 px-1.5 py-0.5 rounded bg-pink-600/90 font-mono text-[9px] text-white flex items-center gap-1 font-bold shadow">
+                  <span>▶</span> REEL
+                </span>
+                <span class="absolute bottom-2 right-2 px-1.5 py-0.5 rounded bg-black/80 font-mono text-[9px] text-white">
+                  ${r.duration ? Math.floor(r.duration) + 's' : 'Reel'}
+                </span>
+              </div>
+              <div class="space-y-1.5">
+                <div class="flex items-center justify-between text-[11px]">
+                  <span class="font-bold text-pink-400">@${r.owner?.username || 'instagram_user'}</span>
+                  ${r.permalink ? `<a href="${r.permalink}" target="_blank" class="text-blue-400 hover:underline text-[10px]">Open ↗</a>` : ''}
+                </div>
+                <p class="text-[11px] text-slate-300 line-clamp-2">${r.caption || 'No caption'}</p>
+                <div class="text-[10px] text-slate-400 flex items-center justify-between pt-1 border-t border-morx-800 font-mono">
+                  <span class="text-emerald-400">❤️ ${(r.like_count || 0).toLocaleString()}</span>
+                  <span class="text-blue-400">💬 ${(r.comments_count || 0).toLocaleString()}</span>
+                  ${r.views_count ? `<span class="text-purple-400">👁️ ${r.views_count.toLocaleString()}</span>` : ''}
+                </div>
               </div>
             </div>
           `;

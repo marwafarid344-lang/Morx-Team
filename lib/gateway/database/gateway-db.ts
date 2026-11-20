@@ -131,8 +131,13 @@ export function resolveProvidersAndEndpointsFromServices(services: (ServiceCateg
         endpoints.push('/api/v1/tiktok/videos', '/api/v1/tiktok/user');
         break;
       case 'instagram':
-        providers.push('instagram');
-        endpoints.push('/api/v1/instagram/media', '/api/v1/instagram/user');
+        providers.push('instagram', 'apify', 'rapidapi');
+        endpoints.push(
+          '/api/v1/instagram/media',
+          '/api/v1/instagram/user',
+          '/api/v1/instagram/reels/search',
+          '/api/instagram/reels/search'
+        );
         break;
     }
   }
@@ -668,6 +673,8 @@ export class GatewayDatabase {
       { id: 'ip_geolocation', name: 'IP Geolocation & Network API', service: 'utils', priority: 100, status: 'active' },
       { id: 'tiktok', name: 'TikTok Display API', service: 'tiktok', priority: 100, status: 'active' },
       { id: 'instagram', name: 'Meta Instagram Graph API', service: 'instagram', priority: 100, status: 'active' },
+      { id: 'apify', name: 'Apify Instagram Hashtag Scraper', service: 'instagram', priority: 95, status: 'active' },
+      { id: 'rapidapi', name: 'RapidAPI Instagram Scraper', service: 'instagram', priority: 90, status: 'active' },
     ];
   }
 

@@ -832,7 +832,86 @@ print(jsonDecode(res.body)['data']);`
   },
 
   // ---------------------------------------------------------------------------
-  // 13. SYSTEM: HEALTH
+  // 13. SOCIAL: INSTAGRAM REELS (APIFY + RAPIDAPI MULTI-PROVIDER FALLBACK)
+  // ---------------------------------------------------------------------------
+  {
+    id: "social-instagram-reels",
+    path: "/api/instagram/reels/search",
+    method: "GET",
+    title: "Instagram Reels Hashtag Search (Apify + RapidAPI Fallback)",
+    category: "social",
+    serviceName: "Instagram Platform",
+    providers: ["Apify", "RapidAPI"],
+    cacheTtl: "10m Cache",
+    rateLimit: "60 req/min",
+    summary: "Searches public Instagram Reels by hashtag without Meta Graph API restrictions using an automatic Apify-to-RapidAPI fallback strategy.",
+    detailsText: "Essential for VoyageMind travel feeds. Scrapes public Reels tagged with any destination hashtag (e.g. travel, alexandria, cairo), returning high-resolution video streams, thumbnails, view/like metrics, audio info, and creator handles.",
+    params: [
+      { name: "tag", type: "string", required: true, desc: "Hashtag keyword without '#'. Leading hashes are stripped automatically.", example: "travel" },
+      { name: "limit", type: "number", required: false, defaultVal: "10", desc: "Number of Reels to return (1-30).", example: "10" },
+      { name: "sort", type: "string", required: false, defaultVal: "top", desc: "Sorting order: 'top' (highest likes/views) or 'recent' (chronological).", example: "top" }
+    ],
+    responseExplanation: "Returns normalized Reels array with shortcode, video_url, thumbnail, views_count, like_count, comments_count, and creator owner metadata.",
+    responseSample: {
+      success: true,
+      service: "instagram",
+      data: [
+        {
+          id: "3985123576472766346",
+          shortcode: "DdOAMdZsYeK",
+          caption: "Bucket list destination: The Great Pyramids of Giza! #travel #cairo #egypt",
+          video_url: "https://scontent.cdninstagram.com/v/t50.2886-16/reel_video.mp4",
+          permalink: "https://www.instagram.com/reel/DdOAMdZsYeK/",
+          thumbnail: "https://scontent.cdninstagram.com/v/t51.2885-15/thumb.jpg",
+          published_at: "2026-11-20T14:30:00.000Z",
+          duration: 18.5,
+          like_count: 24500,
+          comments_count: 380,
+          views_count: 142000,
+          owner: {
+            username: "voyage_explorer",
+            full_name: "World Explorer",
+            profile_pic_url: "https://scontent.cdninstagram.com/profile.jpg"
+          },
+          hashtags: ["travel", "cairo", "egypt"]
+        }
+      ],
+      meta: {
+        provider: "apify",
+        providers_used: ["apify"],
+        cached: false,
+        latency_ms: 1850,
+        total_returned: 1,
+        request_id: "req_ig_90812",
+        timestamp: "2026-11-20T22:00:00Z"
+      },
+      errors: []
+    },
+    curlSnippet: `curl -X GET "https://morx-team.vercel.app/api/instagram/reels/search?tag=travel&limit=10&sort=top" \\
+  -H "Authorization: Bearer YOUR_MORX_API_KEY"`,
+    jsSnippet: `const res = await fetch("https://morx-team.vercel.app/api/instagram/reels/search?tag=travel&limit=10", {
+  headers: { "Authorization": "Bearer YOUR_MORX_API_KEY" }
+});
+const data = await res.json();
+console.log(data.data);`,
+    pythonSnippet: `import requests
+
+res = requests.get(
+    "https://morx-team.vercel.app/api/instagram/reels/search",
+    params={"tag": "travel", "limit": 10, "sort": "top"},
+    headers={"Authorization": "Bearer YOUR_MORX_API_KEY"}
+)
+print(res.json()["data"])`,
+    dartSnippet: `final res = await http.get(
+  Uri.parse('https://morx-team.vercel.app/api/instagram/reels/search?tag=travel&limit=10'),
+  headers: {'Authorization': 'Bearer YOUR_MORX_API_KEY'},
+);
+final reels = jsonDecode(res.body)['data'];
+print(reels);`
+  },
+
+  // ---------------------------------------------------------------------------
+  // 14. SYSTEM: HEALTH
   // ---------------------------------------------------------------------------
   {
     id: "system-health",
