@@ -131,10 +131,8 @@ export function resolveProvidersAndEndpointsFromServices(services: (ServiceCateg
         endpoints.push('/api/v1/tiktok/videos', '/api/v1/tiktok/user');
         break;
       case 'instagram':
-        providers.push('instagram', 'apify', 'rapidapi');
+        providers.push('apify', 'rapidapi', 'instagram');
         endpoints.push(
-          '/api/v1/instagram/media',
-          '/api/v1/instagram/user',
           '/api/v1/instagram/reels/search',
           '/api/instagram/reels/search'
         );

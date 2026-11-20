@@ -125,17 +125,13 @@ export class InstagramProvider implements IProvider {
         const data = await res.json();
         const items = data.data || [];
 
-        const normalized: UnifiedInstagramMedia[] = items.map((m: any) => ({
+        // STRICT REELS/VIDEO FILTER: Only keep actual videos/reels, discard static images/posts
+        const videosOnly = items.filter((m: any) => m.media_type === 'VIDEO');
+
+        const normalized: UnifiedInstagramMedia[] = videosOnly.map((m: any) => ({
           provider: 'instagram',
           id: m.id,
-          type:
-            m.media_type === 'IMAGE'
-              ? 'IMAGE'
-              : m.media_type === 'VIDEO'
-              ? 'VIDEO'
-              : m.media_type === 'CAROUSEL_ALBUM'
-              ? 'CAROUSEL_ALBUM'
-              : 'UNKNOWN',
+          type: 'VIDEO',
           caption: m.caption || null,
           media_url: m.media_url || null,
           permalink: m.permalink || '',

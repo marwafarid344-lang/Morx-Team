@@ -75,7 +75,14 @@ export class ApifyInstagramReelsAdapter implements IInstagramReelsAdapter {
       throw new Error('Apify response format invalid: expected an array of dataset items');
     }
 
-    const normalized: UnifiedInstagramReel[] = data.map((item: any) => {
+    // STRICT REELS FILTER: Exclude any static photo, album, or post without video stream
+    const reelsOnly = data.filter((item: any) => {
+      const isVideoType = item.type === 'Video' || item.productType === 'clips' || item.productType === 'reels';
+      const hasVideoUrl = Boolean(item.videoUrl);
+      return isVideoType || hasVideoUrl;
+    });
+
+    const normalized: UnifiedInstagramReel[] = reelsOnly.map((item: any) => {
       const shortcode = item.shortCode || item.code || '';
       const permalink = item.url || (shortcode ? `https://www.instagram.com/reel/${shortcode}/` : '');
       const thumbnail = item.displayUrl || (Array.isArray(item.images) && item.images[0]) || null;
@@ -185,7 +192,18 @@ export class RapidApiInstagramReelsAdapter implements IInstagramReelsAdapter {
           continue;
         }
 
-        const normalized: UnifiedInstagramReel[] = items.map((m: any) => {
+        // STRICT REELS FILTER: Exclude any static images, carousels, or posts without video stream
+        const videoOnlyItems = items.filter((m: any) => {
+          const isVideoType = m.is_video === true || m.media_type === 2 || m.product_type === 'clips' || m.product_type === 'reels';
+          const hasVideoUrl = Boolean(m.video_url || m.video_versions?.[0]?.url);
+          return isVideoType || hasVideoUrl;
+        });
+
+        if (videoOnlyItems.length === 0) {
+          continue;
+        }
+
+        const normalized: UnifiedInstagramReel[] = videoOnlyItems.map((m: any) => {
           const shortcode = m.code || m.shortcode || m.id || '';
           const caption = typeof m.caption === 'string' ? m.caption : m.caption?.text || null;
           const thumbnail = m.thumbnail_url || m.display_url || m.image_versions2?.candidates?.[0]?.url || null;
