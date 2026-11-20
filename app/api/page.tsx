@@ -60,6 +60,7 @@ import {
   InstagramLogo,
 } from "@/components/gateway/provider-logos"
 import { LanguageLogo } from "@/components/gateway/language-logos"
+import { CodeBlock } from "@/components/gateway/code-block"
 
 interface Parameter {
   name: string
@@ -1452,11 +1453,18 @@ export default function ApiPage() {
                                     </button>
                                   </div>
 
-                                  <pre className="p-4 rounded-xl bg-zinc-950 text-emerald-400 font-mono text-xs border border-zinc-800 overflow-x-auto whitespace-pre-wrap">
-                                    {codeLanguage === "curl" && ep.curlExample}
-                                    {codeLanguage === "js" && ep.jsExample}
-                                    {codeLanguage === "python" && ep.pythonExample}
-                                  </pre>
+                                  <CodeBlock
+                                    code={
+                                      codeLanguage === "curl"
+                                        ? ep.curlExample
+                                        : codeLanguage === "js"
+                                        ? ep.jsExample
+                                        : ep.pythonExample
+                                    }
+                                    language={codeLanguage}
+                                    maxHeight="380px"
+                                    showCopy={false}
+                                  />
                                 </div>
                               )}
 
@@ -1480,9 +1488,12 @@ export default function ApiPage() {
                                       )}
                                     </button>
                                   </div>
-                                  <pre className="p-4 rounded-xl bg-zinc-950 text-zinc-300 font-mono text-xs border border-zinc-800 overflow-x-auto max-h-64">
-                                    {ep.responseExample}
-                                  </pre>
+                                  <CodeBlock
+                                    code={ep.responseExample}
+                                    language="json"
+                                    maxHeight="320px"
+                                    showCopy={false}
+                                  />
                                 </div>
                               )}
 

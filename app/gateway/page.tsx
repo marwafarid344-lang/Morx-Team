@@ -36,6 +36,7 @@ import {
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
 import { ApiAccessGuard } from "@/components/gateway/api-access-guard";
+import { CodeBlock } from "@/components/gateway/code-block";
 import { useAuth } from "@/contexts/auth-context";
 import {
   YouTubeLogo,
@@ -976,9 +977,11 @@ export default function GatewayAdminPage() {
                     </span>
                     <span className="text-muted-foreground">{quickResult.latencyMs} ms</span>
                   </div>
-                  <pre className="p-4 rounded-2xl bg-zinc-950 border border-zinc-800 text-zinc-100 font-mono text-xs overflow-auto max-h-[300px] whitespace-pre-wrap">
-                    {JSON.stringify(quickResult.data, null, 2)}
-                  </pre>
+                  <CodeBlock
+                    language="json"
+                    code={JSON.stringify(quickResult.data, null, 2)}
+                    maxHeight="300px"
+                  />
                 </div>
               )}
             </div>
@@ -1111,13 +1114,10 @@ export default function GatewayAdminPage() {
                 Query any service via simple HTTP fetch. Pass your API key in the authorization header:
               </p>
 
-              <pre className="p-4 rounded-2xl bg-zinc-950 text-zinc-100 font-mono text-xs border border-zinc-800 overflow-x-auto space-y-1">
-                <span className="text-muted-foreground">// Search YouTube videos</span><br/>
-                <span className="text-emerald-400">const res = await fetch("https://YOUR-DOMAIN/api/v1/videos/search?q=Alexandria", &#123;</span><br/>
-                <span className="text-emerald-400">  headers: &#123; "Authorization": "Bearer YOUR_MORX_API_KEY" &#125;</span><br/>
-                <span className="text-emerald-400">&#125;);</span><br/>
-                <span className="text-emerald-400">const &#123; data &#125; = await res.json();</span>
-              </pre>
+              <CodeBlock
+                language="javascript"
+                code={`// Search YouTube videos\nconst res = await fetch("https://YOUR-DOMAIN/api/v1/videos/search?q=Alexandria", {\n  headers: { "Authorization": "Bearer YOUR_MORX_API_KEY" }\n});\nconst { data } = await res.json();`}
+              />
             </div>
           </div>
         )}

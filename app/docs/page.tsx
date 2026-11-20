@@ -48,6 +48,7 @@ import {
   ProviderBrandLogo,
 } from "@/components/gateway/provider-logos"
 import { LanguageLogo } from "@/components/gateway/language-logos"
+import { CodeBlock } from "@/components/gateway/code-block"
 
 // =============================================================================
 // API ENDPOINTS DOCUMENTATION DATA MODEL
@@ -1202,8 +1203,8 @@ export default function DocsPage() {
                   <p className="text-muted-foreground text-[11px] leading-relaxed">
                     Unlike raw third-party APIs that return inconsistent, deeply-nested responses, Morx wraps every successful call or error into a unified structure:
                   </p>
-                  <pre className="p-3 rounded-xl bg-background border border-border/70 font-mono text-[11px] text-muted-foreground overflow-x-auto leading-relaxed">
-{`{
+                  <CodeBlock
+                    code={`{
   "success": true,               // Boolean: overall operation success
   "service": "weather",          // Target namespace (weather, maps, routing, videos, finance, news, utils)
   "data": { ... },               // Standardized payload regardless of upstream provider
@@ -1215,7 +1216,8 @@ export default function DocsPage() {
   },
   "errors": []                   // Array of errors if success is false
 }`}
-                  </pre>
+                    language="json"
+                  />
                 </div>
               </div>
 
@@ -1373,18 +1375,11 @@ export default function DocsPage() {
                             <span className="text-xs uppercase font-bold tracking-wider text-muted-foreground block font-mono">
                               Request JSON Body Schema
                             </span>
-                            <div className="relative">
-                              <pre className="p-4 rounded-2xl bg-muted/30 border border-border/70 font-mono text-xs text-foreground overflow-x-auto leading-relaxed">
-                                {ep.bodySchema}
-                              </pre>
-                              <button
-                                onClick={() => handleCopy(ep.bodySchema!, `${ep.id}-body`)}
-                                className="absolute right-3 top-3 p-1.5 rounded-lg bg-background border border-border/70 hover:bg-muted text-muted-foreground hover:text-foreground text-[11px] flex items-center gap-1 font-mono transition-colors"
-                              >
-                                {copiedId === `${ep.id}-body` ? <Check className="size-3 text-emerald-400" /> : <Copy className="size-3" />}
-                                <span>{copiedId === `${ep.id}-body` ? "Copied" : "Copy Body"}</span>
-                              </button>
-                            </div>
+                            <CodeBlock
+                              code={ep.bodySchema}
+                              language="json"
+                              maxHeight="320px"
+                            />
                           </div>
                         )}
 
@@ -1398,18 +1393,11 @@ export default function DocsPage() {
                           </p>
 
                           {/* JSON Response Block */}
-                          <div className="relative">
-                            <pre className="p-4 rounded-2xl bg-background border border-border/70 font-mono text-xs text-muted-foreground overflow-x-auto max-h-72 leading-relaxed">
-                              {JSON.stringify(ep.responseSample, null, 2)}
-                            </pre>
-                            <button
-                              onClick={() => handleCopy(JSON.stringify(ep.responseSample, null, 2), `${ep.id}-resp`)}
-                              className="absolute right-3 top-3 p-1.5 rounded-lg bg-card border border-border/70 hover:bg-muted text-muted-foreground hover:text-foreground text-[11px] flex items-center gap-1 font-mono transition-colors"
-                            >
-                              {copiedId === `${ep.id}-resp` ? <Check className="size-3 text-emerald-400" /> : <Copy className="size-3" />}
-                              <span>{copiedId === `${ep.id}-resp` ? "Copied" : "Copy JSON"}</span>
-                            </button>
-                          </div>
+                          <CodeBlock
+                            code={JSON.stringify(ep.responseSample, null, 2)}
+                            language="json"
+                            maxHeight="320px"
+                          />
                         </div>
 
                         {/* Ready-to-use Code Integration Tabs */}
@@ -1438,18 +1426,11 @@ export default function DocsPage() {
                             </div>
                           </div>
 
-                          <div className="relative">
-                            <pre className="p-4 rounded-2xl bg-muted/30 border border-border/70 font-mono text-xs text-foreground overflow-x-auto leading-relaxed">
-                              {currentSnippet}
-                            </pre>
-                            <button
-                              onClick={() => handleCopy(currentSnippet, `${ep.id}-code`)}
-                              className="absolute right-3 top-3 p-1.5 rounded-lg bg-background border border-border/70 hover:bg-muted text-muted-foreground hover:text-foreground text-[11px] flex items-center gap-1 font-mono transition-colors"
-                            >
-                              {copiedId === `${ep.id}-code` ? <Check className="size-3 text-emerald-400" /> : <Copy className="size-3" />}
-                              <span>{copiedId === `${ep.id}-code` ? "Copied" : "Copy Code"}</span>
-                            </button>
-                          </div>
+                          <CodeBlock
+                            code={currentSnippet}
+                            language={currentLang}
+                            maxHeight="380px"
+                          />
                         </div>
 
                       </article>
