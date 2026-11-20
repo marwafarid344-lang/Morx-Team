@@ -48,6 +48,17 @@ import {
 import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
 import { ApiAccessGuard } from "@/components/gateway/api-access-guard"
+import {
+  ProviderBrandLogo,
+  YouTubeLogo,
+  OpenWeatherLogo,
+  GoogleMapsLogo,
+  OSRMRouteLogo,
+  FrankfurterLogo,
+  GNewsLogo,
+  IpGeolocationLogo,
+  InstagramLogo,
+} from "@/components/gateway/provider-logos"
 
 interface Parameter {
   name: string
@@ -77,14 +88,14 @@ interface Endpoint {
 
 const CATEGORIES = [
   { id: "all", label: "All Services", icon: Layers },
-  { id: "videos", label: "Video Discovery", icon: Video },
-  { id: "weather", label: "Weather", icon: CloudSun },
-  { id: "maps", label: "Maps & Places", icon: Compass },
-  { id: "routing", label: "Route Optimizer", icon: Navigation },
-  { id: "finance", label: "Financial Rates", icon: Zap },
-  { id: "news", label: "News & Media", icon: BookOpen },
-  { id: "utils", label: "Network Utils", icon: Globe },
-  { id: "social", label: "Social Feeds", icon: Share2 },
+  { id: "videos", label: "Video Discovery", logo: YouTubeLogo, icon: Video },
+  { id: "weather", label: "Weather", logo: OpenWeatherLogo, icon: CloudSun },
+  { id: "maps", label: "Maps & Places", logo: GoogleMapsLogo, icon: Compass },
+  { id: "routing", label: "Route Optimizer", logo: OSRMRouteLogo, icon: Navigation },
+  { id: "finance", label: "Financial Rates", logo: FrankfurterLogo, icon: Zap },
+  { id: "news", label: "News & Media", logo: GNewsLogo, icon: BookOpen },
+  { id: "utils", label: "Network Utils", logo: IpGeolocationLogo, icon: Globe },
+  { id: "social", label: "Instagram (Reels & Posts)", logo: InstagramLogo, icon: Share2 },
   { id: "maintenance", label: "Database Cron", icon: Database },
 ]
 
@@ -695,6 +706,52 @@ print(res.json()["data"])`,
 }`
   },
   {
+    path: "/api/instagram/posts/search",
+    method: "GET",
+    title: "Instagram Posts Search",
+    desc: "Searches public Instagram Posts by hashtag with extreme precision, returning only high-resolution static photography, carousels, and albums.",
+    category: "social",
+    providers: ["Apify", "RapidAPI"],
+    cacheTtl: "10m Cache",
+    rateLimit: "60 req/min",
+    params: [
+      { name: "tag", type: "string", required: true, description: "Hashtag keyword without '#' (e.g. travel, alexandria, cairo)." },
+      { name: "limit", type: "number", required: false, defaultVal: "10", description: "Number of Posts to return (1-30)." },
+      { name: "sort", type: "string", required: false, defaultVal: "top", description: "Sort order: 'top' (highest likes) or 'recent' (latest)." },
+    ],
+    importantNotes: [
+      "Strictly excludes video Reels; only static photography and image carousels are returned.",
+      "Multi-provider automatic fallback from Apify to RapidAPI with 10-minute caching.",
+      "Available under both /api/instagram/posts/search and /api/v1/instagram/posts/search.",
+    ],
+    curlExample: `curl -X GET "https://YOUR-DOMAIN/api/instagram/posts/search?tag=travel&limit=10" \\
+  -H "Authorization: Bearer YOUR_MORX_API_KEY"`,
+    jsExample: `const res = await fetch("https://YOUR-DOMAIN/api/instagram/posts/search?tag=travel&limit=10", {
+  headers: { "Authorization": "Bearer YOUR_MORX_API_KEY" }
+});
+const posts = await res.json();`,
+    pythonExample: `import requests
+res = requests.get("https://YOUR-DOMAIN/api/instagram/posts/search", params={"tag": "travel", "limit": 10}, headers={"Authorization": "Bearer YOUR_MORX_API_KEY"})
+print(res.json()["data"])`,
+    responseExample: `{
+  "success": true,
+  "service": "instagram",
+  "data": [
+    {
+      "id": "34891230192847",
+      "shortcode": "C9xK1mNpQrS",
+      "type": "IMAGE",
+      "caption": "Morning light over Khan el-Khalili #cairo #egypt #travelphotography",
+      "display_url": "https://scontent.cdninstagram.com/photo.jpg",
+      "images": ["https://scontent.cdninstagram.com/photo.jpg"],
+      "permalink": "https://www.instagram.com/p/C9xK1mNpQrS/",
+      "like_count": 5420,
+      "comments_count": 182
+    }
+  ]
+}`
+  },
+  {
     path: "/api/v1/instagram/media",
     method: "GET",
     title: "Instagram User Media",
@@ -750,7 +807,7 @@ const SERVICE_HUBS = [
   {
     id: "weather",
     title: "Weather Intelligence",
-    badge: "OpenWeather API",
+    badge: "OpenWeather & Open-Meteo",
     desc: "Instant live temperature, 5-day predictive forecasts, and Air Quality Index (AQI with pollutants).",
     quickEndpoint: "/api/v1/weather/current?city=Alexandria",
     count: 3,
@@ -768,19 +825,46 @@ const SERVICE_HUBS = [
   {
     id: "routing",
     title: "Route Optimizer",
-    badge: "Internal 2-Opt TSP (Free)",
+    badge: "Internal 2-Opt TSP & OSRM",
     desc: "Sequence multi-stop delivery or tour routes with an instant zero-cost 2-Opt TSP heuristic solver.",
     quickEndpoint: "/api/v1/routes/optimize",
     count: 1,
     icon: Navigation,
   },
   {
+    id: "finance",
+    title: "Exchange & Rates",
+    badge: "European Central Bank (ECB)",
+    desc: "Live foreign currency exchange rates and real-time currency conversion for 160+ fiat currencies.",
+    quickEndpoint: "/api/v1/finance/exchange?from=USD&to=EGP",
+    count: 1,
+    icon: Zap,
+  },
+  {
+    id: "news",
+    title: "News & Media",
+    badge: "GNews Intelligence",
+    desc: "Search global and regional breaking news headlines with multi-language and topic filtering.",
+    quickEndpoint: "/api/v1/news/search?q=Egypt",
+    count: 1,
+    icon: BookOpen,
+  },
+  {
+    id: "utils",
+    title: "Network & IP Lookup",
+    badge: "IP Geolocation",
+    desc: "Resolve public IP addresses to city, country, coordinates, and network ISP metadata.",
+    quickEndpoint: "/api/v1/utils/ip-lookup?ip=8.8.8.8",
+    count: 1,
+    icon: Globe,
+  },
+  {
     id: "social",
     title: "Instagram Platform",
-    badge: "Reels & Posts",
+    badge: "Reels & Posts (Apify/RapidAPI)",
     desc: "Fetch public Instagram Reels and high-resolution photo posts by hashtag with extreme precision.",
     quickEndpoint: "/api/instagram/reels/search",
-    count: 2,
+    count: 3,
     icon: Share2,
   },
 ];
@@ -1015,7 +1099,7 @@ export default function ApiPage() {
                       <div className="flex items-start justify-between gap-2">
                         <div className="flex items-center gap-2.5">
                           <div className="size-9 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
-                            <Icon className="size-4" />
+                            <ProviderBrandLogo name={hub.id} className="size-5 shrink-0 shadow-xs" />
                           </div>
                           <div>
                             <h4 className="font-bold text-xs text-foreground group-hover:text-primary transition-colors">{hub.title}</h4>
@@ -1105,7 +1189,11 @@ export default function ApiPage() {
                             : "bg-card/50 text-muted-foreground hover:text-foreground hover:bg-muted/80 border-border/50"
                         }`}
                       >
-                        <Icon className="size-3.5" />
+                        {cat.logo ? (
+                          <cat.logo className="size-3.5 shrink-0 shadow-xs" />
+                        ) : (
+                          <Icon className="size-3.5" />
+                        )}
                         <span>{cat.label}</span>
                         <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-mono ${
                           isActive 

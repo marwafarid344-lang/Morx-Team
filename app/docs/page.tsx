@@ -791,11 +791,12 @@ print(jsonDecode(res.body)['data']);`
     cacheTtl: "10m Cache",
     rateLimit: "60 req/min",
     summary: "High-precision search for public Instagram image posts, multi-photo carousels, and photo albums, strictly excluding Reels and videos.",
-    detailsText: "Designed specifically for VoyageMind travel galleries and itinerary photo feeds. Only returns high-resolution static photography and carousels with captions, like/comment counts, creator handles, and hashtags.",
+    detailsText: "Designed specifically for VoyageMind travel galleries and itinerary photo feeds. Only returns high-resolution static photography and carousels with captions, like/comment counts, creator handles, and hashtags. Available under both /api/instagram/posts/search and /api/v1/instagram/posts/search.",
     params: [
       { name: "tag", type: "string", required: true, desc: "Hashtag to search without '#'. Leading hashes are stripped automatically.", example: "cairo" },
       { name: "limit", type: "number", required: false, defaultVal: "10", desc: "Max post items to return (1-30).", example: "10" },
-      { name: "sort", type: "string", required: false, defaultVal: "top", desc: "Sorting order: 'top' (highest likes/comments) or 'recent' (chronological).", example: "top" }
+      { name: "sort", type: "string", required: false, defaultVal: "top", desc: "Sorting order: 'top' (highest likes/comments) or 'recent' (chronological).", example: "top" },
+      { name: "no_cache", type: "boolean", required: false, defaultVal: "false", desc: "Bypass 10-minute gateway cache to fetch fresh upstream data immediately.", example: "true" }
     ],
     responseExplanation: "Returns an array of photo posts with `display_url`, `images` gallery list, `caption`, `like_count`, `comments_count`, and `owner` metadata.",
     responseSample: {
@@ -863,11 +864,12 @@ print(jsonDecode(res.body)['data']);`
     cacheTtl: "10m Cache",
     rateLimit: "60 req/min",
     summary: "Searches public Instagram Reels by hashtag without Meta Graph API restrictions using an automatic Apify-to-RapidAPI fallback strategy.",
-    detailsText: "Essential for VoyageMind travel feeds. Scrapes public Reels tagged with any destination hashtag (e.g. travel, alexandria, cairo), returning high-resolution video streams, thumbnails, view/like metrics, audio info, and creator handles.",
+    detailsText: "Essential for VoyageMind travel feeds. Scrapes public Reels tagged with any destination hashtag (e.g. travel, alexandria, cairo), returning high-resolution video streams, thumbnails, view/like metrics, audio info, and creator handles. Available under both /api/instagram/reels/search and /api/v1/instagram/reels/search.",
     params: [
       { name: "tag", type: "string", required: true, desc: "Hashtag keyword without '#'. Leading hashes are stripped automatically.", example: "travel" },
       { name: "limit", type: "number", required: false, defaultVal: "10", desc: "Number of Reels to return (1-30).", example: "10" },
-      { name: "sort", type: "string", required: false, defaultVal: "top", desc: "Sorting order: 'top' (highest likes/views) or 'recent' (chronological).", example: "top" }
+      { name: "sort", type: "string", required: false, defaultVal: "top", desc: "Sorting order: 'top' (highest likes/views) or 'recent' (chronological).", example: "top" },
+      { name: "no_cache", type: "boolean", required: false, defaultVal: "false", desc: "Bypass 10-minute gateway cache to fetch fresh upstream data immediately.", example: "true" }
     ],
     responseExplanation: "Returns normalized Reels array with shortcode, video_url, thumbnail, views_count, like_count, comments_count, and creator owner metadata.",
     responseSample: {

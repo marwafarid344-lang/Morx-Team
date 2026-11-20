@@ -44,6 +44,27 @@
       "createdAt": "2026-11-20T23:08:30.699Z",
       "rawKey": "morx_live_O0rnKOn_88gBbO7WNqRhUkjAkAGbXXQZ5",
       "expiresAt": "2027-11-20T23:08:30.699Z"
+    },
+    {
+      "id": "client_1795216942905_luihn",
+      "name": "Restricted Allowable Client",
+      "description": "",
+      "status": "active",
+      "rateLimitPerMinute": 120,
+      "rateLimitPerHour": 2000,
+      "rateLimitPerDay": 20000,
+      "allowedServices": [
+        "weather"
+      ],
+      "allowedProviders": [
+        "open_meteo"
+      ],
+      "allowedEndpoints": [
+        "/api/v1/weather/current"
+      ],
+      "createdAt": "2026-11-20T23:22:22.905Z",
+      "rawKey": "morx_live_A1cseOP_kqFDSUvFKITLSojMb2AwKSxA3",
+      "expiresAt": "2027-11-20T23:22:22.905Z"
     }
   ],
   "keys": [
@@ -67,7 +88,17 @@
       "createdAt": "2026-11-20T23:08:30.699Z",
       "expiresAt": "2027-11-20T23:08:30.699Z",
       "rawKey": "morx_live_O0rnKOn_88gBbO7WNqRhUkjAkAGbXXQZ5"
+    },
+    {
+      "id": "key_1795216942905_4bqkg",
+      "clientId": "client_1795216942905_luihn",
+      "keyPrefix": "morx_live_A1cseOP",
+      "keyHash": "c1e72ffa3ac9de4a8e8f06991cbbac260bac57fbfbfb59cd37637dcbe157c238",
+      "status": "active",
+      "createdAt": "2026-11-20T23:22:22.905Z",
+      "expiresAt": "2027-11-20T23:22:22.905Z",
+      "rawKey": "morx_live_A1cseOP_kqFDSUvFKITLSojMb2AwKSxA3"
     }
   ],
-  "updatedAt": "2026-11-20T23:08:30.699Z"
+  "updatedAt": "2026-11-20T23:22:22.905Z"
 }

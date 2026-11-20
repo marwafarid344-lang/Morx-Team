@@ -446,6 +446,14 @@ console.log(data.temperature); // 24°C`}
                   </div>
                   <span className="font-mono font-bold text-purple-500 bg-purple-500/10 px-2 py-0.5 rounded">24 Hours</span>
                 </div>
+
+                <div className="p-2.5 rounded-xl bg-muted/40 flex items-center justify-between border border-border/40">
+                  <div>
+                    <span className="font-bold text-foreground block">Instagram Reels & Posts Search</span>
+                    <span className="text-[10px] text-muted-foreground">Apify & RapidAPI multi-provider media cache</span>
+                  </div>
+                  <span className="font-mono font-bold text-pink-500 bg-pink-500/10 px-2 py-0.5 rounded">10 Minutes</span>
+                </div>
               </div>
 
               <div className="p-3 rounded-xl bg-primary/10 border border-primary/20 text-[11px] text-primary">

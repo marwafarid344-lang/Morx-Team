@@ -176,15 +176,15 @@ export function ProviderBrandLogo({
   if (norm.includes("apify")) return <ApifyLogo className={className} />;
   if (norm.includes("rapidapi")) return <RapidApiLogo className={className} />;
   if (norm.includes("youtube") || norm === "videos") return <YouTubeLogo className={className} />;
-  if (norm.includes("instagram")) return <InstagramLogo className={className} />;
+  if (norm.includes("instagram") || norm.includes("social") || norm.includes("reels") || norm.includes("posts")) return <InstagramLogo className={className} />;
   if (norm.includes("openmeteo")) return <OpenMeteoLogo className={className} />;
   if (norm.includes("weather") || norm.includes("openweather")) return <OpenWeatherLogo className={className} />;
   if (norm.includes("mapbox")) return <MapboxLogo className={className} />;
   if (norm.includes("maps") || norm.includes("googlemaps") || norm.includes("places")) return <GoogleMapsLogo className={className} />;
   if (norm.includes("osrm") || norm.includes("routing") || norm.includes("routes") || norm.includes("tsp")) return <OSRMRouteLogo className={className} />;
-  if (norm.includes("frankfurter") || norm.includes("finance") || norm.includes("exchange") || norm.includes("ecb")) return <FrankfurterLogo className={className} />;
+  if (norm.includes("frankfurter") || norm.includes("finance") || norm.includes("exchange") || norm.includes("ecb") || norm.includes("rates")) return <FrankfurterLogo className={className} />;
   if (norm.includes("news") || norm.includes("gnews")) return <GNewsLogo className={className} />;
-  if (norm.includes("ip") || norm.includes("geo") || norm.includes("utils")) return <IpGeolocationLogo className={className} />;
+  if (norm.includes("ip") || norm.includes("geo") || norm.includes("utils") || norm.includes("network")) return <IpGeolocationLogo className={className} />;
 
   // Default fallback
   return <GoogleMapsLogo className={className} />;
