@@ -678,6 +678,55 @@
           { key: "sort", value: "top", desc: "top | recent" }
         ],
         body: null
+      },
+      {
+        id: "streaming-vidora-movie",
+        category: "Streaming & Media",
+        icon: "🎬",
+        title: "Vidora Movie Embed (4K)",
+        method: "GET",
+        path: "/api/v1/streaming/movie",
+        description: "Generate 4K embed streaming player URLs and HTML iframes for movies via TMDB ID (https://vidora.ac).",
+        defaultParams: [
+          { key: "tmdb_id", value: "786892", desc: "TMDB Movie ID (Furiosa: A Mad Max Saga)" },
+          { key: "primaryColor", value: "B20710", desc: "Hex color code without #" },
+          { key: "title", value: "true", desc: "Show movie title (true | false)" },
+          { key: "poster", value: "true", desc: "Show poster image (true | false)" },
+          { key: "autoplay", value: "false", desc: "Autoplay media (true | false)" }
+        ],
+        body: null
+      },
+      {
+        id: "streaming-vidora-tv",
+        category: "Streaming & Media",
+        icon: "📺",
+        title: "Vidora TV Series Embed",
+        method: "GET",
+        path: "/api/v1/streaming/tv",
+        description: "Generate TV series season and episode embed player URLs with 90% watch progress next-episode triggers.",
+        defaultParams: [
+          { key: "tmdb_id", value: "94997", desc: "TMDB TV Show ID (House of the Dragon)" },
+          { key: "season", value: "1", desc: "Season number" },
+          { key: "episode", value: "1", desc: "Episode number" },
+          { key: "nextbutton", value: "true", desc: "Show next episode button at 90% completion" }
+        ],
+        body: null
+      },
+      {
+        id: "streaming-vidora-anime",
+        category: "Streaming & Media",
+        icon: "⚡",
+        title: "Vidora Anime Sub/Dub Embed",
+        method: "GET",
+        path: "/api/v1/streaming/anime",
+        description: "High-speed anime streaming player embed via MyAnimeList ID with automatic sub/dub fallback.",
+        defaultParams: [
+          { key: "mal_id", value: "5", desc: "MyAnimeList Anime ID (Cowboy Bebop)" },
+          { key: "number", value: "1", desc: "Episode number" },
+          { key: "sub_or_dub", value: "sub", desc: "sub | dub" },
+          { key: "fallback", value: "true", desc: "Auto fallback to sub/dub (true | false)" }
+        ],
+        body: null
       }
     ];
 
@@ -1479,6 +1528,55 @@
         return;
       }
 
+      // 11. STREAMING EMBEDS (VIDORA 4K PLAYER)
+      if (data && (data.embed_url || data.iframe_tag || (endpoint.category && endpoint.category.includes('Streaming')) || (endpoint.path && endpoint.path.includes('/streaming/')))) {
+        const titleText = data.type ? `${data.type.toUpperCase()} EMBED PLAYER (ID: ${data.id})` : 'STREAMING PLAYER';
+        const resolutions = data.supported_features?.resolutions?.join(' • ') || '4K Ultra HD • 1080p • 720p • Auto';
+        container.innerHTML = `
+          <div class="p-5 rounded-2xl bg-gradient-to-br from-rose-950/30 via-morx-900 to-morx-950 border border-rose-500/30 space-y-4">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2.5">
+                <div class="w-8 h-8 rounded-xl bg-zinc-900 border border-white/10 flex items-center justify-center font-bold text-white shadow">
+                  <svg width="18" height="18" viewBox="0 0 64 64" fill="none">
+                    <defs>
+                      <linearGradient id="vid-grad-test" x1="0" y1="0" x2="1" y2="1">
+                        <stop offset="0" stop-color="#f4f5f7" />
+                        <stop offset="1" stop-color="#464b52" />
+                      </linearGradient>
+                    </defs>
+                    <path d="M14 18h9.5L32 40.5 40.5 18H50L36.4 49h-8.8z" fill="url(#vid-grad-test)" />
+                  </svg>
+                </div>
+                <div>
+                  <h3 class="font-bold text-sm text-white">${titleText}</h3>
+                  <span class="text-[11px] text-rose-400 font-mono">Vidora Streaming API (vidora.ac)</span>
+                </div>
+              </div>
+              <span class="px-2.5 py-1 rounded-md text-[10px] font-mono font-bold bg-rose-500/20 text-rose-300 border border-rose-500/30">
+                4K Ultra HD
+              </span>
+            </div>
+
+            <!-- Live Responsive Iframe Player -->
+            <div class="relative w-full aspect-video rounded-xl overflow-hidden border border-morx-800 bg-black shadow-2xl">
+              <iframe src="${data.embed_url}" class="w-full h-full" frameborder="0" allowfullscreen allow="autoplay; fullscreen; encrypted-media"></iframe>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs font-mono pt-2 border-t border-morx-800">
+              <div class="p-2.5 rounded-lg bg-morx-900/80 space-y-1">
+                <span class="text-slate-400 text-[10px] block">DIRECT EMBED URL</span>
+                <a href="${data.embed_url}" target="_blank" class="text-blue-400 hover:underline truncate block text-[11px]">${data.embed_url} ↗</a>
+              </div>
+              <div class="p-2.5 rounded-lg bg-morx-900/80 space-y-1">
+                <span class="text-slate-400 text-[10px] block">PLAYER CAPABILITIES</span>
+                <span class="text-emerald-400 block text-[11px] font-semibold">${resolutions}</span>
+              </div>
+            </div>
+          </div>
+        `;
+        return;
+      }
+
       // Fallback
       container.innerHTML = `<div class="p-4 rounded-xl bg-morx-950 border border-morx-800 text-xs text-slate-300">Received valid response envelope with ${Object.keys(data).length} top-level fields. Switch to JSON Viewer for full details.</div>`;
     }
@@ -1511,7 +1609,7 @@
 
       drawer.classList.remove('hidden');
       grid.innerHTML = '';
-      progress.innerText = 'Executing 6 live API calls...';
+      progress.innerText = 'Executing 7 live API calls...';
 
       const tests = [
         { name: "Videos", path: "/api/v1/videos/search?q=Alexandria&limit=2", method: "GET" },
@@ -1520,6 +1618,7 @@
         { name: "OSRMRoute", path: "/api/v1/routes/directions?coordinates=29.9187,31.2001;29.9500,31.2200&profile=driving", method: "GET" },
         { name: "Optimizer", path: "/api/v1/routes/optimize", method: "POST", body: CATALOG.find(e => e.id === 'routes-optimize').body },
         { name: "IG Posts", path: "/api/v1/instagram/posts/search?tag=travel&limit=2", method: "GET" },
+        { name: "Vidora Streaming", path: "/api/v1/streaming/movie?tmdb_id=786892", method: "GET" },
       ];
 
       for (const t of tests) {
