@@ -45,6 +45,7 @@ import {
   FrankfurterLogo,
   GNewsLogo,
   IpGeolocationLogo,
+  VidoraLogo,
   ProviderBrandLogo,
 } from "@/components/gateway/provider-logos"
 import { LanguageLogo } from "@/components/gateway/language-logos"
@@ -982,12 +983,235 @@ print(res.json()["data"])`,
   headers: {'Authorization': 'Bearer YOUR_MORX_API_KEY'},
 );
 print(jsonDecode(res.body)['data']);`
+  },
+
+  // ---------------------------------------------------------------------------
+  // 14. STREAMING: VIDORA MOVIE EMBED
+  // ---------------------------------------------------------------------------
+  {
+    id: "streaming-movie",
+    path: "/api/v1/streaming/movie",
+    method: "GET",
+    title: "Vidora Movie Streaming Embed Player",
+    category: "streaming",
+    serviceName: "Media Streaming",
+    providers: ["Vidora Streaming API (https://vidora.ac)"],
+    cacheTtl: "24h Cache",
+    rateLimit: "120 req/min",
+    summary: "Generates high-speed 4K streaming embed URLs and HTML iframes for movies using TMDB IDs.",
+    detailsText: "Connects to Vidora (vidora.ac) to provide embeddable movie streams with automatic 4K resolution selection, multi-language subtitles, dubbed audio tracks, and customizable UI player themes via query parameters.",
+    params: [
+      { name: "tmdb_id", type: "number | string", required: true, desc: "The Movie Database (TMDB) movie ID.", example: "786892" },
+      { name: "primaryColor", type: "string", required: false, desc: "Hex color code without # for player sliders and progress.", example: "B20710" },
+      { name: "secondaryColor", type: "string", required: false, desc: "Hex color code without # for the background progress bar.", example: "170000" },
+      { name: "iconColor", type: "string", required: false, desc: "Hex color code without # for playback icons.", example: "B20710" },
+      { name: "title", type: "boolean", required: false, defaultVal: "true", desc: "Controls whether the movie title is displayed.", example: "true" },
+      { name: "poster", type: "boolean", required: false, defaultVal: "true", desc: "Determines whether the poster image is shown before playback.", example: "true" },
+      { name: "autoplay", type: "boolean", required: false, defaultVal: "false", desc: "Controls whether the movie starts playing automatically.", example: "false" },
+      { name: "startAt", type: "number", required: false, desc: "Starts playback at the specified second.", example: "120" },
+      { name: "sub_file", type: "string", required: false, desc: "Direct URL to an external .vtt subtitle file.", example: "https://example.com/arabic.vtt" },
+      { name: "sub_label", type: "string", required: false, desc: "Label for the external subtitle track.", example: "Arabic" },
+      { name: "fallback_url", type: "string", required: false, desc: "Redirect URL if the stream fails to load.", example: "https://morx.ai/player-fallback" },
+    ],
+    responseExplanation: "Returns `embed_url`, `iframe_tag`, applied `customization`, and `supported_features` (4K Ultra HD, dubs, subtitles, postmessage events).",
+    responseSample: {
+      success: true,
+      service: "streaming",
+      data: {
+        provider: "vidora",
+        type: "movie",
+        id: "786892",
+        embed_url: "https://vidora.ac/movie/786892?primaryColor=B20710&title=true&poster=true",
+        iframe_tag: "<iframe src=\"https://vidora.ac/movie/786892?primaryColor=B20710&title=true&poster=true\" frameborder=\"0\" allowfullscreen></iframe>",
+        customization: {
+          primaryColor: "B20710",
+          title: true,
+          poster: true
+        },
+        supported_features: {
+          resolutions: ["4K Ultra HD", "1080p Full HD", "720p HD", "Auto Adaptation"],
+          dubs: true,
+          subtitles: true,
+          postmessage_events: true,
+          localstorage_progress_sync: true
+        },
+        documentation_url: "https://vidora.ac"
+      },
+      meta: {
+        provider: "vidora",
+        cached: false,
+        latency_ms: 18,
+        timestamp: "2026-11-21T20:00:00Z"
+      },
+      errors: []
+    },
+    curlSnippet: `curl -X GET "https://morx-team.vercel.app/api/v1/streaming/movie?tmdb_id=786892&primaryColor=B20710" \\
+  -H "Authorization: Bearer YOUR_MORX_API_KEY"`,
+    jsSnippet: `const res = await fetch("https://morx-team.vercel.app/api/v1/streaming/movie?tmdb_id=786892&primaryColor=B20710", {
+  headers: { "Authorization": "Bearer YOUR_MORX_API_KEY" }
+});
+const { data } = await res.json();
+console.log(data.embed_url); // https://vidora.ac/movie/786892?primaryColor=B20710`,
+    pythonSnippet: `res = requests.get(
+    "https://morx-team.vercel.app/api/v1/streaming/movie",
+    headers={"Authorization": "Bearer YOUR_MORX_API_KEY"},
+    params={"tmdb_id": "786892", "primaryColor": "B20710"}
+)
+print(res.json()["data"]["iframe_tag"])`,
+    dartSnippet: `final res = await http.get(
+  Uri.parse('https://morx-team.vercel.app/api/v1/streaming/movie?tmdb_id=786892&primaryColor=B20710'),
+  headers: {'Authorization': 'Bearer YOUR_MORX_API_KEY'},
+);
+print(jsonDecode(res.body)['data']['embed_url']);`
+  },
+
+  // ---------------------------------------------------------------------------
+  // 15. STREAMING: VIDORA TV SHOW EMBED
+  // ---------------------------------------------------------------------------
+  {
+    id: "streaming-tv",
+    path: "/api/v1/streaming/tv",
+    method: "GET",
+    title: "Vidora TV Series Streaming Embed Player",
+    category: "streaming",
+    serviceName: "Media Streaming",
+    providers: ["Vidora Streaming API (https://vidora.ac)"],
+    cacheTtl: "24h Cache",
+    rateLimit: "120 req/min",
+    summary: "Generates episode-specific embed streaming URLs and HTML iframes for television series.",
+    detailsText: "Embeds television series seasons and episodes using TMDB IDs. Automatically displays a next-episode prompt once 90% of playback completes when enabled.",
+    params: [
+      { name: "tmdb_id", type: "number | string", required: true, desc: "The Movie Database (TMDB) series ID.", example: "94997" },
+      { name: "season", type: "number", required: true, defaultVal: "1", desc: "Season number (e.g. 1).", example: "1" },
+      { name: "episode", type: "number", required: true, defaultVal: "1", desc: "Episode number (e.g. 1).", example: "1" },
+      { name: "nextbutton", type: "boolean", required: false, defaultVal: "true", desc: "Shows next episode button at 90% watch progress.", example: "true" },
+      { name: "autoplay", type: "boolean", required: false, defaultVal: "false", desc: "Controls auto playback start.", example: "false" },
+    ],
+    responseExplanation: "Returns TV series episode streaming embed URL and responsive HTML iframe code.",
+    responseSample: {
+      success: true,
+      service: "streaming",
+      data: {
+        provider: "vidora",
+        type: "tv",
+        id: "94997",
+        season: 1,
+        episode: 1,
+        embed_url: "https://vidora.ac/tv/94997/1/1?nextbutton=true",
+        iframe_tag: "<iframe src=\"https://vidora.ac/tv/94997/1/1?nextbutton=true\" frameborder=\"0\" allowfullscreen></iframe>",
+        supported_features: {
+          resolutions: ["4K Ultra HD", "1080p Full HD", "720p HD", "Auto Adaptation"],
+          dubs: true,
+          subtitles: true,
+          postmessage_events: true,
+          localstorage_progress_sync: true
+        },
+        documentation_url: "https://vidora.ac"
+      },
+      meta: {
+        provider: "vidora",
+        cached: false,
+        latency_ms: 20,
+        timestamp: "2026-11-21T20:00:00Z"
+      },
+      errors: []
+    },
+    curlSnippet: `curl -X GET "https://morx-team.vercel.app/api/v1/streaming/tv?tmdb_id=94997&season=1&episode=1" \\
+  -H "Authorization: Bearer YOUR_MORX_API_KEY"`,
+    jsSnippet: `const res = await fetch("https://morx-team.vercel.app/api/v1/streaming/tv?tmdb_id=94997&season=1&episode=1", {
+  headers: { "Authorization": "Bearer YOUR_MORX_API_KEY" }
+});
+const { data } = await res.json();
+console.log(data.iframe_tag);`,
+    pythonSnippet: `res = requests.get(
+    "https://morx-team.vercel.app/api/v1/streaming/tv",
+    headers={"Authorization": "Bearer YOUR_MORX_API_KEY"},
+    params={"tmdb_id": "94997", "season": 1, "episode": 1}
+)
+print(res.json()["data"])`,
+    dartSnippet: `final res = await http.get(
+  Uri.parse('https://morx-team.vercel.app/api/v1/streaming/tv?tmdb_id=94997&season=1&episode=1'),
+  headers: {'Authorization': 'Bearer YOUR_MORX_API_KEY'},
+);
+print(jsonDecode(res.body)['data']);`
+  },
+
+  // ---------------------------------------------------------------------------
+  // 16. STREAMING: VIDORA ANIME EMBED
+  // ---------------------------------------------------------------------------
+  {
+    id: "streaming-anime",
+    path: "/api/v1/streaming/anime",
+    method: "GET",
+    title: "Vidora Anime Sub & Dub Streaming Embed Player",
+    category: "streaming",
+    serviceName: "Media Streaming",
+    providers: ["Vidora Streaming API (https://vidora.ac)"],
+    cacheTtl: "24h Cache",
+    rateLimit: "120 req/min",
+    summary: "Embeds subbed and dubbed anime episodes directly via MyAnimeList (MAL) IDs.",
+    detailsText: "Integrates MyAnimeList identifier mapping to resolve direct streaming player embed codes with automatic fallback between subtitles and dubbed audio.",
+    params: [
+      { name: "mal_id", type: "number | string", required: true, desc: "MyAnimeList anime ID (e.g. 5 for Cowboy Bebop).", example: "5" },
+      { name: "number", type: "number", required: true, defaultVal: "1", desc: "Episode number.", example: "1" },
+      { name: "sub_or_dub", type: "string", required: false, defaultVal: "sub", desc: "'sub' for Japanese with subtitles, 'dub' for English voiceover.", example: "sub" },
+      { name: "fallback", type: "boolean", required: false, defaultVal: "true", desc: "Automatically falls back to sub/dub if preferred type is unavailable.", example: "true" },
+    ],
+    responseExplanation: "Returns Anime streaming player URL and responsive iframe embed code.",
+    responseSample: {
+      success: true,
+      service: "streaming",
+      data: {
+        provider: "vidora",
+        type: "anime",
+        id: "5",
+        episode: 1,
+        subOrDub: "sub",
+        fallback: true,
+        embed_url: "https://vidora.ac/anime/5/1/sub?fallback=true",
+        iframe_tag: "<iframe src=\"https://vidora.ac/anime/5/1/sub?fallback=true\" frameborder=\"0\" allowfullscreen></iframe>",
+        supported_features: {
+          resolutions: ["1080p Full HD", "720p HD", "Auto Adaptation"],
+          dubs: true,
+          subtitles: true,
+          postmessage_events: true,
+          localstorage_progress_sync: true
+        },
+        documentation_url: "https://vidora.ac"
+      },
+      meta: {
+        provider: "vidora",
+        cached: false,
+        latency_ms: 19,
+        timestamp: "2026-11-21T20:00:00Z"
+      },
+      errors: []
+    },
+    curlSnippet: `curl -X GET "https://morx-team.vercel.app/api/v1/streaming/anime?mal_id=5&number=1&sub_or_dub=sub" \\
+  -H "Authorization: Bearer YOUR_MORX_API_KEY"`,
+    jsSnippet: `const res = await fetch("https://morx-team.vercel.app/api/v1/streaming/anime?mal_id=5&number=1&sub_or_dub=sub", {
+  headers: { "Authorization": "Bearer YOUR_MORX_API_KEY" }
+});
+const { data } = await res.json();
+console.log(data.embed_url);`,
+    pythonSnippet: `res = requests.get(
+    "https://morx-team.vercel.app/api/v1/streaming/anime",
+    headers={"Authorization": "Bearer YOUR_MORX_API_KEY"},
+    params={"mal_id": "5", "number": 1, "sub_or_dub": "sub"}
+)
+print(res.json()["data"])`,
+    dartSnippet: `final res = await http.get(
+  Uri.parse('https://morx-team.vercel.app/api/v1/streaming/anime?mal_id=5&number=1&sub_or_dub=sub'),
+  headers: {'Authorization': 'Bearer YOUR_MORX_API_KEY'},
+);
+print(jsonDecode(res.body)['data']);`
   }
 ];
 
 const CATEGORIES = [
   { id: "all", label: "All Endpoints", icon: Layers },
   { id: "videos", label: "Videos", logo: YouTubeLogo },
+  { id: "streaming", label: "Streaming (Vidora)", logo: VidoraLogo },
   { id: "weather", label: "Weather", logo: OpenWeatherLogo },
   { id: "maps", label: "Maps & Places", logo: GoogleMapsLogo },
   { id: "routing", label: "Routes (OSRM/TSP)", logo: OSRMRouteLogo },

@@ -41,6 +41,7 @@ export interface UnifiedResponse<T = unknown> {
 
 export type ServiceCategory =
   | 'videos'
+  | 'streaming'
   | 'weather'
   | 'maps'
   | 'routing'

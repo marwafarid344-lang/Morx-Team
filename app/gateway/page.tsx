@@ -47,6 +47,7 @@ import {
   FrankfurterLogo,
   GNewsLogo,
   IpGeolocationLogo,
+  VidoraLogo,
   ProviderBrandLogo,
 } from "@/components/gateway/provider-logos";
 
@@ -59,6 +60,7 @@ const GATEWAY_SERVICES = [
   { id: "news", label: "News & Media", provider: "GNews Intelligence", logo: GNewsLogo, color: "text-cyan-400" },
   { id: "utils", label: "Network & IP Lookup", provider: "IP Geolocation", logo: IpGeolocationLogo, color: "text-indigo-400" },
   { id: "instagram", label: "Instagram Platform", provider: "Reels & Posts Engine", logo: InstagramLogo, color: "text-purple-400" },
+  { id: "streaming", label: "Media Streaming", provider: "Vidora Streaming API (4K)", logo: VidoraLogo, color: "text-rose-400" },
 ];
 
 const QUICK_ENDPOINTS = [
@@ -67,6 +69,13 @@ const QUICK_ENDPOINTS = [
     service: "weather",
     method: "GET",
     path: "/api/v1/weather/current?city=Alexandria",
+    body: null,
+  },
+  {
+    name: "Vidora Movie Player (Furiosa)",
+    service: "streaming",
+    method: "GET",
+    path: "/api/v1/streaming/movie?tmdb_id=786892&primaryColor=B20710",
     body: null,
   },
   {

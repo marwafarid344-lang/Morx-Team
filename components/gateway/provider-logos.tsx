@@ -152,6 +152,21 @@ export function RapidApiLogo({ className = "size-4 shrink-0" }: { className?: st
   );
 }
 
+export function VidoraLogo({ className = "size-4 shrink-0" }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 64 64" className={className} fill="none" aria-label="Vidora">
+      <defs>
+        <linearGradient id="vidora-mark" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stopColor="#f4f5f7" />
+          <stop offset="1" stopColor="#464b52" />
+        </linearGradient>
+      </defs>
+      <rect width="64" height="64" rx="16" fill="#1c1d20" stroke="rgba(255,255,255,0.12)" strokeWidth="2" />
+      <path d="M14 18h9.5L32 40.5 40.5 18H50L36.4 49h-8.8z" fill="url(#vidora-mark)" />
+    </svg>
+  );
+}
+
 export function MapboxLogo({ className = "size-4 shrink-0" }: { className?: string }) {
   return (
     <svg viewBox="0 0 24 24" className={className} fill="none" aria-label="Mapbox">
@@ -174,6 +189,7 @@ export function ProviderBrandLogo({
   const norm = name.toLowerCase().replace(/[-_\s]/g, "");
 
   if (norm.includes("apify")) return <ApifyLogo className={className} />;
+  if (norm.includes("vidora") || norm.includes("streaming") || norm.includes("stream") || norm.includes("anime") || norm.includes("tmdb")) return <VidoraLogo className={className} />;
   if (norm.includes("rapidapi")) return <RapidApiLogo className={className} />;
   if (norm.includes("youtube") || norm === "videos") return <YouTubeLogo className={className} />;
   if (norm.includes("instagram") || norm.includes("social") || norm.includes("reels") || norm.includes("posts")) return <InstagramLogo className={className} />;

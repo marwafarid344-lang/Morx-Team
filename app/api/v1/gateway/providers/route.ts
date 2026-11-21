@@ -11,10 +11,14 @@ export const dynamic = 'force-dynamic';
 export async function GET(request: NextRequest) {
   const services: ServiceCategory[] = [
     'videos',
+    'streaming',
     'weather',
     'maps',
     'routing',
     'instagram',
+    'finance',
+    'news',
+    'utils',
   ];
 
   const dbProviders = await GatewayDatabase.listProviders();

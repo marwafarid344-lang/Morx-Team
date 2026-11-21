@@ -18,6 +18,7 @@ export const MORX_ALLOWABLE_PROVIDERS = [
   'instagram',
   'apify',
   'rapidapi',
+  'vidora',
 ] as const;
 
 export type MorxAllowableProvider = (typeof MORX_ALLOWABLE_PROVIDERS)[number];
@@ -48,6 +49,9 @@ export const MORX_ALLOWABLE_ENDPOINTS = [
   '/api/instagram/reels/search',
   '/api/v1/instagram/posts/search',
   '/api/instagram/posts/search',
+  '/api/v1/streaming/movie',
+  '/api/v1/streaming/tv',
+  '/api/v1/streaming/anime',
   '/api/v1/gateway/clients',
   '/api/v1/gateway/metrics',
   '/api/v1/gateway/health',

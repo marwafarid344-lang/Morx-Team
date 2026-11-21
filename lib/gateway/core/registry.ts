@@ -15,6 +15,7 @@ import { InstagramProvider } from '../providers/social/instagram';
 import { IpGeolocationProvider } from '../providers/utils/ip-geolocation';
 import { FrankfurterProvider } from '../providers/finance/frankfurter';
 import { GNewsProvider } from '../providers/news/gnews';
+import { VidoraProvider } from '../providers/streaming/vidora';
 
 export class ProviderRegistry {
   private static providers: Map<ServiceCategory, IProvider[]> = new Map();
@@ -34,6 +35,7 @@ export class ProviderRegistry {
     this.register(new IpGeolocationProvider());
     this.register(new FrankfurterProvider());
     this.register(new GNewsProvider());
+    this.register(new VidoraProvider());
 
     // 2. Define Capabilities
     this.capabilities.set('youtube', {
@@ -174,6 +176,35 @@ export class ProviderRegistry {
       maxLimit: 10,
       quotaCostPerCall: 1,
       notes: 'Global news search and real-time top headlines indexing',
+    });
+
+    this.capabilities.set('vidora', {
+      supportedOperations: ['movie', 'tv', 'anime'],
+      supportedFilters: [
+        'id',
+        'tmdb_id',
+        'mal_id',
+        'season',
+        'episode',
+        'number',
+        'sub_or_dub',
+        'fallback',
+        'primaryColor',
+        'secondaryColor',
+        'iconColor',
+        'title',
+        'poster',
+        'autoplay',
+        'nextbutton',
+        'startAt',
+        'sub_file',
+        'sub_label',
+        'fallback_url',
+      ],
+      authType: 'none',
+      paginationSupported: false,
+      quotaCostPerCall: 0,
+      notes: 'Vidora high-speed streaming embed API for movies (TMDB), TV series (TMDB), and anime (MyAnimeList)',
     });
   }
 

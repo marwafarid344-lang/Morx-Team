@@ -164,12 +164,14 @@ async function runGatewayTests() {
   const mapsProviders = ProviderRegistry.getProviders('maps');
   const routingProviders = ProviderRegistry.getProviders('routing');
   const instagramProviders = ProviderRegistry.getProviders('instagram');
+  const streamingProviders = ProviderRegistry.getProviders('streaming');
 
   assert.strictEqual(videoProviders.length >= 1, true, 'Videos provider registered');
   assert.strictEqual(weatherProviders.length >= 1, true, 'Weather provider registered');
   assert.strictEqual(mapsProviders.length >= 2, true, 'Maps providers registered (Google + Mapbox)');
   assert.strictEqual(routingProviders.length >= 2, true, 'Routing providers registered (Google + Internal TSP)');
   assert.strictEqual(instagramProviders.length >= 1, true, 'Instagram provider registered');
+  assert.strictEqual(streamingProviders.length >= 1, true, 'Streaming provider (Vidora) registered');
   console.log('   ✓ All service providers and capabilities registered successfully.');
 
   // ── TEST 8: Provider Compliance Engine & Registry ──
@@ -261,6 +263,27 @@ async function runGatewayTests() {
   const gnewsRes = await ProviderOrchestrator.execute('news', 'search', { q: 'technology' }, { specificProvider: 'gnews' });
   assert.strictEqual(gnewsRes.success, true, 'GNews search should succeed');
   assert.strictEqual(Array.isArray(gnewsRes.data), true);
+
+  // Test Vidora Streaming execution (Movie, TV, Anime)
+  const vidoraMovieEval = ComplianceEngine.evaluate('vidora', 'streaming', 'movie');
+  assert.strictEqual(vidoraMovieEval.allowed, true, 'Vidora movie streaming must be approved');
+
+  const vidoraRes = await ProviderOrchestrator.execute('streaming', 'movie', { tmdb_id: 786892, primaryColor: 'B20710', autoplay: true }, { specificProvider: 'vidora' });
+  assert.strictEqual(vidoraRes.success, true, 'Vidora movie embed should succeed');
+  assert.strictEqual((vidoraRes.data as any)?.provider, 'vidora');
+  assert.strictEqual((vidoraRes.data as any)?.type, 'movie');
+  assert.strictEqual((vidoraRes.data as any)?.embed_url.includes('https://vidora.ac/movie/786892'), true);
+  assert.strictEqual((vidoraRes.data as any)?.embed_url.includes('primaryColor=B20710'), true);
+  assert.strictEqual((vidoraRes.data as any)?.iframe_tag.startsWith('<iframe'), true);
+
+  const vidoraTvRes = await ProviderOrchestrator.execute('streaming', 'tv', { tmdb_id: 94997, season: 2, episode: 1 }, { specificProvider: 'vidora' });
+  assert.strictEqual(vidoraTvRes.success, true, 'Vidora TV embed should succeed');
+  assert.strictEqual((vidoraTvRes.data as any)?.embed_url.includes('https://vidora.ac/tv/94997/2/1'), true);
+
+  const vidoraAnimeRes = await ProviderOrchestrator.execute('streaming', 'anime', { mal_id: 5, number: 1, sub_or_dub: 'sub' }, { specificProvider: 'vidora' });
+  assert.strictEqual(vidoraAnimeRes.success, true, 'Vidora Anime embed should succeed');
+  assert.strictEqual((vidoraAnimeRes.data as any)?.embed_url.includes('https://vidora.ac/anime/5/1/sub'), true);
+  console.log('   ✓ All streaming & media embed providers (Vidora) verified and executing cleanly.');
   console.log('   ✓ All 4 new providers verified and executing cleanly.');
 
   // ── TEST 11: Strict Allowable Providers & Allowable Endpoints Enforcement ──
@@ -271,12 +294,16 @@ async function runGatewayTests() {
   assert.strictEqual(AllowableCatalog.isAllowableProvider('ip_geolocation'), true, 'ip_geolocation must be in allowable catalog');
   assert.strictEqual(AllowableCatalog.isAllowableProvider('frankfurter'), true, 'frankfurter must be in allowable catalog');
   assert.strictEqual(AllowableCatalog.isAllowableProvider('gnews'), true, 'gnews must be in allowable catalog');
+  assert.strictEqual(AllowableCatalog.isAllowableProvider('vidora'), true, 'vidora must be in allowable catalog');
 
   // 11.2 Check Catalog contains all endpoints
   assert.strictEqual(AllowableCatalog.isAllowableEndpoint('/api/v1/maps/isochrone'), true);
   assert.strictEqual(AllowableCatalog.isAllowableEndpoint('/api/v1/utils/ip-lookup'), true);
   assert.strictEqual(AllowableCatalog.isAllowableEndpoint('/api/v1/finance/exchange'), true);
   assert.strictEqual(AllowableCatalog.isAllowableEndpoint('/api/v1/news/search'), true);
+  assert.strictEqual(AllowableCatalog.isAllowableEndpoint('/api/v1/streaming/movie'), true);
+  assert.strictEqual(AllowableCatalog.isAllowableEndpoint('/api/v1/streaming/tv'), true);
+  assert.strictEqual(AllowableCatalog.isAllowableEndpoint('/api/v1/streaming/anime'), true);
 
   // 11.3 Reject unallowable endpoint via AllowableCatalog
   assert.strictEqual(AllowableCatalog.isAllowableEndpoint('/api/v1/unauthorized/leak-data'), false, 'Unauthorized endpoint must be rejected');

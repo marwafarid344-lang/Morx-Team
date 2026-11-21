@@ -135,6 +135,14 @@ export function resolveProvidersAndEndpointsFromServices(services: (ServiceCateg
           '/api/instagram/posts/search'
         );
         break;
+      case 'streaming':
+        providers.push('vidora');
+        endpoints.push(
+          '/api/v1/streaming/movie',
+          '/api/v1/streaming/tv',
+          '/api/v1/streaming/anime'
+        );
+        break;
     }
   }
 

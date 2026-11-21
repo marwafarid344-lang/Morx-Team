@@ -504,6 +504,49 @@ export class ComplianceRegistry {
       requiredApprovals: [],
       lastReviewedDate: '2026-11-18',
     });
+
+    // 13. Vidora Streaming Embed API
+    this.register({
+      providerName: 'vidora',
+      service: 'streaming',
+      officialDocumentation: 'https://vidora.ac',
+      applicableAgreement: 'Vidora Embed & Streaming API Terms of Service (Public Embed Access)',
+      complianceStatus: 'APPROVED',
+      approvedUseCases: [
+        'Embedded streaming player for movies, TV series, and anime with TMDB and MAL integration',
+        'Customizable player theming and postmessage event tracking in Morx frontend',
+      ],
+      allowedOperations: ['movie', 'tv', 'anime'],
+      prohibitedOperations: [
+        'direct_stream_ripping',
+        'bypassing_player_controls',
+        'unauthorized_commercial_resale',
+      ],
+      dataRedistributionPolicy: 'TRANSFORMED_ONLY',
+      dataRetentionPolicy: {
+        maxStorageDays: 30,
+        allowPermanentStorage: false,
+        deletionOnRevocationRequired: true,
+      },
+      cachingPolicy: {
+        allowed: true,
+        maxTtlSeconds: 86400,
+        prohibitedDataTypes: ['raw_video_chunks', 'audio_streams'],
+        allowPersistentStorage: false,
+      },
+      attributionRequirements: {
+        required: true,
+        displayText: 'Powered by Vidora Streaming API',
+        logoUrl: 'https://vidora.ac/favicon.ico',
+        linkUrl: 'https://vidora.ac',
+        placement: 'inline',
+      },
+      oauthRequirements: { required: false },
+      geographicRestrictions: [],
+      clientEligibility: 'all',
+      requiredApprovals: [],
+      lastReviewedDate: '2026-11-21',
+    });
   }
 
   static register(config: ProviderComplianceConfig): void {

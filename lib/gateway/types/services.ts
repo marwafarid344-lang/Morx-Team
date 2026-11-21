@@ -321,3 +321,39 @@ export interface UnifiedNewsArticle {
   };
 }
 
+// ─── 11. STREAMING & MEDIA EMBEDS (VIDORA) ───────────────────────────
+export interface UnifiedStreamingCustomization {
+  primaryColor?: string;
+  secondaryColor?: string;
+  iconColor?: string;
+  title?: boolean;
+  poster?: boolean;
+  autoplay?: boolean;
+  nextbutton?: boolean;
+  startAt?: number;
+  sub_file?: string;
+  sub_label?: string;
+  fallback_url?: string;
+}
+
+export interface UnifiedStreamingEmbed {
+  provider: 'vidora';
+  type: 'movie' | 'tv' | 'anime';
+  id: string | number;
+  season?: number;
+  episode?: number;
+  subOrDub?: 'sub' | 'dub';
+  fallback?: boolean;
+  embed_url: string;
+  iframe_tag: string;
+  customization?: UnifiedStreamingCustomization;
+  supported_features: {
+    resolutions: string[];
+    dubs: boolean;
+    subtitles: boolean;
+    postmessage_events: boolean;
+    localstorage_progress_sync: boolean;
+  };
+  documentation_url: string;
+}
+

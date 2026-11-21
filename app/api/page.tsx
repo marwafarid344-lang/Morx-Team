@@ -28,6 +28,7 @@ import {
   Code2,
   SlidersHorizontal,
   Info,
+  Film,
   X
 } from "lucide-react"
 import Link from "next/link"
@@ -57,6 +58,7 @@ import {
   FrankfurterLogo,
   GNewsLogo,
   IpGeolocationLogo,
+  VidoraLogo,
   InstagramLogo,
 } from "@/components/gateway/provider-logos"
 import { LanguageLogo } from "@/components/gateway/language-logos"
@@ -91,6 +93,7 @@ interface Endpoint {
 const CATEGORIES = [
   { id: "all", label: "All Services", icon: Layers },
   { id: "videos", label: "Video Discovery", logo: YouTubeLogo, icon: Video },
+  { id: "streaming", label: "Media Streaming", logo: VidoraLogo, icon: Film },
   { id: "weather", label: "Weather", logo: OpenWeatherLogo, icon: CloudSun },
   { id: "maps", label: "Maps & Places", logo: GoogleMapsLogo, icon: Compass },
   { id: "routing", label: "Route Optimizer", logo: OSRMRouteLogo, icon: Navigation },
@@ -792,6 +795,138 @@ print(res.json()["data"])`,
     }
   ]
 }`
+  },
+  {
+    path: "/api/v1/streaming/movie",
+    method: "GET",
+    title: "Vidora Movie Streaming Embed",
+    desc: "Generate 4K embed streaming URLs and iframe HTML codes for movies with customizable player styling.",
+    category: "streaming",
+    providers: ["Vidora Streaming API"],
+    cacheTtl: "24h Cache",
+    rateLimit: "120 req/min",
+    params: [
+      { name: "tmdb_id", type: "number | string", required: true, description: "TMDB Movie ID (e.g. 786892 for Furiosa)." },
+      { name: "primaryColor", type: "string", required: false, description: "Hex color code without # for controls." },
+      { name: "autoplay", type: "boolean", required: false, defaultVal: "false", description: "Auto-play media." },
+      { name: "poster", type: "boolean", required: false, defaultVal: "true", description: "Display poster image." },
+      { name: "title", type: "boolean", required: false, defaultVal: "true", description: "Display movie title." },
+    ],
+    importantNotes: [
+      "Zero API key needed upstream; automatic 4K and dub/sub detection.",
+      "Customizable player themes with postmessage event tracking support.",
+    ],
+    curlExample: `curl -X GET "https://YOUR-DOMAIN/api/v1/streaming/movie?tmdb_id=786892&primaryColor=B20710" \\
+  -H "Authorization: Bearer YOUR_MORX_API_KEY"`,
+    jsExample: `const res = await fetch("https://YOUR-DOMAIN/api/v1/streaming/movie?tmdb_id=786892", {
+  headers: { "Authorization": "Bearer YOUR_MORX_API_KEY" }
+});
+const { data } = await res.json();
+console.log(data.embed_url);`,
+    pythonExample: `import requests
+res = requests.get("https://YOUR-DOMAIN/api/v1/streaming/movie", headers={"Authorization": "Bearer YOUR_MORX_API_KEY"}, params={"tmdb_id": 786892})
+print(res.json()["data"]["iframe_tag"])`,
+    responseExample: `{
+  "success": true,
+  "service": "streaming",
+  "data": {
+    "provider": "vidora",
+    "type": "movie",
+    "id": "786892",
+    "embed_url": "https://vidora.ac/movie/786892?primaryColor=B20710",
+    "iframe_tag": "<iframe src=\"https://vidora.ac/movie/786892?primaryColor=B20710\" frameborder=\"0\" allowfullscreen></iframe>",
+    "supported_features": {
+      "resolutions": ["4K Ultra HD", "1080p Full HD", "720p HD", "Auto Adaptation"],
+      "dubs": true,
+      "subtitles": true,
+      "postmessage_events": true,
+      "localstorage_progress_sync": true
+    }
+  }
+}`
+  },
+  {
+    path: "/api/v1/streaming/tv",
+    method: "GET",
+    title: "Vidora TV Series Streaming Embed",
+    desc: "Generate TV series season and episode embed player URLs with 90% watch progress next-episode triggers.",
+    category: "streaming",
+    providers: ["Vidora Streaming API"],
+    cacheTtl: "24h Cache",
+    rateLimit: "120 req/min",
+    params: [
+      { name: "tmdb_id", type: "number | string", required: true, description: "TMDB TV Show ID (e.g. 94997)." },
+      { name: "season", type: "number", required: true, defaultVal: "1", description: "Season number." },
+      { name: "episode", type: "number", required: true, defaultVal: "1", description: "Episode number." },
+      { name: "nextbutton", type: "boolean", required: false, defaultVal: "true", description: "Shows next episode button at 90% completion." },
+    ],
+    importantNotes: [
+      "Automatically preserves episode-level progress in localStorage.",
+    ],
+    curlExample: `curl -X GET "https://YOUR-DOMAIN/api/v1/streaming/tv?tmdb_id=94997&season=1&episode=1" \\
+  -H "Authorization: Bearer YOUR_MORX_API_KEY"`,
+    jsExample: `const res = await fetch("https://YOUR-DOMAIN/api/v1/streaming/tv?tmdb_id=94997&season=1&episode=1", {
+  headers: { "Authorization": "Bearer YOUR_MORX_API_KEY" }
+});
+const { data } = await res.json();`,
+    pythonExample: `import requests
+res = requests.get("https://YOUR-DOMAIN/api/v1/streaming/tv", headers={"Authorization": "Bearer YOUR_MORX_API_KEY"}, params={"tmdb_id": 94997, "season": 1, "episode": 1})
+print(res.json()["data"])`,
+    responseExample: `{
+  "success": true,
+  "service": "streaming",
+  "data": {
+    "provider": "vidora",
+    "type": "tv",
+    "id": "94997",
+    "season": 1,
+    "episode": 1,
+    "embed_url": "https://vidora.ac/tv/94997/1/1",
+    "iframe_tag": "<iframe src=\"https://vidora.ac/tv/94997/1/1\" frameborder=\"0\" allowfullscreen></iframe>"
+  }
+}`
+  },
+  {
+    path: "/api/v1/streaming/anime",
+    method: "GET",
+    title: "Vidora Anime Sub/Dub Embed",
+    desc: "Direct anime streaming player embeds via MyAnimeList (MAL) IDs with sub/dub audio selection.",
+    category: "streaming",
+    providers: ["Vidora Streaming API"],
+    cacheTtl: "24h Cache",
+    rateLimit: "120 req/min",
+    params: [
+      { name: "mal_id", type: "number | string", required: true, description: "MyAnimeList ID (e.g. 5)." },
+      { name: "number", type: "number", required: true, defaultVal: "1", description: "Episode number." },
+      { name: "sub_or_dub", type: "string", required: false, defaultVal: "sub", description: "Subtitles ('sub') or English audio ('dub')." },
+      { name: "fallback", type: "boolean", required: false, defaultVal: "true", description: "Fall back to sub/dub if preferred type is absent." },
+    ],
+    importantNotes: [
+      "Built-in fallback flag ensures media never fails to play.",
+    ],
+    curlExample: `curl -X GET "https://YOUR-DOMAIN/api/v1/streaming/anime?mal_id=5&number=1&sub_or_dub=sub" \\
+  -H "Authorization: Bearer YOUR_MORX_API_KEY"`,
+    jsExample: `const res = await fetch("https://YOUR-DOMAIN/api/v1/streaming/anime?mal_id=5&number=1&sub_or_dub=sub", {
+  headers: { "Authorization": "Bearer YOUR_MORX_API_KEY" }
+});
+const { data } = await res.json();`,
+    pythonExample: `import requests
+res = requests.get("https://YOUR-DOMAIN/api/v1/streaming/anime", headers={"Authorization": "Bearer YOUR_MORX_API_KEY"}, params={"mal_id": 5, "number": 1})
+print(res.json()["data"])`,
+    responseExample: `{
+  "success": true,
+  "service": "streaming",
+  "data": {
+    "provider": "vidora",
+    "type": "anime",
+    "id": "5",
+    "episode": 1,
+    "subOrDub": "sub",
+    "fallback": true,
+    "embed_url": "https://vidora.ac/anime/5/1/sub?fallback=true",
+    "iframe_tag": "<iframe src=\"https://vidora.ac/anime/5/1/sub?fallback=true\" frameborder=\"0\" allowfullscreen></iframe>"
+  }
+}`
   }
 ]
 
@@ -868,6 +1003,15 @@ const SERVICE_HUBS = [
     quickEndpoint: "/api/instagram/reels/search",
     count: 3,
     icon: Share2,
+  },
+  {
+    id: "streaming",
+    title: "Media Streaming",
+    badge: "Vidora Streaming API (4K)",
+    desc: "Embed 4K movies, television series, and anime with customizable player themes via TMDB and MyAnimeList.",
+    quickEndpoint: "/api/v1/streaming/movie?tmdb_id=786892",
+    count: 3,
+    icon: Film,
   },
 ];
 
