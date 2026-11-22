@@ -351,3 +351,61 @@
     height: 0 !important;
     background: transparent !important;
 }
+
+/* Wordle Authentic Animations & Colors */
+@keyframes wordle-pop {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.12); }
+    100% { transform: scale(1); }
+}
+
+@keyframes wordle-shake {
+    0%, 100% { transform: translateX(0); }
+    15% { transform: translateX(-5px); }
+    30% { transform: translateX(5px); }
+    45% { transform: translateX(-4px); }
+    60% { transform: translateX(4px); }
+    75% { transform: translateX(-2px); }
+    90% { transform: translateX(2px); }
+}
+
+@keyframes wordle-bounce {
+    0%, 20% { transform: translateY(0); }
+    40% { transform: translateY(-24px); }
+    50% { transform: translateY(0); }
+    60% { transform: translateY(-12px); }
+    80% { transform: translateY(0); }
+    100% { transform: translateY(0); }
+}
+
+@keyframes wordle-flip {
+    0% {
+        transform: rotateX(0deg);
+    }
+    49% {
+        transform: rotateX(90deg);
+    }
+    51% {
+        transform: rotateX(90deg);
+    }
+    100% {
+        transform: rotateX(0deg);
+    }
+}
+
+.animate-wordle-flip {
+    animation: wordle-flip 500ms ease-in-out forwards;
+}
+
+.animate-wordle-pop {
+    animation: wordle-pop 100ms ease-in-out;
+}
+
+.animate-wordle-shake {
+    animation: wordle-shake 600ms ease-in-out;
+}
+
+.animate-wordle-bounce {
+    animation: wordle-bounce 1000ms ease;
+}
+

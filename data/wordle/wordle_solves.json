@@ -1,0 +1,47 @@
+[
+  {
+    "id": "slv_mwrq0vbd_3dv8yo",
+    "word_id": "wrd_mwrpjapp_tt27c",
+    "date": "2026-11-22",
+    "user_name": "Guest Player",
+    "user_avatar": "",
+    "guesses": [
+      "STEAM",
+      "UPEND",
+      "AUDIO",
+      "SHINE"
+    ],
+    "grid_pattern": [
+      [
+        "correct",
+        "absent",
+        "present",
+        "absent",
+        "absent"
+      ],
+      [
+        "absent",
+        "absent",
+        "present",
+        "correct",
+        "absent"
+      ],
+      [
+        "absent",
+        "absent",
+        "absent",
+        "present",
+        "absent"
+      ],
+      [
+        "correct",
+        "correct",
+        "correct",
+        "correct",
+        "correct"
+      ]
+    ],
+    "attempts": 4,
+    "solved_at": "2026-11-22T10:55:42.217Z"
+  }
+]

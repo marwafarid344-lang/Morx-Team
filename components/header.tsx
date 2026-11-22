@@ -179,6 +179,7 @@ export function Header() {
                 {[
                   { href: "/docs", label: "Docs" },
                   { href: "/api", label: "API" },
+                  { href: "/wordle", label: "Wordle" },
                 ].map((link) => (
                   <motion.div
                     key={link.href}
@@ -201,6 +202,7 @@ export function Header() {
                 {[
                   { href: "/docs", label: "Documentation" },
                   { href: "/api", label: "API" },
+                  { href: "/wordle", label: "Wordle" },
                   { href: "/pricing", label: "Pricing" },
                 ].map((link) => (
                   <motion.div
@@ -335,6 +337,7 @@ export function Header() {
                 <Link href="/" className="block text-sm font-medium py-2" onClick={() => setMobileMenuOpen(false)}>Home</Link>
                 <Link href="/teams" className="block text-sm font-medium py-2" onClick={() => setMobileMenuOpen(false)}>Teams</Link>
                 <Link href="/templates" className="block text-sm font-medium py-2" onClick={() => setMobileMenuOpen(false)}>Templates</Link>
+                <Link href="/wordle" className="block text-sm font-medium py-2 text-green-600 dark:text-green-400 font-bold" onClick={() => setMobileMenuOpen(false)}>Wordle</Link>
                 <Link href="/talent" className="block text-sm font-medium py-2 text-primary font-bold" onClick={() => setMobileMenuOpen(false)}>Marketplace</Link>
                 <Link href="/invitations" className="flex items-center justify-between text-sm font-medium py-2" onClick={() => setMobileMenuOpen(false)}>
                   Invitations
